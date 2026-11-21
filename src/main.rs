@@ -432,7 +432,7 @@ fn run(common: &Common, cases: Vec<Case>, reduce: bool, generator_version: &str)
             let decompiler = decompilers[d].as_ref();
             let verdict = roundtrip::check(&source, profile, decompiler);
             let mut reduced = None;
-            if verdict.kind.is_failure() {
+            if verdict.kind.is_failure() || verdict.kind == Kind::Refused {
                 let kind = verdict.kind;
                 if reduce && let Source::Seed(seed, grammar) = case.source {
                     let (program, _) = reduce::reduce(
@@ -444,9 +444,12 @@ fn run(common: &Common, cases: Vec<Case>, reduce: bool, generator_version: &str)
                 } else if reduce && let Source::Text(text) = &case.source {
                     reduced = Some(mutate::reduce(text, |s| roundtrip::check(s, profile, decompiler).kind == kind, 400));
                 }
-                if let Some(work) = &common.work {
-                    save(work, decompiler.name(), &case.name, profile, &source, &verdict, reduced.as_deref());
-                }
+            }
+            // refusals too: a refusal is something to fix, just not a wrong one
+            if (verdict.kind.is_failure() || verdict.kind == Kind::Refused)
+                && let Some(work) = &common.work
+            {
+                save(work, decompiler.name(), &case.name, profile, &source, &verdict, reduced.as_deref());
             }
             (case, profile, d, verdict.kind, verdict.detail, reduced.map(|r| r.lines().count()), verdict.quality)
         })
