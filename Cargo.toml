@@ -6,6 +6,9 @@ description = "A standardized, open-source benchmark for Luau decompilers"
 repository = "https://github.com/Scrensayol/rosetta"
 publish = false
 
+# its own workspace, also when checked out inside another (sunberry's CI does that)
+[workspace]
+
 [[bin]]
 name = "rosetta"
 path = "src/main.rs"
