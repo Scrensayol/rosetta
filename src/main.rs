@@ -114,7 +114,14 @@ struct Baseline {
     refused: BTreeMap<String, Vec<String>>,
 }
 
+// Luau's experimental syntax that cases use: `if local`/`if const` and `while local`/`while const`.
+// Flags are process-wide, so this is set once before anything compiles
+const FLAGS: [&str; 2] = ["LuauExperimentalIfLocalSyntax", "LuauExperimentalWhileLocalSyntax"];
+
 fn main() -> ExitCode {
+    for flag in FLAGS {
+        mlua::Lua::set_fflag(flag, true).unwrap_or_else(|()| panic!("this Luau has no fast flag {flag}"));
+    }
 
     match Cli::parse().command {
         Command::Gen { seed, grammar } => {

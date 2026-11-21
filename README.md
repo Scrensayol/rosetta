@@ -27,7 +27,8 @@ decompiler that refuses 1% is far more useful than one that's quietly wrong 1% o
 
 - **cases/**: hand-written programs, each aimed at something decompilers get wrong: inlined
   functions, loop exits, closures and upvalues, numbers (NaN sign, `x^3` folding), contextual
-  keywords (`while continue do`), dead branches, Roblox-style scripts. New edge cases are welcome.
+  keywords (`while continue do`), dead branches, Luau's experimental `if local` / `while local`,
+  Roblox-style scripts. New edge cases are welcome.
 - **generated**: `fuzz` builds random programs from a seed with a grammar (`full`, `straight`
   for straight-line code, `branches` for no loops), so a run is reproducible from its seed range.
 
@@ -56,12 +57,13 @@ Rosetta's Luau to reproduce a case, `--reduce` shrinks a failing program to a mi
 `--report` writes a JSON summary, and `--baseline` / `--update-baseline` let a CI run fail only
 on failures that are new (see [sunberry's workflow](https://github.com/Scrensayol/sunberry/blob/main/.github/workflows/test.yaml)).
 
-The Luau compiler and VM come from `mlua` 0.12.2 / `luau0-src` 0.22.0, pinned, because the
-Luau version decides what the programs compile to.
+The Luau compiler and VM come from `luau0-src` 0.24.0 (Luau 0.747) through `mlua` pinned to a
+commit on its main branch, because the Luau version decides what the programs compile to.
+The experimental `if local` and `while local` syntax is switched on, so cases can use it.
 
 ## Results
 
-Run on 2026-11-21 with five decompilers: sunberry 0.5.0 (its new core with `--strict`, and its
+Run on 2026-11-21 (Luau 0.747) with five decompilers: sunberry 0.5.0 (its new core with `--strict`, and its
 original core with `--core old`), Tovek 2.7, and the two web APIs lua.expert and Composite through
 the scripts in [adapters/](adapters) (default options; Composite with telemetry off, so it keeps
 none of the programs). All five got the same bytecode.
@@ -76,15 +78,15 @@ none of the programs). All five got the same bytecode.
 | Tovek 2.7 | 1,142 (95.2%) | 4 | 0 | 54 |
 | sunberry (old core) | 722 (60.2%) | 408 | 70 | 0 |
 
-**Hand-written cases** (`check`, 24 programs x 6 profiles = 144 round trips each):
+**Hand-written cases** (`check`, 25 programs x 6 profiles = 150 round trips each):
 
 | decompiler | pass | wrong | refused |
 | --- | --- | --- | --- |
-| sunberry (new core) | 144 | 0 | 0 |
-| lua.expert | 144 | 0 | 0 |
-| Composite | 144 | 0 | 0 |
-| Tovek 2.7 | 142 | 0 | 2 |
-| sunberry (old core) | 136 | 8 | 0 |
+| sunberry (new core) | 150 | 0 | 0 |
+| lua.expert | 150 | 0 | 0 |
+| Composite | 150 | 0 | 0 |
+| Tovek 2.7 | 148 | 0 | 2 |
+| sunberry (old core) | 138 | 12 | 0 |
 
 What the wrong ones were:
 - **lua.expert and Tovek** (4 each): seed 1077, where `x^3` on a run-time value prints
