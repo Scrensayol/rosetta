@@ -61,24 +61,46 @@ Luau version decides what the programs compile to.
 
 ## Results
 
-Run on 2026-11-21: sunberry 0.5.0 (its new core, `--strict`, and its original core with
-`--core old`), Tovek 2.7.
+Run on 2026-11-21 with five decompilers: sunberry 0.5.0 (its new core with `--strict`, and its
+original core with `--core old`), Tovek 2.7, and the two web APIs lua.expert and Composite through
+the scripts in [adapters/](adapters) (default options; Composite with telemetry off, so it keeps
+none of the programs). All five got the same bytecode.
 
-**Generated programs** (`fuzz --seeds 1000..2000`, 5,994 usable round trips each):
+**Generated programs** (`fuzz --seeds 1000..1200`, 1,200 round trips each):
 
 | decompiler | pass | wrong | doesn't recompile | refused |
 | --- | --- | --- | --- | --- |
-| sunberry (new core) | 5,986 (99.9%) | 0 | 0 | 8 |
-| Tovek 2.7 | 5,772 (96.3%) | 4 | 0 | 218 |
-| sunberry (old core) | 3,685 (61.5%) | 2,043 | 266 | 0 |
+| sunberry (new core) | 1,198 (99.8%) | 0 | 0 | 2 |
+| lua.expert | 1,172 (97.7%) | 4 | 0 | 24 |
+| Composite | 1,170 (97.5%) | 7 | 0 | 23 |
+| Tovek 2.7 | 1,142 (95.2%) | 4 | 0 | 54 |
+| sunberry (old core) | 722 (60.2%) | 408 | 70 | 0 |
 
-**Hand-written cases** (`check`, 24 programs x 6 profiles):
+**Hand-written cases** (`check`, 24 programs x 6 profiles = 144 round trips each):
 
 | decompiler | pass | wrong | refused |
 | --- | --- | --- | --- |
 | sunberry (new core) | 144 | 0 | 0 |
+| lua.expert | 144 | 0 | 0 |
+| Composite | 144 | 0 | 0 |
 | Tovek 2.7 | 142 | 0 | 2 |
 | sunberry (old core) | 136 | 8 | 0 |
+
+What the wrong ones were:
+- **lua.expert and Tovek** (4 each): seed 1077, where `x^3` on a run-time value prints
+  `-0.31840539825142244` instead of `-0.31840539825142256`. Luau computes `x^3` at run time
+  as `x*x*x` but folds a constant `^` with `pow()`; writing the value back as a constant
+  changes the last digits.
+- **Composite** (7): the same seed 1077 twice, and seeds 1034, 1106 and 1188. On 1106 a
+  variable that holds `nil` comes back holding a function (the program prints `fn` where it
+  printed `nil`); on 1188 the decompiled program stops two lines early.
+
+lua.expert's refusals are `Provided bytecode is not supported`; Composite's are internal
+errors (`readable HIR preparation introduced a nonstructural node`, `structure recovery could
+not represent every prototype`).
+
+A larger run of the three local decompilers (`--seeds 1000..2000`, 5,994 usable round trips):
+sunberry's new core 99.9% with 0 wrong, Tovek 96.3% with 4 wrong, sunberry's old core 61.5%.
 
 Rosetta started inside sunberry, and its author also writes sunberry, so it's fair to be
 suspicious of these numbers: everything needed to rerun them is here, and cases that break
