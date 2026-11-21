@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 description = "A standardized, open-source benchmark for Luau decompilers"
 repository = "https://github.com/Scrensayol/rosetta"
+license = "MIT"
 publish = false
 
 # its own workspace, also when checked out inside another (sunberry's CI does that)

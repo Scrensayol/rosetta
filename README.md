@@ -83,3 +83,7 @@ Run on 2026-11-21: sunberry 0.5.0 (its new core, `--strict`, and its original co
 Rosetta started inside sunberry, and its author also writes sunberry, so it's fair to be
 suspicious of these numbers: everything needed to rerun them is here, and cases that break
 sunberry are just as welcome as any other.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
