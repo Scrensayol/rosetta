@@ -27,8 +27,8 @@ decompiler that refuses 1% is far more useful than one that's quietly wrong 1% o
 
 - **cases/**: hand-written programs, each aimed at something decompilers get wrong: inlined
   functions, loop exits, closures and upvalues, numbers (NaN sign, `x^3` folding), contextual
-  keywords (`while continue do`), dead branches, Luau's experimental `if local` / `while local`,
-  Roblox-style scripts. New edge cases are welcome.
+  keywords (`while continue do`), dead branches, `if`s nested 150 deep, Luau's experimental
+  `if local` / `while local`, Roblox-style scripts. New edge cases are welcome.
 - **generated**: `fuzz` builds random programs from a seed with a grammar (`full`, `straight`
   for straight-line code, `branches` for no loops), so a run is reproducible from its seed range.
 
@@ -78,15 +78,15 @@ none of the programs). All five got the same bytecode.
 | Tovek 2.7 | 1,142 (95.2%) | 4 | 0 | 54 |
 | sunberry (old core) | 722 (60.2%) | 408 | 70 | 0 |
 
-**Hand-written cases** (`check`, 25 programs x 6 profiles = 150 round trips each):
+**Hand-written cases** (`check`, 26 programs x 6 profiles = 156 round trips each):
 
-| decompiler | pass | wrong | refused |
-| --- | --- | --- | --- |
-| sunberry (new core) | 150 | 0 | 0 |
-| lua.expert | 150 | 0 | 0 |
-| Composite | 150 | 0 | 0 |
-| Tovek 2.7 | 148 | 0 | 2 |
-| sunberry (old core) | 138 | 12 | 0 |
+| decompiler | pass | wrong | doesn't recompile | refused |
+| --- | --- | --- | --- | --- |
+| sunberry (new core) | 156 | 0 | 0 | 0 |
+| lua.expert | 156 | 0 | 0 | 0 |
+| Composite | 156 | 0 | 0 | 0 |
+| Tovek 2.7 | 154 | 0 | 0 | 2 |
+| sunberry (old core) | 138 | 12 | 6 | 0 |
 
 What the wrong ones were:
 - **lua.expert and Tovek** (4 each): seed 1077, where `x^3` on a run-time value prints
