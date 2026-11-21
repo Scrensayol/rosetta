@@ -63,7 +63,7 @@ The experimental `if local` and `while local` syntax is switched on, so cases ca
 
 ## Results
 
-Run on 2026-11-21 (Luau 0.747) with five decompilers: sunberry 0.5.0 (its new core with `--strict`, and its
+Run on 2026-11-21 (Luau 0.747) with five decompilers: sunberry 0.5.1 (its new core with `--strict`, and its
 original core with `--core old`), Tovek 2.7, and the two web APIs lua.expert and Composite through
 the scripts in [adapters/](adapters) (default options; Composite with telemetry off, so it keeps
 none of the programs). All five got the same bytecode.
