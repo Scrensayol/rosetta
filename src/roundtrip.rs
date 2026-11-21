@@ -3,6 +3,7 @@ use serde::Serialize;
 use crate::{
     decompiler::Decompiler,
     luau::{self, Ending, Observation, Profile},
+    quality::{self, Quality},
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize)]
@@ -30,11 +31,13 @@ pub struct Verdict {
     pub output: Option<String>,
     pub want: Option<Observation>,
     pub got: Option<Observation>,
+    // only on a pass
+    pub quality: Option<Quality>,
 }
 
 impl Verdict {
     fn new(kind: Kind, detail: impl Into<String>) -> Verdict {
-        Verdict { kind, detail: detail.into(), output: None, want: None, got: None }
+        Verdict { kind, detail: detail.into(), output: None, want: None, got: None, quality: None }
     }
 }
 
@@ -54,7 +57,8 @@ pub fn check(source: &str, profile: Profile, decompiler: &dyn Decompiler) -> Ver
         return Verdict::new(Kind::Unusable, "input exhausts the memory limit");
     }
 
-    let output = match decompiler.decompile(&bytecode) {
+    let (output, cpu) = decompiler.decompile(&bytecode);
+    let output = match output {
         Ok(o) => o,
         Err(e) => {
             let kind = if e.starts_with("unsupported") { Kind::Refused } else { Kind::DecompileFailed };
@@ -69,7 +73,8 @@ pub fn check(source: &str, profile: Profile, decompiler: &dyn Decompiler) -> Ver
     };
     let got = luau::run(&recompiled);
     let (kind, detail) = if got == want { (Kind::Pass, String::new()) } else { (Kind::Mismatch, first_difference(&want, &got)) };
-    Verdict { kind, detail, output: Some(output), want: Some(want), got: Some(got) }
+    let quality = (kind == Kind::Pass).then(|| quality::measure(source, &output, profile.debug >= 2, cpu));
+    Verdict { kind, detail, output: Some(output), want: Some(want), got: Some(got), quality }
 }
 
 fn first_difference(want: &Observation, got: &Observation) -> String {

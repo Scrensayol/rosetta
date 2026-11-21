@@ -1,6 +1,10 @@
+mod bytecode;
 mod decompiler;
 mod generator;
+mod lex;
 mod luau;
+mod mutate;
+mod quality;
 mod reduce;
 mod rng;
 mod roundtrip;
@@ -15,7 +19,8 @@ use std::{
 use clap::{Args, Parser, Subcommand};
 use decompiler::{Decompiler, External};
 use generator::Grammar;
-use luau::Profile;
+use luau::{Extra, Profile};
+use quality::{Quality, Summary};
 use rayon::prelude::*;
 use roundtrip::{Kind, Verdict};
 use serde::Serialize;
@@ -49,6 +54,35 @@ enum Command {
         #[arg(long, value_enum, default_value = "full")]
         grammar: Grammar,
     },
+    /// Round-trip mutants of existing programs (Bin2Wrong-style), each kept only when its bytecode
+    /// shows something no program before it did
+    Mutate {
+        #[command(flatten)]
+        common: Common,
+        /// Programs to mutate: .luau files or directories. Defaults to the cases directory
+        #[arg(long = "pool")]
+        pool: Vec<PathBuf>,
+        /// Also mutate the programs these seeds generate (a count or a range like 100..200)
+        #[arg(long)]
+        pool_seeds: Option<String>,
+        #[arg(long, value_enum, default_value = "full")]
+        grammar: Grammar,
+        /// Mutants to keep
+        #[arg(long, default_value = "200")]
+        count: usize,
+        #[arg(long, default_value = "1")]
+        seed: u64,
+        /// Also mutate compiler options real scripts aren't built with: coverage, type info,
+        /// mutable globals, disabled builtins
+        #[arg(long)]
+        compile_options: bool,
+        /// Write every kept mutant here as a .luau file that `check` reruns as it was
+        #[arg(long)]
+        dump: Option<PathBuf>,
+        /// Shrink each failing mutant to a minimal one that fails the same way
+        #[arg(long)]
+        reduce: bool,
+    },
     /// Print the program a seed generates
     Gen {
         seed: u64,
@@ -81,7 +115,7 @@ enum Command {
 struct Common {
     /// name=command, where {} is the path of a raw bytecode file and the source comes out on stdout,
     /// e.g. tovek='/path/luau-lifter {}'. Repeat to compare several.
-    #[arg(long = "decompiler", required = true)]
+    #[arg(long = "decompiler")]
     decompilers: Vec<String>,
     /// Comma-separated profiles such as O1g1,O2g2, or "all"
     #[arg(long, default_value = "all")]
@@ -154,7 +188,7 @@ fn main() -> ExitCode {
                 .par_iter()
                 .filter_map(|f| {
                     let text = fs::read_to_string(f).ok()?;
-                    luau::compile(&text, Profile { opt: 1, debug: 1 }).err().map(|e| format!("{}: {}", f.display(), e.lines().next().unwrap_or_default()))
+                    luau::compile(&text, Profile::new(1, 1)).err().map(|e| format!("{}: {}", f.display(), e.lines().next().unwrap_or_default()))
                 })
                 .collect::<Vec<_>>();
             println!("{} files, {} don't compile", files.len(), bad.len());
@@ -209,7 +243,10 @@ fn main() -> ExitCode {
             cases.sort();
             let cases = cases
                 .into_iter()
-                .map(|p| Case { name: p.file_stem().unwrap().to_string_lossy().into_owned(), source: Source::File(p) })
+                .map(|p| {
+                    let extra = fs::read_to_string(&p).ok().and_then(|text| options_directive(&text)).unwrap_or_default();
+                    Case { name: p.file_stem().unwrap().to_string_lossy().into_owned(), source: Source::File(p), extra }
+                })
                 .collect();
             run(&common, cases, false, generator::GENERATOR_VERSION)
         }
@@ -218,7 +255,7 @@ fn main() -> ExitCode {
                 eprintln!("--seeds takes a count or a range like 100..200");
                 return ExitCode::from(2);
             };
-            let cases = seeds.map(|seed| Case { name: format!("seed{seed}"), source: Source::Seed(seed, grammar) }).collect();
+            let cases = seeds.map(|seed| Case { name: format!("seed{seed}"), source: Source::Seed(seed, grammar), extra: Extra::default() }).collect();
             let generator = match grammar {
                 Grammar::Full => generator::GENERATOR_VERSION.to_string(),
                 Grammar::Straight => format!("{}-straight", generator::GENERATOR_VERSION),
@@ -226,7 +263,57 @@ fn main() -> ExitCode {
             };
             run(&common, cases, reduce, &generator)
         }
+        Command::Mutate { common, pool, pool_seeds, grammar, count, seed, compile_options, dump, reduce } => {
+            let mut files = Vec::new();
+            let paths = if pool.is_empty() { vec![Path::new(env!("CARGO_MANIFEST_DIR")).join("cases")] } else { pool };
+            for path in paths {
+                collect_luau(&path, &mut files);
+            }
+            files.sort();
+            let mut programs = files
+                .iter()
+                .filter_map(|p| Some((p.file_stem()?.to_string_lossy().into_owned(), fs::read_to_string(p).ok()?)))
+                .collect::<Vec<_>>();
+            if let Some(seeds) = pool_seeds {
+                let Some(seeds) = parse_seeds(&seeds) else {
+                    eprintln!("--pool-seeds takes a count or a range like 100..200");
+                    return ExitCode::from(2);
+                };
+                programs.extend(seeds.map(|s| (format!("seed{s}"), generator::generate(s, grammar).render())));
+            }
+            let hash = mutate::pool_hash(&programs);
+            let pool_size = programs.len();
+            let started = std::time::Instant::now();
+            let (mutants, stats) = mutate::evolve(programs, seed, count, compile_options);
+            println!(
+                "kept {} mutants of {pool_size} programs (pool {hash}): {} attempts, {} usable, {} bytecode features, {:.1}s",
+                mutants.len(),
+                stats.attempts,
+                stats.usable,
+                stats.features,
+                started.elapsed().as_secs_f64()
+            );
+            if let Some(dir) = &dump {
+                fs::create_dir_all(dir).expect("create dump dir");
+                for m in &mutants {
+                    fs::write(dir.join(format!("{}.luau", m.name)), m.file_text()).expect("write mutant");
+                }
+                println!("wrote them to {}", dir.display());
+                if common.decompilers.is_empty() {
+                    return ExitCode::SUCCESS;
+                }
+            }
+            let cases = mutants.into_iter().map(|m| Case { name: m.name.clone(), extra: m.extra, source: Source::Text(m.file_text()) }).collect();
+            let options = if compile_options { "-options" } else { "" };
+            let generator = format!("mutate-{}-{}-seed{seed}-pool{hash}{options}", mutate::MUTATOR_VERSION, generator::GENERATOR_VERSION);
+            run(&common, cases, reduce, &generator)
+        }
     }
+}
+
+// `--!rosetta-options +c2+m3` near the top of a file: compiler options a dumped mutant needs
+fn options_directive(text: &str) -> Option<Extra> {
+    text.lines().take(3).find_map(|l| l.strip_prefix("--!rosetta-options ")).and_then(|o| Extra::parse(o.trim()))
 }
 
 fn parse_seeds(text: &str) -> Option<std::ops::Range<u64>> {
@@ -249,11 +336,14 @@ fn collect_luau(path: &Path, out: &mut Vec<PathBuf>) {
 enum Source {
     File(PathBuf),
     Seed(u64, Grammar),
+    Text(String),
 }
 
 struct Case {
     name: String,
     source: Source,
+    // compiler options for every profile this case runs at
+    extra: Extra,
 }
 
 impl Case {
@@ -261,6 +351,7 @@ impl Case {
         match &self.source {
             Source::File(p) => fs::read_to_string(p).unwrap_or_default(),
             Source::Seed(s, g) => generator::generate(*s, *g).render(),
+            Source::Text(t) => t.clone(),
         }
     }
 }
@@ -285,6 +376,16 @@ struct Report {
     // decompiler -> profile -> failures
     by_profile: BTreeMap<String, BTreeMap<String, usize>>,
     failures: BTreeMap<String, Vec<Failure>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    quality: Option<QualityReport>,
+}
+
+// Readability, measured only on the round trips every decompiler in the run passed, so no
+// decompiler is averaged over an easier set than another
+#[derive(Serialize)]
+struct QualityReport {
+    round_trips: usize,
+    by_decompiler: BTreeMap<String, Summary>,
 }
 
 fn decompilers(specs: &[String]) -> Result<Vec<Box<dyn Decompiler>>, String> {
@@ -306,6 +407,10 @@ fn run(common: &Common, cases: Vec<Case>, reduce: bool, generator_version: &str)
             }
         }
     };
+    if common.decompilers.is_empty() {
+        eprintln!("give at least one --decompiler name=command");
+        return ExitCode::from(2);
+    }
     let decompilers = match decompilers(&common.decompilers) {
         Ok(d) => d,
         Err(e) => {
@@ -317,7 +422,7 @@ fn run(common: &Common, cases: Vec<Case>, reduce: bool, generator_version: &str)
     let decompiler_count = decompilers.len();
     let jobs = cases
         .iter()
-        .flat_map(|case| profiles.iter().flat_map(move |p| (0..decompiler_count).map(move |d| (case, *p, d))))
+        .flat_map(|case| profiles.iter().flat_map(move |p| (0..decompiler_count).map(move |d| (case, Profile { extra: case.extra, ..*p }, d))))
         .collect::<Vec<_>>();
     let started = std::time::Instant::now();
     let results = jobs
@@ -328,22 +433,25 @@ fn run(common: &Common, cases: Vec<Case>, reduce: bool, generator_version: &str)
             let verdict = roundtrip::check(&source, profile, decompiler);
             let mut reduced = None;
             if verdict.kind.is_failure() {
+                let kind = verdict.kind;
                 if reduce && let Source::Seed(seed, grammar) = case.source {
-                    let kind = verdict.kind;
                     let (program, _) = reduce::reduce(
                         &generator::generate(seed, grammar),
                         |p| roundtrip::check(&p.render(), profile, decompiler).kind == kind,
                         400,
                     );
                     reduced = Some(program.render());
+                } else if reduce && let Source::Text(text) = &case.source {
+                    reduced = Some(mutate::reduce(text, |s| roundtrip::check(s, profile, decompiler).kind == kind, 400));
                 }
                 if let Some(work) = &common.work {
                     save(work, decompiler.name(), &case.name, profile, &source, &verdict, reduced.as_deref());
                 }
             }
-            (case, profile, d, verdict.kind, verdict.detail, reduced.map(|r| r.lines().count()))
+            (case, profile, d, verdict.kind, verdict.detail, reduced.map(|r| r.lines().count()), verdict.quality)
         })
         .collect::<Vec<_>>();
+    let quality = quality_report(&results, &decompilers);
 
     let mut report = Report {
         generator: generator_version.to_string(),
@@ -352,13 +460,14 @@ fn run(common: &Common, cases: Vec<Case>, reduce: bool, generator_version: &str)
         totals: BTreeMap::new(),
         by_profile: BTreeMap::new(),
         failures: BTreeMap::new(),
+        quality,
     };
     let refusals = results
         .iter()
         .filter(|r| r.3 == Kind::Refused)
-        .map(|(case, profile, d, kind, detail, _)| (case.name.clone(), *profile, *d, *kind, detail.clone()))
+        .map(|(case, profile, d, kind, detail, _, _)| (case.name.clone(), *profile, *d, *kind, detail.clone()))
         .collect::<Vec<_>>();
-    for (case, profile, d, kind, detail, reduced_lines) in results {
+    for (case, profile, d, kind, detail, reduced_lines, _) in results {
         let name = decompilers[d].name().to_string();
         *report.totals.entry(name.clone()).or_default().entry(kind).or_default() += 1;
         if kind.is_failure() {
@@ -412,6 +521,9 @@ fn run(common: &Common, cases: Vec<Case>, reduce: bool, generator_version: &str)
         for (reason, (count, example)) in reasons.iter().take(8) {
             println!("  refused {count:5}x  {reason}  (e.g. {example})");
         }
+    }
+    if let Some(quality) = &report.quality {
+        print_quality(quality);
     }
     println!("{} round trips in {:.1}s", jobs.len(), started.elapsed().as_secs_f64());
 
@@ -476,6 +588,38 @@ fn run(common: &Common, cases: Vec<Case>, reduce: bool, generator_version: &str)
         return if regressed { ExitCode::FAILURE } else { ExitCode::SUCCESS };
     }
     if failed { ExitCode::FAILURE } else { ExitCode::SUCCESS }
+}
+
+type Outcome<'a> = (&'a Case, Profile, usize, Kind, String, Option<usize>, Option<Quality>);
+
+fn quality_report(results: &[Outcome], decompilers: &[Box<dyn Decompiler>]) -> Option<QualityReport> {
+    let mut passes = BTreeMap::<(&str, Profile), Vec<Option<&Quality>>>::new();
+    for (case, profile, d, _, _, _, quality) in results {
+        passes.entry((&case.name, *profile)).or_insert_with(|| vec![None; decompilers.len()])[*d] = quality.as_ref();
+    }
+    let common = passes.values().filter_map(|qs| qs.iter().copied().collect::<Option<Vec<_>>>()).collect::<Vec<_>>();
+    if common.is_empty() {
+        return None;
+    }
+    let by_decompiler = decompilers
+        .iter()
+        .enumerate()
+        .map(|(d, decompiler)| (decompiler.name().to_string(), Summary::of(&common.iter().map(|qs| qs[d]).collect::<Vec<_>>())))
+        .collect();
+    Some(QualityReport { round_trips: common.len(), by_decompiler })
+}
+
+fn print_quality(quality: &QualityReport) {
+    println!("readability on the {} round trips every decompiler passed:", quality.round_trips);
+    let width = quality.by_decompiler.keys().map(String::len).max().unwrap_or(0).max(10);
+    println!("  {:width$}  similarity   size  locals  nesting  endless  names g2  cpu ms", "decompiler");
+    for (name, s) in &quality.by_decompiler {
+        let names = s.names.map_or("-".to_string(), |n| format!("{n:.1}%"));
+        println!(
+            "  {name:width$}  {:>9.1}%  {:>4.2}x  {:>5.2}x  {:>+7.2}  {:>7}  {:>8}  {:>6.2}",
+            s.similarity, s.size, s.locals, s.nesting, s.endless, names, s.cpu_ms_median
+        );
+    }
 }
 
 fn save(work: &Path, decompiler: &str, case: &str, profile: Profile, source: &str, verdict: &Verdict, reduced: Option<&str>) {

@@ -1,4 +1,9 @@
-use std::{cell::Cell, cell::RefCell, fmt, rc::Rc};
+use std::{
+    cell::{Cell, RefCell},
+    fmt,
+    rc::Rc,
+    time::{Duration, Instant},
+};
 
 use mlua::{
     Lua, MultiValue, VmState,
@@ -10,38 +15,105 @@ use serde::Serialize;
 pub struct Profile {
     pub opt: u8,
     pub debug: u8,
+    pub extra: Extra,
+}
+
+// Compiler options past -O and -g, which only the mutation fuzzer's --compile-options turns on.
+// Real scripts are compiled without them, so they're kept out of the default runs
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize)]
+pub struct Extra {
+    // COVERAGE instructions: 1 per statement, 2 per expression too
+    pub coverage: u8,
+    // type information for every function, not just native ones
+    pub type_info: u8,
+    // a mask over MUTABLE_GLOBALS: no GETIMPORT for fields reached through these
+    pub mutable: u8,
+    // a mask over DISABLED_BUILTINS: these compile to plain calls instead of FASTCALL
+    pub disabled: u16,
+}
+
+pub const MUTABLE_GLOBALS: [&str; 8] = ["math", "string", "table", "bit32", "buffer", "utf8", "os", "coroutine"];
+pub const DISABLED_BUILTINS: [&str; 16] = [
+    "assert", "type", "typeof", "rawequal", "rawget", "select", "tostring", "tonumber", "math.floor", "math.abs", "math.max", "math.min",
+    "string.sub", "string.byte", "string.len", "table.insert",
+];
+
+impl Extra {
+    pub fn is_default(&self) -> bool {
+        *self == Extra::default()
+    }
+
+    // "+c2+t1+m5+d300", the inverse of Display
+    pub fn parse(mut text: &str) -> Option<Extra> {
+        let mut extra = Extra::default();
+        while let Some(rest) = text.strip_prefix('+') {
+            let end = rest[1..].find('+').map_or(rest.len(), |i| i + 1);
+            let (flag, value) = rest.get(..1).zip(rest.get(1..end))?;
+            match flag {
+                "c" => extra.coverage = value.parse().ok().filter(|v| *v <= 2)?,
+                "t" => extra.type_info = value.parse().ok().filter(|v| *v <= 1)?,
+                "m" => extra.mutable = value.parse().ok()?,
+                "d" => extra.disabled = value.parse().ok()?,
+                _ => return None,
+            }
+            text = &rest[end..];
+        }
+        text.is_empty().then_some(extra)
+    }
+}
+
+impl fmt::Display for Extra {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for (flag, value) in [("c", self.coverage as u32), ("t", self.type_info as u32), ("m", self.mutable as u32), ("d", self.disabled as u32)] {
+            if value != 0 {
+                write!(f, "+{flag}{value}")?;
+            }
+        }
+        Ok(())
+    }
 }
 
 impl Profile {
     pub const ALL: [Profile; 6] = [
-        Profile { opt: 0, debug: 1 },
-        Profile { opt: 1, debug: 1 },
-        Profile { opt: 2, debug: 1 },
-        Profile { opt: 0, debug: 2 },
-        Profile { opt: 1, debug: 2 },
-        Profile { opt: 2, debug: 2 },
+        Profile { opt: 0, debug: 1, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0 } },
+        Profile { opt: 1, debug: 1, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0 } },
+        Profile { opt: 2, debug: 1, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0 } },
+        Profile { opt: 0, debug: 2, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0 } },
+        Profile { opt: 1, debug: 2, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0 } },
+        Profile { opt: 2, debug: 2, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0 } },
     ];
+
+    pub fn new(opt: u8, debug: u8) -> Profile {
+        Profile { opt, debug, extra: Extra::default() }
+    }
 
     pub fn parse(text: &str) -> Option<Profile> {
         let rest = text.strip_prefix('O')?;
-        let (opt, debug) = rest.split_once('g')?;
-        let profile = Profile { opt: opt.parse().ok()?, debug: debug.parse().ok()? };
+        let (opt, rest) = rest.split_once('g')?;
+        let digits = rest.find('+').unwrap_or(rest.len());
+        let profile = Profile { opt: opt.parse().ok()?, debug: rest[..digits].parse().ok()?, extra: Extra::parse(&rest[digits..])? };
         (profile.opt <= 2 && profile.debug <= 2).then_some(profile)
     }
 }
 
 impl fmt::Display for Profile {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "O{}g{}", self.opt, self.debug)
+        write!(f, "O{}g{}{}", self.opt, self.debug, self.extra)
     }
 }
 
 pub fn compile(source: &str, profile: Profile) -> Result<Vec<u8>, String> {
-    let bytecode = Compiler::new()
-        .set_optimization_level(profile.opt)
-        .set_debug_level(profile.debug)
-        .compile(source)
-        .map_err(|e| e.to_string())?;
+    let pick = |names: &[&'static str], mask: u32| names.iter().enumerate().filter(|(i, _)| mask >> i & 1 == 1).map(|(_, n)| *n).collect::<Vec<_>>();
+    let mut compiler = Compiler::new().set_optimization_level(profile.opt).set_debug_level(profile.debug);
+    let extra = profile.extra;
+    if !extra.is_default() {
+        compiler = compiler
+            .set_coverage_level(extra.coverage)
+            .set_type_info_level(extra.type_info)
+            .set_mutable_globals(pick(&MUTABLE_GLOBALS, extra.mutable as u32))
+            .set_disabled_builtins(pick(&DISABLED_BUILTINS, extra.disabled as u32));
+    }
+    let bytecode = compiler.compile(source).map_err(|e| e.to_string())?;
     // luau_compile reports a syntax error as a chunk whose first byte is 0
     match bytecode.split_first() {
         Some((0, message)) => Err(String::from_utf8_lossy(message).into_owned()),
@@ -71,6 +143,10 @@ impl Observation {
 }
 
 pub const STEP_BUDGET: u64 = 2_000_000;
+// A net under the step budget for programs that spend their steps in library calls doing
+// unbounded work, like table.insert(t, 1, v) on a table that keeps growing. Only programs that
+// are broken anyway get near it
+pub const WALL_LIMIT: Duration = Duration::from_secs(5);
 pub const OUT_OF_MEMORY: &str = "memory limit";
 
 // Runs bytecode in a fresh VM. print is captured, and anything that differs between two
@@ -103,8 +179,12 @@ pub fn run(bytecode: &[u8]) -> Observation {
 
     {
         let steps = steps.clone();
+        let deadline = Instant::now() + WALL_LIMIT;
         lua.set_interrupt(move |_| {
-            let n = steps.get() + 1;
+            let mut n = steps.get() + 1;
+            if n % 4096 == 0 && Instant::now() > deadline {
+                n = STEP_BUDGET + 1;
+            }
             steps.set(n);
             if n > STEP_BUDGET {
                 Err(mlua::Error::runtime("rosetta: step budget exhausted"))
@@ -115,7 +195,7 @@ pub fn run(bytecode: &[u8]) -> Observation {
     }
 
     static PRELUDE: std::sync::OnceLock<Vec<u8>> = std::sync::OnceLock::new();
-    let prelude = PRELUDE.get_or_init(|| compile(crate::generator::PRELUDE, Profile { opt: 1, debug: 1 }).expect("prelude compiles"));
+    let prelude = PRELUDE.get_or_init(|| compile(crate::generator::PRELUDE, Profile::new(1, 1)).expect("prelude compiles"));
     lua.load(&prelude[..]).set_mode(ChunkMode::Binary).set_name("=prelude").exec().expect("prelude runs");
 
     let result = lua.load(bytecode).set_mode(ChunkMode::Binary).set_name("=prog").exec();
