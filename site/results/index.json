@@ -135,6 +135,26 @@
       "web": false
     },
     {
+      "file": "luacid-full.json",
+      "sha256": "e04bc0106e26be5c4501616ae900a102fcddd7b305cd4adaacb16f07cc98f825",
+      "decompiler": "luacid",
+      "version": null,
+      "tier": "full",
+      "hash": "99c2122fc5494b3c",
+      "score": {
+        "passed": 12198,
+        "total": 12204
+      },
+      "totals": {
+        "pass": 12198,
+        "unusable": 6,
+        "mismatch": 6
+      },
+      "created": "2026-11-22T17:03:03Z",
+      "seconds": 13014.49,
+      "web": true
+    },
+    {
       "file": "sunberry-full.json",
       "sha256": "a252958a8c527807bcd176b3a9f332833edd524211d9a79332687b6b2fc544a7",
       "decompiler": "sunberry",

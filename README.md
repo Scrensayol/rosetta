@@ -155,8 +155,9 @@ locally, run `python3 -m http.server -d site`.
 ## Results
 
 The leaderboard and every official `bench` result are on the website,
-[scrensayol.github.io/rosetta](https://scrensayol.github.io/rosetta/). The tables below are the
-older per-command runs, which also compare readability across decompilers.
+[scrensayol.github.io/rosetta](https://scrensayol.github.io/rosetta/). The fuzz and check
+tables below are per-command runs (sunberry 0.5.4), which also compare readability across
+decompilers on the round trips they all passed.
 
 Run on 2026-11-22 (Luau 0.747) with seven decompilers: sunberry 0.5.4 (its new core with `--strict`, and
 its original core with `--core old`), Tovek 2.7, Fission 1.0.5-beta, and the three web APIs lua.expert,
@@ -206,22 +207,24 @@ lua.expert's refusals are `Provided bytecode is not supported`; Composite's are 
 errors (`readable HIR preparation introduced a nonstructural node`, `structure recovery could
 not represent every prototype`). luacid and Fission never refuse: they always print something.
 
-A larger run of the local decompilers (`--seeds 1000..2000`, 5,994 usable round trips):
-sunberry's new core 100% with 0 wrong, Tovek 96.3% with 4 wrong, Fission 73.8% with 798 wrong and
-770 that don't recompile, sunberry's old core 61.5%.
+**The benchmark's full tier** (`bench --tier full`: the 35 cases, seeds 1000..2000 and 1000 mutants
+of the cases, 12,204 usable round trips each). Every result file is on
+[the website](https://scrensayol.github.io/rosetta/), with each program's verdict at each profile:
 
-**Mutants** (`mutate --count 1000 --seed 1`, 1,000 mutants of the cases, 6,000 round trips each).
-These are local decompilers only, because a mutation run is thousands of requests, more than
-it's fair to send someone else's server:
+| decompiler | pass | wrong | doesn't recompile | refused | cases | generated | mutants |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| luacid | 12,198 (99.95%) | 6 | 0 | 0 | 210/210 | 5,990/5,994 | 5,998/6,000 |
+| sunberry 0.5.5 (new core) | 12,196 (99.93%) | 0 | 0 | 8 | 210/210 | 5,994/5,994 | 5,992/6,000 |
+| lua.expert | 12,090 (99.1%) | 4 | 0 | 110 | 210/210 | 5,886/5,994 | 5,994/6,000 |
+| Composite | 11,989 (98.2%) | 82 | 0 | 133 | 210/210 | 5,825/5,994 | 5,954/6,000 |
+| Tovek 2.7 | 11,841 (97.0%) | 4 | 0 | 359 | 208/210 | 5,772/5,994 | 5,861/6,000 |
+| Fission | 9,557 (78.3%) | 1,409 | 1,238 | 0 | 183/210 | 4,426/5,994 | 4,948/6,000 |
+| sunberry (old core) | 9,189 (75.3%) | 2,735 | 280 | 0 | 176/210 | 3,685/5,994 | 5,328/6,000 |
 
-| decompiler | pass | wrong | doesn't recompile | refused |
-| --- | --- | --- | --- | --- |
-| sunberry (new core) | 6,000 (100%) | 0 | 0 | 0 |
-| Tovek 2.7 | 5,966 (99.4%) | 0 | 0 | 34 |
-| sunberry (old core) | 5,698 (95.0%) | 254 | 48 | 0 |
-| Fission | 4,837 (80.6%) | 755 | 408 | 0 |
-
-Tovek's refusals are `residual goto/label would be invalid Luau`.
+luacid's other two wrong ones are mutants mut1-475 and mut1-510 at O2g2, which print a different
+function value than the original: the program printed its second function and the decompiled
+one prints its first. sunberry's refusals are `a condition that isn't an expression`, Tovek's
+mostly `residual goto/label would be invalid Luau`.
 
 ### How the output reads
 
@@ -254,15 +257,8 @@ its server process).
 | lua.expert | 64.3% | 0.55x | 0.50x | -1.35 | 252 | 35.7% | - |
 | sunberry (old core) | 58.8% | 0.52x | 0.49x | -1.68 | 220 | 38.6% | 7.5 |
 
-**Mutants** (`mutate --count 1000 --seed 1`, 4,543 round trips all four local decompilers
-passed; the web APIs aren't sent mutation runs):
-
-| decompiler | similarity | size | locals | nesting | endless | names g2 | cpu ms |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| sunberry (new core) | 91.5% | 0.98x | 1.03x | -0.65 | 525 | 90.4% | 5.7 |
-| Tovek 2.7 | 90.0% | 0.93x | 0.95x | -0.82 | 581 | 94.8% | 7.0 |
-| Fission | 83.7% | 1.02x | 1.22x | -0.43 | 456 | 84.1% | - |
-| sunberry (old core) | 80.9% | 0.90x | 0.86x | -0.66 | 1,443 | 74.2% | 6.9 |
+Each result page on the website also shows how one decompiler's own passes read, over its full
+tier run.
 
 Generated programs come out much smaller than their source because the generator writes
 `do ... end` blocks and constant expressions that Luau's compiler folds away. No decompiler can
