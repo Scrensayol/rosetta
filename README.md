@@ -74,7 +74,8 @@ the original program, so it's reproducible and anyone can check it.
 
 Every decompiler runs the same way, as a command: `name=command`, where `{}` is the path of a raw
 (unencoded) bytecode file and the source comes out on stdout. Nothing runs in-process, so nobody
-gets an advantage.
+gets an advantage. A decompiler that only runs as a web API or a server gets a small adapter
+script: [adapters/](adapters) has lua.expert, Composite, luacid and Fission.
 
 ```sh
 cargo build --release
@@ -104,19 +105,22 @@ The experimental `if local` and `while local` syntax is switched on, so cases ca
 
 ## Results
 
-Run on 2026-11-21 (Luau 0.747) with five decompilers: sunberry 0.5.1 (its new core with `--strict`, and its
-original core with `--core old`), Tovek 2.7, and the two web APIs lua.expert and Composite through
-the scripts in [adapters/](adapters) (default options; Composite with telemetry off, so it keeps
-none of the programs). All five got the same bytecode.
+Run on 2026-11-22 (Luau 0.747) with seven decompilers: sunberry 0.5.4 (its new core with `--strict`, and
+its original core with `--core old`), Tovek 2.7, Fission 1.0.5-beta, and the three web APIs lua.expert,
+Composite and luacid. Fission runs as its own HTTP server on this machine; it and the web APIs go
+through the scripts in [adapters/](adapters), all with default options (Composite with telemetry
+off, so it keeps none of the programs). All seven got the same bytecode.
 
 **Generated programs** (`fuzz --seeds 1000..1200`, 1,200 round trips each):
 
 | decompiler | pass | wrong | doesn't recompile | refused |
 | --- | --- | --- | --- | --- |
-| sunberry (new core) | 1,198 (99.8%) | 0 | 0 | 2 |
+| sunberry (new core) | 1,200 (100%) | 0 | 0 | 0 |
+| luacid | 1,196 (99.7%) | 4 | 0 | 0 |
 | lua.expert | 1,172 (97.7%) | 4 | 0 | 24 |
-| Composite | 1,170 (97.5%) | 7 | 0 | 23 |
+| Composite | 1,168 (97.3%) | 9 | 0 | 23 |
 | Tovek 2.7 | 1,142 (95.2%) | 4 | 0 | 54 |
+| Fission | 915 (76.3%) | 181 | 104 | 0 |
 | sunberry (old core) | 722 (60.2%) | 408 | 70 | 0 |
 
 **Hand-written cases** (`check`, 26 programs x 6 profiles = 156 round trips each):
@@ -126,24 +130,32 @@ none of the programs). All five got the same bytecode.
 | sunberry (new core) | 156 | 0 | 0 | 0 |
 | lua.expert | 156 | 0 | 0 | 0 |
 | Composite | 156 | 0 | 0 | 0 |
+| luacid | 156 | 0 | 0 | 0 |
 | Tovek 2.7 | 154 | 0 | 0 | 2 |
 | sunberry (old core) | 138 | 12 | 6 | 0 |
+| Fission | 132 | 18 | 6 | 0 |
 
 What the wrong ones were:
-- **lua.expert and Tovek** (4 each): seed 1077, where `x^3` on a run-time value prints
+- **luacid, lua.expert and Tovek** (4 each): seed 1077, where `x^3` on a run-time value prints
   `-0.31840539825142244` instead of `-0.31840539825142256`. Luau computes `x^3` at run time
   as `x*x*x` but folds a constant `^` with `pow()`; writing the value back as a constant
   changes the last digits.
-- **Composite** (7): the same seed 1077 twice, and seeds 1034, 1106 and 1188. On 1106 a
-  variable that holds `nil` comes back holding a function (the program prints `fn` where it
-  printed `nil`); on 1188 the decompiled program stops two lines early.
+- **Composite** (9): the same seed 1077 twice, and seeds 1018, 1034, 1106 and 1188. On 1018 a
+  comparison that printed `true` prints `false`; on 1106 a variable that holds `nil` comes back
+  holding a function (the program prints `fn` where it printed `nil`); on 1188 the decompiled
+  program stops two lines early.
+- **Fission** (181, and 104 that don't recompile): 115 print different values (`2.5 3.5 6.5` comes
+  back as `3.5 4.5 8.5`, `11 12 31` as `31 32 33`), 66 stop early, and the outputs that don't compile mostly call a method on a literal without the
+  parentheses Luau needs (`` `{v}`:rep(2) ``). On the hand-written cases it also turns `Class.new(x)`
+  into `function Class:new()` building `{ self = self }` at debug level 2.
 
 lua.expert's refusals are `Provided bytecode is not supported`; Composite's are internal
 errors (`readable HIR preparation introduced a nonstructural node`, `structure recovery could
-not represent every prototype`).
+not represent every prototype`). luacid and Fission never refuse: they always print something.
 
-A larger run of the three local decompilers (`--seeds 1000..2000`, 5,994 usable round trips):
-sunberry's new core 99.9% with 0 wrong, Tovek 96.3% with 4 wrong, sunberry's old core 61.5%.
+A larger run of the local decompilers (`--seeds 1000..2000`, 5,994 usable round trips):
+sunberry's new core 100% with 0 wrong, Tovek 96.3% with 4 wrong, Fission 73.8% with 798 wrong and
+770 that don't recompile, sunberry's old core 61.5%.
 
 **Mutants** (`mutate --count 1000 --seed 1`, 1,000 mutants of the cases, 6,000 round trips each).
 These are local decompilers only, because a mutation run is thousands of requests, more than
@@ -151,47 +163,53 @@ it's fair to send someone else's server:
 
 | decompiler | pass | wrong | doesn't recompile | refused |
 | --- | --- | --- | --- | --- |
+| sunberry (new core) | 6,000 (100%) | 0 | 0 | 0 |
 | Tovek 2.7 | 5,966 (99.4%) | 0 | 0 | 34 |
-| sunberry (new core) | 5,964 (99.4%) | 0 | 0 | 36 |
 | sunberry (old core) | 5,698 (95.0%) | 254 | 48 | 0 |
+| Fission | 4,837 (80.6%) | 755 | 408 | 0 |
 
-Tovek's refusals are `residual goto/label would be invalid Luau`; sunberry's are a register
-read before it's written (`mut1-103` at `-O0`, for one).
+Tovek's refusals are `residual goto/label would be invalid Luau`.
 
 ### How the output reads
 
 Run on 2026-11-22 (Luau 0.747). Every table only covers the round trips all of its decompilers
 passed, so compare rows within a table, never across tables. CPU time isn't given for the web
-APIs, because their adapters only measure the local `curl`.
+APIs or Fission, because their adapters only measure the local `curl` (Fission decompiles inside
+its server process).
 
-**Hand-written cases** (`check`, 138 round trips all five passed):
-
-| decompiler | similarity | size | locals | nesting | endless | names g2 | cpu ms |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| sunberry (new core) | 92.3% | 0.98x | 1.00x | -0.19 | 8 | 98.9% | 4.1 |
-| Tovek 2.7 | 90.3% | 0.94x | 0.95x | -0.33 | 14 | 97.5% | 4.0 |
-| Composite | 87.5% | 1.02x | 1.10x | -0.30 | 11 | 97.7% | - |
-| lua.expert | 86.9% | 0.98x | 1.02x | -0.07 | 41 | 58.8% | - |
-| sunberry (old core) | 83.1% | 0.99x | 0.98x | -0.13 | 38 | 83.4% | 4.7 |
-
-**Generated programs** (`fuzz --seeds 1000..1200`, 674 round trips all five passed):
+**Hand-written cases** (`check`, 116 round trips all seven passed):
 
 | decompiler | similarity | size | locals | nesting | endless | names g2 | cpu ms |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| sunberry (new core) | 72.5% | 0.65x | 0.78x | -1.38 | 20 | 78.4% | 6.7 |
-| Composite | 68.0% | 0.66x | 0.90x | -1.07 | 187 | 73.1% | - |
-| Tovek 2.7 | 66.2% | 0.57x | 0.57x | -1.65 | 16 | 66.2% | 8.5 |
-| lua.expert | 64.8% | 0.56x | 0.51x | -1.38 | 343 | 36.2% | - |
-| sunberry (old core) | 59.5% | 0.52x | 0.50x | -1.69 | 318 | 39.7% | 7.5 |
+| sunberry (new core) | 91.8% | 0.97x | 0.99x | -0.23 | 8 | 98.5% | 5.1 |
+| Tovek 2.7 | 89.4% | 0.92x | 0.94x | -0.34 | 14 | 97.1% | 6.1 |
+| Composite | 86.4% | 1.02x | 1.08x | -0.35 | 11 | 97.7% | - |
+| lua.expert | 86.3% | 0.96x | 1.00x | -0.08 | 34 | 58.4% | - |
+| luacid | 86.0% | 0.97x | 1.00x | -0.30 | 14 | 98.9% | - |
+| Fission | 82.4% | 1.06x | 1.21x | +0.08 | 10 | 89.3% | - |
+| sunberry (old core) | 82.1% | 0.97x | 0.95x | -0.15 | 35 | 82.2% | 5.9 |
 
-**Mutants** (`mutate --count 1000 --seed 1`, 5,664 round trips all three local decompilers
+**Generated programs** (`fuzz --seeds 1000..1200`, 512 round trips all seven passed):
+
+| decompiler | similarity | size | locals | nesting | endless | names g2 | cpu ms |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| sunberry (new core) | 72.1% | 0.64x | 0.77x | -1.39 | 14 | 77.8% | 6.6 |
+| Composite | 67.6% | 0.66x | 0.89x | -1.08 | 145 | 72.2% | - |
+| luacid | 66.9% | 0.59x | 0.63x | -1.40 | 49 | 48.3% | - |
+| Tovek 2.7 | 65.5% | 0.56x | 0.56x | -1.66 | 10 | 65.1% | 8.4 |
+| Fission | 64.3% | 0.68x | 0.85x | -0.53 | 17 | 66.6% | - |
+| lua.expert | 64.3% | 0.55x | 0.50x | -1.35 | 252 | 35.7% | - |
+| sunberry (old core) | 58.8% | 0.52x | 0.49x | -1.68 | 220 | 38.6% | 7.5 |
+
+**Mutants** (`mutate --count 1000 --seed 1`, 4,543 round trips all four local decompilers
 passed; the web APIs aren't sent mutation runs):
 
 | decompiler | similarity | size | locals | nesting | endless | names g2 | cpu ms |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| sunberry (new core) | 91.6% | 0.99x | 1.04x | -0.55 | 546 | 91.7% | 6.2 |
-| Tovek 2.7 | 90.5% | 0.94x | 0.96x | -0.78 | 580 | 95.6% | 9.4 |
-| sunberry (old core) | 81.8% | 0.93x | 0.87x | -0.62 | 1,492 | 76.5% | 8.0 |
+| sunberry (new core) | 91.5% | 0.98x | 1.03x | -0.65 | 525 | 90.4% | 5.7 |
+| Tovek 2.7 | 90.0% | 0.93x | 0.95x | -0.82 | 581 | 94.8% | 7.0 |
+| Fission | 83.7% | 1.02x | 1.22x | -0.43 | 456 | 84.1% | - |
+| sunberry (old core) | 80.9% | 0.90x | 0.86x | -0.66 | 1,443 | 74.2% | 6.9 |
 
 Generated programs come out much smaller than their source because the generator writes
 `do ... end` blocks and constant expressions that Luau's compiler folds away. No decompiler can
