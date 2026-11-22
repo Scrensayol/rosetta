@@ -1,5 +1,6 @@
 use std::{
     cell::{Cell, RefCell},
+    collections::HashMap,
     fmt,
     rc::Rc,
     time::{Duration, Instant},
@@ -208,7 +209,7 @@ pub fn run(bytecode: &[u8]) -> Observation {
         }
     };
 
-    let mut addresses = Vec::new();
+    let mut addresses = HashMap::new();
     let log = log.borrow().iter().map(|line| normalize(line, &mut addresses)).collect();
     let ending = match ending {
         Ending::Errored(text) => Ending::Errored(normalize(&text, &mut addresses)),
@@ -227,7 +228,8 @@ fn error_text(error: &mlua::Error) -> String {
 }
 
 // "prog:12: msg" -> "prog:?: msg" and "0x00007f..." -> "0x#1" numbered by first appearance
-pub fn normalize(text: &str, addresses: &mut Vec<String>) -> String {
+// (a map, not a list: a program stuck printing a fresh table every iteration has a million of them)
+pub fn normalize(text: &str, addresses: &mut HashMap<String, usize>) -> String {
     let bytes = text.as_bytes();
     let mut out = String::with_capacity(text.len());
     let mut i = 0;
@@ -244,14 +246,9 @@ pub fn normalize(text: &str, addresses: &mut Vec<String>) -> String {
             let hex = bytes[i + 2..].iter().take_while(|b| b.is_ascii_hexdigit()).count();
             if hex >= 6 {
                 let address = &text[i..i + 2 + hex];
-                let index = match addresses.iter().position(|a| a == address) {
-                    Some(index) => index,
-                    None => {
-                        addresses.push(address.to_string());
-                        addresses.len() - 1
-                    }
-                };
-                out.push_str(&format!("0x#{}", index + 1));
+                let next = addresses.len() + 1;
+                let index = *addresses.entry(address.to_string()).or_insert(next);
+                out.push_str(&format!("0x#{index}"));
                 i += 2 + hex;
                 continue;
             }
