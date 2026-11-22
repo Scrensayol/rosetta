@@ -54,7 +54,9 @@ the original program, so it's reproducible and anyone can check it.
 - **cases/**: hand-written programs, each aimed at something decompilers get wrong: inlined
   functions, loop exits, closures and upvalues, numbers (NaN sign, `x^3` folding), contextual
   keywords (`while continue do`), dead branches, `if`s nested 150 deep, Luau's experimental
-  `if local` / `while local`, Roblox-style scripts. New edge cases are welcome.
+  `if local` / `while local`, comparisons with NaN, operator precedence, string escapes and
+  number edges, table constructors, iterators, metamethods, builtins, Roblox-style scripts.
+  New edge cases are welcome.
 - **generated**: `fuzz` builds random programs from a seed with a grammar (`full`, `straight`
   for straight-line code, `branches` for no loops), so a run is reproducible from its seed range.
 - **mutants**: `mutate` is mutation fuzzing in the style of Bin2Wrong. It starts from existing programs (the cases by default, plus `--pool` directories and
@@ -114,8 +116,8 @@ $R bench --tier full --decompiler "mine=/path/to/decompiler {}" --version mine=1
 
 | tier | programs | round trips |
 |---|---|---|
-| quick | the 29 cases, then the 50 generated programs and the 50 mutants of the full tier whose bytecode has the most features | 774 |
-| full | the 29 cases, seeds 1000..2000, 1000 mutants of the cases (seed 1) | 12,174 |
+| quick | the 35 cases, then the 50 generated programs and the 50 mutants of the full tier whose bytecode has the most features | 810 |
+| full | the 35 cases, seeds 1000..2000, 1000 mutants of the cases (seed 1) | 12,210 |
 
 "Features" are the ones mutation fuzzing counts: distinct opcode pairs and triples and where
 jumps land, at each optimization level. Picking by them never looks at a decompiler, and it
