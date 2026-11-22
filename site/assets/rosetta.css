@@ -358,8 +358,9 @@ footer a:hover { color: var(--accent); }
 	.result { padding: 16px 0 60px; gap: 14px; }
 	.section-head { flex-wrap: wrap; height: auto; min-height: 44px; padding: 9px 12px; gap: 6px 12px; }
 	.section-head .grow { display: none; }
-	.chips { width: 100%; }
-	.chip { flex: 1; }
+	.section-head .chips { width: 100%; }
+	.section-head .chip { flex: 1; }
+	.board-head h3 { white-space: nowrap; }
 	.grid { grid-template-columns: minmax(0, 1fr); }
 	.card { padding: 18px 16px; }
 	.ring { width: 160px; height: 160px; margin-top: 16px; }
