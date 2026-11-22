@@ -1,0 +1,420 @@
+// The all-in-one run: the hand-written cases, a fixed range of generated programs and a fixed set
+// of mutants, every one at every profile, written as one JSON result per decompiler. Everything
+// that decides which programs run is pinned under the suite name and fingerprinted, so two
+// results with the same suite hash were graded on exactly the same programs. The website reads
+// these files.
+
+use std::{
+    collections::BTreeMap,
+    fs,
+    path::{Path, PathBuf},
+    process::ExitCode,
+    time::{Instant, SystemTime, UNIX_EPOCH},
+};
+
+use rayon::prelude::*;
+use serde::Serialize;
+
+use crate::{
+    decompiler::{Decompiler, External},
+    generator::{self, Grammar},
+    luau::{Extra, Profile},
+    mutate,
+    quality::Summary,
+    roundtrip::{self, Kind},
+};
+
+// Bump when anything below changes which programs run or how they're graded
+pub const SUITE: &str = "rosetta-1";
+pub const LUAU: &str = "0.747";
+const MUTATION_SEED: u64 = 1;
+const FUZZ_START: u64 = 1000;
+// generated programs and mutants in the full tier
+const FULL: usize = 1000;
+
+#[derive(Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
+pub enum Tier {
+    /// The cases, plus the 50 generated programs and the 50 mutants of the full tier whose bytecode
+    /// does the most: about 750 round trips
+    Quick,
+    /// The cases, 1000 generated programs and 1000 mutants: about 12,000 round trips
+    Full,
+}
+
+impl Tier {
+    fn name(self) -> &'static str {
+        match self {
+            Tier::Quick => "quick",
+            Tier::Full => "full",
+        }
+    }
+
+    // how many generated programs and mutants the tier keeps
+    fn size(self) -> usize {
+        match self {
+            Tier::Quick => 50,
+            Tier::Full => 1000,
+        }
+    }
+}
+
+struct Program {
+    name: String,
+    about: Option<String>,
+    source: String,
+    extra: Extra,
+}
+
+struct Section {
+    id: &'static str,
+    title: &'static str,
+    about: String,
+    programs: Vec<Program>,
+}
+
+#[derive(Serialize, Clone, Copy, Default)]
+struct Score {
+    passed: usize,
+    total: usize,
+}
+
+#[derive(Serialize)]
+struct SuiteInfo {
+    name: &'static str,
+    tier: &'static str,
+    hash: String,
+}
+
+#[derive(Serialize)]
+struct DecompilerInfo {
+    name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    version: Option<String>,
+}
+
+#[derive(Serialize)]
+struct TestOut {
+    name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    about: Option<String>,
+    // one letter per profile, in the order of `profiles`: see LETTERS
+    results: String,
+    // profile -> the first line of why it didn't pass
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    details: BTreeMap<String, String>,
+}
+
+#[derive(Serialize)]
+struct SectionOut {
+    id: &'static str,
+    title: &'static str,
+    about: String,
+    score: Score,
+    tests: Vec<TestOut>,
+}
+
+#[derive(Serialize)]
+struct BenchResult {
+    format: &'static str,
+    schema: u32,
+    rosetta: &'static str,
+    luau: &'static str,
+    suite: SuiteInfo,
+    decompiler: DecompilerInfo,
+    created: String,
+    seconds: f64,
+    threads: usize,
+    profiles: Vec<String>,
+    // letter -> verdict, so the file explains itself
+    letters: BTreeMap<char, Kind>,
+    score: Score,
+    totals: BTreeMap<Kind, usize>,
+    sections: Vec<SectionOut>,
+    // readability over this decompiler's own passes (a run with several decompilers in the README
+    // measures it over the passes they share instead)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    quality: Option<Summary>,
+}
+
+const LETTERS: [(char, Kind); 6] = [
+    ('p', Kind::Pass),
+    ('w', Kind::Mismatch),
+    ('c', Kind::RecompileFailed),
+    ('f', Kind::DecompileFailed),
+    ('r', Kind::Refused),
+    ('u', Kind::Unusable),
+];
+
+fn letter(kind: Kind) -> char {
+    LETTERS.iter().find(|(_, k)| *k == kind).unwrap().0
+}
+
+// the comment block a case starts with, as one line
+fn about(source: &str) -> Option<String> {
+    let text = source
+        .lines()
+        .skip_while(|l| l.starts_with("--!"))
+        .map_while(|l| l.strip_prefix("--"))
+        .map(str::trim)
+        .collect::<Vec<_>>()
+        .join(" ");
+    (!text.is_empty()).then_some(text)
+}
+
+fn sections(tier: Tier) -> Vec<Section> {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("cases");
+    let mut files = Vec::new();
+    crate::collect_luau(&dir, &mut files);
+    files.sort();
+    let cases = files
+        .iter()
+        .map(|p| {
+            let source = fs::read_to_string(p).expect("read case");
+            Program {
+                name: p.file_stem().unwrap().to_string_lossy().into_owned(),
+                about: about(&source),
+                extra: crate::options_directive(&source).unwrap_or_default(),
+                source,
+            }
+        })
+        .collect::<Vec<_>>();
+
+    // quick isn't the first 50 of each: it's the 50 of full's with the most bytecode features,
+    // picked without looking at any decompiler, so it stays a subset of full and still separates
+    // decompilers that pass all the easy programs
+    let seeds = FUZZ_START..FUZZ_START + FULL as u64;
+    let generated = seeds
+        .clone()
+        .into_par_iter()
+        .map(|seed| Program {
+            name: format!("seed{seed}"),
+            about: None,
+            source: generator::generate(seed, Grammar::Full).render(),
+            extra: Extra::default(),
+        })
+        .collect::<Vec<_>>();
+
+    let pool = cases.iter().map(|c| (c.name.clone(), c.source.clone())).collect::<Vec<_>>();
+    let pool_hash = mutate::pool_hash(&pool);
+    let (mutants, _) = mutate::evolve(pool, MUTATION_SEED, FULL, false);
+    let mutants = mutants
+        .into_iter()
+        .map(|m| {
+            let source = m.file_text();
+            Program { name: m.name.clone(), about: Some(format!("{} of {}: {}", m.name, m.origin, m.ops.join(", "))), extra: m.extra, source }
+        })
+        .collect::<Vec<_>>();
+
+    let generated = hardest(generated, tier.size());
+    let mutants = hardest(mutants, tier.size());
+    let picked = if tier == Tier::Full { String::new() } else { format!(", the {} with the most bytecode features", tier.size()) };
+
+    vec![
+        Section {
+            id: "cases",
+            title: "hand-written cases",
+            about: format!("the {} programs in cases/, each a shape that has tripped decompilers up", cases.len()),
+            programs: cases,
+        },
+        Section {
+            id: "generated",
+            title: "generated programs",
+            about: format!("fuzz --seeds {}..{}{picked} (generator {})", seeds.start, seeds.end, generator::GENERATOR_VERSION),
+            programs: generated,
+        },
+        Section {
+            id: "mutants",
+            title: "mutants",
+            about: format!(
+                "mutate --count {FULL} --seed {MUTATION_SEED} over the cases{picked} (pool {pool_hash}, mutator {})",
+                mutate::MUTATOR_VERSION
+            ),
+            programs: mutants,
+        },
+    ]
+}
+
+// the n programs with the most bytecode features, kept in their original order
+fn hardest(programs: Vec<Program>, n: usize) -> Vec<Program> {
+    if programs.len() <= n {
+        return programs;
+    }
+    let counts = programs.par_iter().map(|p| mutate::feature_count(&p.source, p.extra)).collect::<Vec<_>>();
+    let mut order = (0..programs.len()).collect::<Vec<_>>();
+    order.sort_by(|&a, &b| counts[b].cmp(&counts[a]).then(a.cmp(&b)));
+    let mut keep = vec![false; programs.len()];
+    for &i in &order[..n] {
+        keep[i] = true;
+    }
+    programs.into_iter().zip(keep).filter_map(|(p, k)| k.then_some(p)).collect()
+}
+
+// FNV-1a over everything that decides what runs. A fingerprint, not a signature
+fn fingerprint(tier: Tier, sections: &[Section]) -> String {
+    let mut h: u64 = 0xcbf2_9ce4_8422_2325;
+    let mut feed = |s: &str| {
+        for b in s.bytes().chain([0]) {
+            h = (h ^ b as u64).wrapping_mul(0x100_0000_01b3);
+        }
+    };
+    feed(SUITE);
+    feed(tier.name());
+    feed(LUAU);
+    for p in Profile::ALL {
+        feed(&p.to_string());
+    }
+    for s in sections {
+        feed(s.id);
+        for p in &s.programs {
+            feed(&p.name);
+            feed(&p.source);
+            feed(&p.extra.to_string());
+        }
+    }
+    format!("{h:016x}")
+}
+
+// UTC, to the second, without pulling in a date crate
+fn now_utc() -> String {
+    let secs = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0) as i64;
+    let (days, rem) = (secs.div_euclid(86400), secs.rem_euclid(86400));
+    // Howard Hinnant's civil_from_days
+    let z = days + 719_468;
+    let era = z.div_euclid(146_097);
+    let doe = z - era * 146_097;
+    let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146_096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let d = doy - (153 * mp + 2) / 5 + 1;
+    let m = if mp < 10 { mp + 3 } else { mp - 9 };
+    let y = yoe + era * 400 + i64::from(m <= 2);
+    format!("{y:04}-{m:02}-{d:02}T{:02}:{:02}:{:02}Z", rem / 3600, rem % 3600 / 60, rem % 60)
+}
+
+fn first_line(detail: &str) -> String {
+    let line = detail.lines().find(|l| !l.trim().is_empty()).unwrap_or_default().trim();
+    if line.len() > 240 { format!("{}...", &line[..line.floor_char_boundary(240)]) } else { line.to_string() }
+}
+
+pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path) -> ExitCode {
+    if specs.is_empty() {
+        eprintln!("give at least one --decompiler name=command");
+        return ExitCode::from(2);
+    }
+    let decompilers = match specs.iter().map(|s| External::parse(s)).collect::<Result<Vec<_>, _>>() {
+        Ok(d) => d,
+        Err(e) => {
+            eprintln!("--decompiler: {e}");
+            return ExitCode::from(2);
+        }
+    };
+    let mut version_of = BTreeMap::new();
+    for v in versions {
+        let Some((name, version)) = v.split_once('=') else {
+            eprintln!("--version takes name=version");
+            return ExitCode::from(2);
+        };
+        version_of.insert(name.to_string(), version.to_string());
+    }
+    if let Err(e) = fs::create_dir_all(out) {
+        eprintln!("can't create {}: {e}", out.display());
+        return ExitCode::from(2);
+    }
+
+    let started = Instant::now();
+    let sections = sections(tier);
+    let hash = fingerprint(tier, &sections);
+    let programs = sections.iter().map(|s| s.programs.len()).sum::<usize>();
+    println!(
+        "suite {SUITE} {} ({hash}): {programs} programs at {} profiles, ready in {:.1}s",
+        tier.name(),
+        Profile::ALL.len(),
+        started.elapsed().as_secs_f64()
+    );
+
+    let jobs = sections
+        .iter()
+        .enumerate()
+        .flat_map(|(s, section)| (0..section.programs.len()).flat_map(move |p| (0..Profile::ALL.len()).map(move |q| (s, p, q))))
+        .collect::<Vec<_>>();
+    for decompiler in &decompilers {
+        let started = Instant::now();
+        let outcomes = jobs
+            .par_iter()
+            .map(|&(s, p, q)| {
+                let program = &sections[s].programs[p];
+                let profile = Profile { extra: program.extra, ..Profile::ALL[q] };
+                let verdict = roundtrip::check(&program.source, profile, decompiler);
+                (verdict.kind, verdict.detail, verdict.quality)
+            })
+            .collect::<Vec<_>>();
+        let seconds = (started.elapsed().as_secs_f64() * 100.0).round() / 100.0;
+
+        let mut next = outcomes.iter();
+        let mut totals = BTreeMap::<Kind, usize>::new();
+        let mut overall = Score::default();
+        let mut passes = Vec::new();
+        let mut out_sections = Vec::new();
+        for section in &sections {
+            let mut score = Score::default();
+            let tests = section
+                .programs
+                .iter()
+                .map(|program| {
+                    let mut results = String::new();
+                    let mut details = BTreeMap::new();
+                    for base in Profile::ALL {
+                        let (kind, detail, quality) = next.next().unwrap();
+                        results.push(letter(*kind));
+                        *totals.entry(*kind).or_default() += 1;
+                        if *kind != Kind::Unusable {
+                            score.total += 1;
+                        }
+                        if *kind == Kind::Pass {
+                            score.passed += 1;
+                        } else {
+                            details.insert(base.to_string(), first_line(detail));
+                        }
+                        passes.extend(quality.as_ref());
+                    }
+                    TestOut { name: program.name.clone(), about: program.about.clone(), results, details }
+                })
+                .collect();
+            overall.passed += score.passed;
+            overall.total += score.total;
+            out_sections.push(SectionOut { id: section.id, title: section.title, about: section.about.clone(), score, tests });
+        }
+
+        let name = decompiler.name().to_string();
+        let result = BenchResult {
+            format: "rosetta-result",
+            schema: 1,
+            rosetta: env!("CARGO_PKG_VERSION"),
+            luau: LUAU,
+            suite: SuiteInfo { name: SUITE, tier: tier.name(), hash: hash.clone() },
+            decompiler: DecompilerInfo { version: version_of.get(&name).cloned(), name: name.clone() },
+            created: now_utc(),
+            seconds,
+            threads: rayon::current_num_threads(),
+            profiles: Profile::ALL.iter().map(Profile::to_string).collect(),
+            letters: LETTERS.into_iter().collect(),
+            score: overall,
+            totals,
+            sections: out_sections,
+            quality: (!passes.is_empty()).then(|| Summary::of(&passes)),
+        };
+        let file_name: String = name.chars().map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' { c } else { '-' }).collect();
+        let path: PathBuf = out.join(format!("{file_name}-{}.json", tier.name()));
+        fs::write(&path, serde_json::to_string(&result).unwrap() + "\n").expect("write result");
+        let parts = result.sections.iter().map(|s| format!("{} {}/{}", s.id, s.score.passed, s.score.total)).collect::<Vec<_>>();
+        println!(
+            "{name}: {}/{} ({:.1}%) | {} | {seconds:.1}s -> {}",
+            overall.passed,
+            overall.total,
+            overall.passed as f64 * 100.0 / overall.total.max(1) as f64,
+            parts.join(", "),
+            path.display()
+        );
+    }
+    ExitCode::SUCCESS
+}

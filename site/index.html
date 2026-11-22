@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>rosetta · a standard for luau decompilers</title>
+<meta name="description" content="Rosetta grades Luau decompilers by round trip: compile, decompile, recompile, and check the program still does the same thing.">
+<meta name="theme-color" content="#1b1720">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Noto+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="assets/rosetta.css">
+</head>
+<body>
+<header class="nav"></header>
+
+<section class="hero">
+	<canvas id="sky"></canvas>
+	<div class="wrap hero-inner">
+		<div>
+			<h1 class="rise" style="--i:0">every decompiler says it's accurate. <b>rosetta checks.</b></h1>
+			<p class="rise" style="--i:2">rosetta compiles a program, hands the bytecode to a decompiler, recompiles what comes back and runs both. if the output doesn't print exactly what the original printed, it's wrong, whatever it looks like.</p>
+			<div class="actions rise" style="--i:4">
+				<a class="btn accent" href="#leaderboard"><svg viewBox="0 0 24 24"><path d="M3 13h4v8H3zm7-10h4v18h-4zm7 6h4v12h-4z"/></svg>leaderboard</a>
+				<a class="btn" href="result.html"><svg viewBox="0 0 24 24"><path d="M11 15V6.8L7.4 10.4 6 9l6-6 6 6-1.4 1.4L13 6.8V15zm-7 3h16v3H4z"/></svg>view a result</a>
+				<a class="btn" href="https://github.com/Scrensayol/rosetta" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 1.5V8h4.5zM8 12v2h8v-2zm0 4v2h8v-2z"/></svg>documentation</a>
+			</div>
+		</div>
+		<div class="code rise" style="--i:6">
+<pre class="keep"><span class="c"># build it once</span>
+<span class="k">git clone</span> https://github.com/Scrensayol/rosetta
+<span class="k">cd</span> rosetta &amp;&amp; <span class="k">cargo build</span> --release
+
+<span class="c"># ~770 round trips; --tier full runs ~12,000</span>
+./target/release/rosetta <span class="k">bench</span> \
+  --decompiler <span class="s">'mine=/path/to/decompiler {}'</span> \
+  --version <span class="s">mine=1.0</span></pre>
+			<div class="code-foot">
+				<button class="btn" id="copy"><svg viewBox="0 0 24 24"><path d="M8 3h11v13h-2V5H8zM5 7h10v14H5z"/></svg><span>copy</span></button>
+				<span>the decompiler gets a raw bytecode file as <span class="keep">{}</span> and prints the source. drop the json it writes into the result viewer.</span>
+			</div>
+		</div>
+	</div>
+	<a class="scroll-cue" href="#different" aria-label="scroll"><svg viewBox="0 0 24 24"><path d="m12 16-7-7 1.4-1.4 5.6 5.6 5.6-5.6L19 9z"/></svg></a>
+</section>
+
+<section class="band alt" id="different">
+	<div class="wrap">
+		<h2>what makes rosetta different?</h2>
+		<p class="lede">decompilers grade themselves on how the output looks. rosetta grades them on what it does.</p>
+		<div class="features" id="features"></div>
+	</div>
+</section>
+
+<section class="band" id="leaderboard">
+	<div class="wrap">
+		<h2>leaderboard</h2>
+		<p class="lede">official runs of the same suite on the same bytes. wrong output is the number that matters most: a refusal tells you it can't, a wrong answer doesn't.</p>
+		<div class="board" id="board"></div>
+	</div>
+</section>
+
+<section class="band alt">
+	<div class="wrap">
+		<h2>results you can check</h2>
+		<p class="lede">anyone can run the bench and share the json. the viewer tells you what you're looking at.</p>
+		<div class="states" id="states"></div>
+	</div>
+</section>
+
+<section class="band cta">
+	<div class="wrap">
+		<h2>got a decompiler?</h2>
+		<p class="lede">anything that takes a bytecode file and prints source can be benched: a binary, a script, or a web api through a small adapter.</p>
+		<div class="actions">
+			<a class="btn accent" href="result.html">drop in a result</a>
+			<a class="btn" href="https://github.com/Scrensayol/rosetta#readme" target="_blank" rel="noopener">read the docs</a>
+		</div>
+	</div>
+</section>
+
+<footer>rosetta is mit licensed · suite <span class="keep">rosetta-1</span> · <a href="https://github.com/Scrensayol/rosetta">github</a></footer>
+<script src="assets/common.js"></script>
+<script src="assets/home.js"></script>
+</body>
+</html>

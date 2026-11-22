@@ -1,3 +1,4 @@
+mod bench;
 mod bytecode;
 mod decompiler;
 mod generator;
@@ -83,6 +84,21 @@ enum Command {
         #[arg(long)]
         reduce: bool,
     },
+    /// The all-in-one benchmark: the cases, generated programs and mutants, pinned as one suite.
+    /// Writes one JSON result per decompiler for the website
+    Bench {
+        /// name=command, as for check
+        #[arg(long = "decompiler")]
+        decompilers: Vec<String>,
+        #[arg(long, value_enum, default_value = "quick")]
+        tier: bench::Tier,
+        /// name=version, shown with that decompiler's result. Repeat for each
+        #[arg(long = "version")]
+        versions: Vec<String>,
+        /// Directory for the result files
+        #[arg(long, default_value = ".")]
+        out: PathBuf,
+    },
     /// Print the program a seed generates
     Gen {
         seed: u64,
@@ -158,6 +174,7 @@ fn main() -> ExitCode {
     }
 
     match Cli::parse().command {
+        Command::Bench { decompilers, tier, versions, out } => bench::run(&decompilers, tier, &versions, &out),
         Command::Gen { seed, grammar } => {
             print!("{}", generator::generate(seed, grammar).render());
             ExitCode::SUCCESS

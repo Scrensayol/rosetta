@@ -313,6 +313,12 @@ fn mutate_extra(extra: Extra, rng: &mut Rng) -> Extra {
 }
 
 // The novelty signal for a program: features of its bytecode at every optimization level
+// How much a program exercises: distinct opcode pairs, triples and jump landings over -O0..-O2.
+// The benchmark's quick tier picks the programs with the most
+pub fn feature_count(source: &str, extra: Extra) -> usize {
+    features(source, extra).map_or(0, |f| f.len())
+}
+
 fn features(source: &str, extra: Extra) -> Option<HashSet<u32>> {
     let mut out = HashSet::new();
     for opt in 0..=2u8 {

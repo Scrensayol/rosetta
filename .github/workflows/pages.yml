@@ -1,0 +1,39 @@
+# Publishes site/ to GitHub Pages. The site is static: the result viewer reads JSON in the browser.
+name: pages
+
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      # a result file added without rerunning build-index.sh would show as unverified
+      - name: Check results/index.json is up to date
+        shell: bash
+        run: |
+          jq -S . site/results/index.json >"$RUNNER_TEMP/committed.json"
+          sh site/build-index.sh
+          diff <(jq -S . site/results/index.json) "$RUNNER_TEMP/committed.json"
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

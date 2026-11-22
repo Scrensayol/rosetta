@@ -103,7 +103,58 @@ The Luau compiler and VM come from `luau0-src` 0.24.0 (Luau 0.747) through `mlua
 commit on its main branch, because the Luau version decides what the programs compile to.
 The experimental `if local` and `while local` syntax is switched on, so cases can use it.
 
+## The benchmark
+
+`bench` runs all three kinds of program as one suite and gives one score:
+
+```sh
+$R bench --decompiler "mine=/path/to/decompiler {}" --version mine=1.0            # quick
+$R bench --tier full --decompiler "mine=/path/to/decompiler {}" --version mine=1.0
+```
+
+| tier | programs | round trips |
+|---|---|---|
+| quick | the 29 cases, then the 50 generated programs and the 50 mutants of the full tier whose bytecode has the most features | 774 |
+| full | the 29 cases, seeds 1000..2000, 1000 mutants of the cases (seed 1) | 12,174 |
+
+"Features" are the ones mutation fuzzing counts: distinct opcode pairs and triples and where
+jumps land, at each optimization level. Picking by them never looks at a decompiler, and it
+makes quick harder than the full tier on average, not an easy sample of it. Every program runs at
+all six profiles. The score is the round trips that passed, out of every
+one whose input was usable. The suite is pinned as `rosetta-1`: which programs run, the
+profiles and the Luau version are fingerprinted into a suite hash, so two results with the same
+hash ran the same programs. Anything that changes the programs gets a new suite name.
+
+`bench` writes one JSON file per decompiler, `<name>-<tier>.json`. Each file lists every
+program with one letter per profile (`p` pass, `w` wrong output, `c` doesn't recompile,
+`f` crashed or timed out, `r` refused, `u` unusable input) and the first line of why a
+program didn't pass. The file also has the section and overall scores, the totals, the
+readability of its passes, the wall time and the suite.
+
+### The website
+
+[site/](site) is a static site for GitHub Pages, in the spirit of sUNC's result pages. It shows
+the leaderboard and a result viewer. Drop a result file on the viewer, or open one with
+`result.html?r=<name>`, `?url=<link to a JSON file>` or a share link. The file is read in
+the browser and never uploaded. The viewer puts every result in one of three states:
+
+- **verified**: byte for byte an official result in [site/results/](site/results), whose
+  SHA-256 is listed in `results/index.json`.
+- **spoofed**: the file contradicts itself. Its scores or totals don't match its own
+  verdicts, or it claims a known suite but lists other programs.
+- **unverified**: anything else that parses. A result someone edited by hand while keeping
+  it consistent also lands here. Without a server there's nothing to sign with, so only
+  official results are proof.
+
+To publish an official result, copy it into `site/results/` and run `site/build-index.sh`
+(it needs `jq`). The Pages workflow refuses to deploy if the index is stale. To preview
+locally, run `python3 -m http.server -d site`.
+
 ## Results
+
+The leaderboard and every official `bench` result are on the website,
+[scrensayol.github.io/rosetta](https://scrensayol.github.io/rosetta/). The tables below are the
+older per-command runs, which also compare readability across decompilers.
 
 Run on 2026-11-22 (Luau 0.747) with seven decompilers: sunberry 0.5.4 (its new core with `--strict`, and
 its original core with `--core old`), Tovek 2.7, Fission 1.0.5-beta, and the three web APIs lua.expert,
@@ -123,17 +174,17 @@ off, so it keeps none of the programs). All seven got the same bytecode.
 | Fission | 915 (76.3%) | 181 | 104 | 0 |
 | sunberry (old core) | 722 (60.2%) | 408 | 70 | 0 |
 
-**Hand-written cases** (`check`, 26 programs x 6 profiles = 156 round trips each):
+**Hand-written cases** (`check`, 29 programs x 6 profiles = 174 round trips each):
 
 | decompiler | pass | wrong | doesn't recompile | refused |
 | --- | --- | --- | --- | --- |
-| sunberry (new core) | 156 | 0 | 0 | 0 |
-| lua.expert | 156 | 0 | 0 | 0 |
-| Composite | 156 | 0 | 0 | 0 |
-| luacid | 156 | 0 | 0 | 0 |
-| Tovek 2.7 | 154 | 0 | 0 | 2 |
-| sunberry (old core) | 138 | 12 | 6 | 0 |
-| Fission | 132 | 18 | 6 | 0 |
+| sunberry (new core) | 174 | 0 | 0 | 0 |
+| lua.expert | 174 | 0 | 0 | 0 |
+| Composite | 174 | 0 | 0 | 0 |
+| luacid | 174 | 0 | 0 | 0 |
+| Tovek 2.7 | 172 | 0 | 0 | 2 |
+| sunberry (old core) | 150 | 18 | 6 | 0 |
+| Fission | 150 | 18 | 6 | 0 |
 
 What the wrong ones were:
 - **luacid, lua.expert and Tovek** (4 each): seed 1077, where `x^3` on a run-time value prints
@@ -177,17 +228,17 @@ passed, so compare rows within a table, never across tables. CPU time isn't give
 APIs or Fission, because their adapters only measure the local `curl` (Fission decompiles inside
 its server process).
 
-**Hand-written cases** (`check`, 116 round trips all seven passed):
+**Hand-written cases** (`check`, 128 round trips all seven passed):
 
 | decompiler | similarity | size | locals | nesting | endless | names g2 | cpu ms |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| sunberry (new core) | 91.8% | 0.97x | 0.99x | -0.23 | 8 | 98.5% | 5.1 |
-| Tovek 2.7 | 89.4% | 0.92x | 0.94x | -0.34 | 14 | 97.1% | 6.1 |
-| Composite | 86.4% | 1.02x | 1.08x | -0.35 | 11 | 97.7% | - |
-| lua.expert | 86.3% | 0.96x | 1.00x | -0.08 | 34 | 58.4% | - |
-| luacid | 86.0% | 0.97x | 1.00x | -0.30 | 14 | 98.9% | - |
-| Fission | 82.4% | 1.06x | 1.21x | +0.08 | 10 | 89.3% | - |
-| sunberry (old core) | 82.1% | 0.97x | 0.95x | -0.15 | 35 | 82.2% | 5.9 |
+| sunberry (new core) | 91.8% | 0.97x | 1.00x | -0.21 | 8 | 98.7% | 7.1 |
+| Tovek 2.7 | 89.6% | 0.93x | 0.94x | -0.30 | 14 | 97.0% | 9.6 |
+| Composite | 86.6% | 1.02x | 1.09x | -0.32 | 14 | 97.5% | - |
+| lua.expert | 86.5% | 0.96x | 0.97x | -0.07 | 37 | 57.8% | - |
+| luacid | 86.2% | 0.98x | 0.99x | -0.21 | 14 | 98.0% | - |
+| Fission | 83.0% | 1.05x | 1.19x | +0.07 | 10 | 88.6% | - |
+| sunberry (old core) | 82.7% | 0.96x | 0.93x | -0.13 | 35 | 79.6% | 8.3 |
 
 **Generated programs** (`fuzz --seeds 1000..1200`, 512 round trips all seven passed):
 
