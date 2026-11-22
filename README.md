@@ -176,17 +176,17 @@ off, so it keeps none of the programs). All seven got the same bytecode.
 | Fission | 915 (76.3%) | 181 | 104 | 0 |
 | sunberry (old core) | 722 (60.2%) | 408 | 70 | 0 |
 
-**Hand-written cases** (`check`, 29 programs x 6 profiles = 174 round trips each):
+**Hand-written cases** (`check`, 35 programs x 6 profiles = 210 round trips each):
 
 | decompiler | pass | wrong | doesn't recompile | refused |
 | --- | --- | --- | --- | --- |
-| sunberry (new core) | 174 | 0 | 0 | 0 |
-| lua.expert | 174 | 0 | 0 | 0 |
-| Composite | 174 | 0 | 0 | 0 |
-| luacid | 174 | 0 | 0 | 0 |
-| Tovek 2.7 | 172 | 0 | 0 | 2 |
-| sunberry (old core) | 150 | 18 | 6 | 0 |
-| Fission | 150 | 18 | 6 | 0 |
+| sunberry (new core) | 210 | 0 | 0 | 0 |
+| lua.expert | 210 | 0 | 0 | 0 |
+| Composite | 210 | 0 | 0 | 0 |
+| luacid | 210 | 0 | 0 | 0 |
+| Tovek 2.7 | 208 | 0 | 0 | 2 |
+| Fission | 183 | 21 | 6 | 0 |
+| sunberry (old core) | 176 | 28 | 6 | 0 |
 
 What the wrong ones were:
 - **luacid, lua.expert and Tovek** (4 each): seed 1077, where `x^3` on a run-time value prints
@@ -230,17 +230,17 @@ passed, so compare rows within a table, never across tables. CPU time isn't give
 APIs or Fission, because their adapters only measure the local `curl` (Fission decompiles inside
 its server process).
 
-**Hand-written cases** (`check`, 128 round trips all seven passed):
+**Hand-written cases** (`check`, 154 round trips all seven passed):
 
 | decompiler | similarity | size | locals | nesting | endless | names g2 | cpu ms |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| sunberry (new core) | 91.8% | 0.97x | 1.00x | -0.21 | 8 | 98.7% | 7.1 |
-| Tovek 2.7 | 89.6% | 0.93x | 0.94x | -0.30 | 14 | 97.0% | 9.6 |
-| Composite | 86.6% | 1.02x | 1.09x | -0.32 | 14 | 97.5% | - |
-| lua.expert | 86.5% | 0.96x | 0.97x | -0.07 | 37 | 57.8% | - |
-| luacid | 86.2% | 0.98x | 0.99x | -0.21 | 14 | 98.0% | - |
-| Fission | 83.0% | 1.05x | 1.19x | +0.07 | 10 | 88.6% | - |
-| sunberry (old core) | 82.7% | 0.96x | 0.93x | -0.13 | 35 | 79.6% | 8.3 |
+| sunberry (new core) | 91.5% | 0.97x | 1.00x | -0.18 | 8 | 98.6% | 4.9 |
+| Tovek 2.7 | 89.4% | 0.93x | 0.96x | -0.25 | 14 | 96.6% | 7.5 |
+| Composite | 87.0% | 1.02x | 1.11x | -0.27 | 14 | 96.6% | - |
+| lua.expert | 86.9% | 0.96x | 0.97x | -0.05 | 37 | 56.5% | - |
+| luacid | 86.7% | 0.98x | 1.00x | -0.15 | 14 | 98.0% | - |
+| Fission | 84.0% | 1.03x | 1.18x | +0.06 | 10 | 88.1% | - |
+| sunberry (old core) | 83.8% | 0.95x | 0.92x | -0.12 | 35 | 78.4% | 6.2 |
 
 **Generated programs** (`fuzz --seeds 1000..1200`, 512 round trips all seven passed):
 
