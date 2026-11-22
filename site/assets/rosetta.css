@@ -25,7 +25,12 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scrollbar-color: var(--surface-hover) var(--bg); }
+.code pre, .drawer { scrollbar-width: thin; scrollbar-color: rgba(255, 138, 180, 0.35) transparent; }
+::-webkit-scrollbar { width: 10px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface-hover); }
+.code pre::-webkit-scrollbar-thumb, .drawer::-webkit-scrollbar-thumb { background: rgba(255, 138, 180, 0.35); }
 body {
 	margin: 0;
 	background: var(--bg);
@@ -96,7 +101,14 @@ button { font: inherit; color: inherit; text-transform: inherit; }
 
 /* ---- results page layout ---- */
 .result { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 22px; padding: 30px 0 80px; align-items: start; }
-@media (max-width: 1000px) { .result { grid-template-columns: 1fr; } .side { order: -1; } }
+/* one column: the score card first, then the tests, then the rest of the side panel */
+@media (max-width: 1000px) {
+	.result { grid-template-columns: minmax(0, 1fr); }
+	.result .side { display: contents; }
+	.result .side > * { order: 2; }
+	.result .side > .card.edge { order: 0; }
+	.result .sections { order: 1; }
+}
 
 .section { margin-bottom: 26px; }
 .section-head {
@@ -228,8 +240,8 @@ button { font: inherit; color: inherit; text-transform: inherit; }
 /* ---- landing ---- */
 .hero { position: relative; min-height: min(calc(100vh - 56px), 920px); display: grid; align-items: center; overflow: hidden; }
 .hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-.hero-inner { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; padding: 60px 0; }
-@media (max-width: 960px) { .hero-inner { grid-template-columns: 1fr; } }
+.hero-inner { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; padding-top: 60px; padding-bottom: 60px; }
+@media (max-width: 960px) { .hero-inner { grid-template-columns: minmax(0, 1fr); } }
 .hero h1 { margin: 0 0 16px; font: 700 clamp(34px, 4vw, 50px)/1.1 var(--display); letter-spacing: -1px; }
 .hero h1 b { color: var(--accent); }
 .hero p { margin: 0 0 26px; color: var(--text-muted); font-size: 16.5px; max-width: 560px; }
@@ -311,6 +323,58 @@ button { font: inherit; color: inherit; text-transform: inherit; }
 footer { padding: 26px 28px 34px; text-align: center; font-size: 12px; color: var(--text-dim); }
 footer a { color: var(--text-muted); }
 footer a:hover { color: var(--accent); }
+
+/* ---- phones ---- */
+@media (max-width: 640px) {
+	body { font-size: 14.5px; }
+	.wrap { padding: 0 14px; }
+	.nav { height: 52px; padding: 0 10px 0 16px; }
+	.logo small { display: none; }
+	.nav-links a { width: 36px; height: 36px; }
+	.notice { justify-content: flex-start; padding: 9px 14px; font-size: 12px; }
+	.side { top: 0; }
+
+	.hero { min-height: 0; }
+	.hero-inner { padding-top: 40px; padding-bottom: 72px; gap: 28px; }
+	.hero h1 { font-size: 31px; letter-spacing: -0.5px; }
+	.hero p { font-size: 15px; margin-bottom: 20px; }
+	.hero .actions .btn { flex: 1 1 auto; justify-content: center; }
+	.code { padding: 10px; }
+	.code pre { padding: 14px 14px; font-size: 11.5px; }
+	.code-foot { flex-direction: column; align-items: flex-start; gap: 10px; }
+	.band { padding: 56px 0; }
+	.band h2 { font-size: 24px; }
+	.band .lede { margin-bottom: 26px; font-size: 14px; }
+	.feature, .state { padding: 20px 18px; }
+
+	.board-head { padding: 0 10px; }
+	.board th, .board td { padding-left: 8px; padding-right: 8px; }
+	.board .rank { width: 26px; }
+	.board .who small { display: block; margin: 0; }
+	.board .meter { width: auto; }
+	.board .meter .track2 { display: none; }
+	.meter-row b { width: auto; }
+
+	.result { padding: 16px 0 60px; gap: 14px; }
+	.section-head { flex-wrap: wrap; height: auto; min-height: 44px; padding: 9px 12px; gap: 6px 12px; }
+	.section-head .grow { display: none; }
+	.chips { width: 100%; }
+	.chip { flex: 1; }
+	.grid { grid-template-columns: minmax(0, 1fr); }
+	.card { padding: 18px 16px; }
+	.ring { width: 160px; height: 160px; margin-top: 16px; }
+	.score b { font-size: 40px; }
+
+	.drawer { width: calc(100vw - 16px); max-height: 86vh; }
+	.drawer-head { padding: 10px 10px 10px 14px; }
+	.drawer-body { padding: 12px 12px 16px; }
+	.prow { grid-template-columns: 56px 1fr; gap: 4px 10px; }
+	.prow .detail { grid-column: 1 / -1; }
+	.drawer-foot { padding: 0 12px 14px; }
+
+	.drop { min-height: 220px; padding: 28px 16px; }
+	.drop h2 { font-size: 22px; }
+}
 
 /* last, so it wins over every transition above */
 @media (prefers-reduced-motion: reduce) {
