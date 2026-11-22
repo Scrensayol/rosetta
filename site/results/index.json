@@ -155,6 +155,48 @@
       "web": false
     },
     {
+      "file": "lua-expert-full.json",
+      "sha256": "b714134b453ef898527810c37d3cb4c70615e8da3f881a2bf540238406e5b1ec",
+      "decompiler": "lua.expert",
+      "version": null,
+      "tier": "full",
+      "hash": "99c2122fc5494b3c",
+      "score": {
+        "passed": 12090,
+        "total": 12204
+      },
+      "totals": {
+        "pass": 12090,
+        "unusable": 6,
+        "refused": 110,
+        "mismatch": 4
+      },
+      "created": "2026-11-22T14:43:30Z",
+      "seconds": 5329.97,
+      "web": true
+    },
+    {
+      "file": "composite-full.json",
+      "sha256": "ffed014e848d096d2abfcbcc5fd45f904f43d16d40fa0f68a3997e5c9c21d46c",
+      "decompiler": "composite",
+      "version": null,
+      "tier": "full",
+      "hash": "99c2122fc5494b3c",
+      "score": {
+        "passed": 11989,
+        "total": 12204
+      },
+      "totals": {
+        "pass": 11989,
+        "unusable": 6,
+        "refused": 133,
+        "mismatch": 82
+      },
+      "created": "2026-11-22T14:42:54Z",
+      "seconds": 5260.17,
+      "web": true
+    },
+    {
       "file": "tovek-full.json",
       "sha256": "6ba0741e087b4cbdad4f0a3f93d9c70c1c4c5a276be10ef30e5222d7683242cd",
       "decompiler": "tovek",
@@ -219,25 +261,6 @@
     }
   ],
   "suites": {
-    "b90ea066cf5e767e": {
-      "name": "rosetta-1",
-      "tier": "quick",
-      "profiles": 6,
-      "sections": {
-        "cases": {
-          "count": 35,
-          "names": "3a8cb0b18dee7721a7d6f160530ed2aef35de48592580d0b726ac75016c843a4"
-        },
-        "generated": {
-          "count": 50,
-          "names": "fbe4fb3b6f5bc20615b14940a817edd91c01dbd1439a4fc00da7bc62dd587c0c"
-        },
-        "mutants": {
-          "count": 50,
-          "names": "bea11b25661a21c0f6fb2f733632d9f74541e3dbb5946fd1fe135b0669587c11"
-        }
-      }
-    },
     "99c2122fc5494b3c": {
       "name": "rosetta-1",
       "tier": "full",
@@ -254,6 +277,25 @@
         "mutants": {
           "count": 1000,
           "names": "75f1b60ca7dde4c61d897de64bf319dcd0704e1ceb34d064b3ec68e67a28c579"
+        }
+      }
+    },
+    "b90ea066cf5e767e": {
+      "name": "rosetta-1",
+      "tier": "quick",
+      "profiles": 6,
+      "sections": {
+        "cases": {
+          "count": 35,
+          "names": "3a8cb0b18dee7721a7d6f160530ed2aef35de48592580d0b726ac75016c843a4"
+        },
+        "generated": {
+          "count": 50,
+          "names": "fbe4fb3b6f5bc20615b14940a817edd91c01dbd1439a4fc00da7bc62dd587c0c"
+        },
+        "mutants": {
+          "count": 50,
+          "names": "bea11b25661a21c0f6fb2f733632d9f74541e3dbb5946fd1fe135b0669587c11"
         }
       }
     }
