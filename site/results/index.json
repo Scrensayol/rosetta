@@ -38,9 +38,9 @@
     },
     {
       "file": "sunberry-quick.json",
-      "sha256": "6bef79e40e55e7500583c50ea1bcf2f2be5d9d827c92ec889dadee6fbbad50ca",
+      "sha256": "c15aad78f089eaf0bb9ef862eacc290541e8dacbef9ccaec9ecb6ecda6ca7ad4",
       "decompiler": "sunberry",
-      "version": "0.5.4-955dc96",
+      "version": "0.5.5",
       "tier": "quick",
       "hash": "b90ea066cf5e767e",
       "score": {
@@ -51,8 +51,8 @@
         "pass": 804,
         "refused": 6
       },
-      "created": "2026-11-22T15:28:51Z",
-      "seconds": 8.41,
+      "created": "2026-11-22T15:45:54Z",
+      "seconds": 6.17,
       "web": false
     },
     {
@@ -136,9 +136,9 @@
     },
     {
       "file": "sunberry-full.json",
-      "sha256": "1c0ea909d60b300323e516f4a2937f67dcb72fb496cc75ca6cf41009a154c080",
+      "sha256": "a252958a8c527807bcd176b3a9f332833edd524211d9a79332687b6b2fc544a7",
       "decompiler": "sunberry",
-      "version": "0.5.4-955dc96",
+      "version": "0.5.5",
       "tier": "full",
       "hash": "99c2122fc5494b3c",
       "score": {
@@ -150,8 +150,8 @@
         "unusable": 6,
         "refused": 8
       },
-      "created": "2026-11-22T15:29:52Z",
-      "seconds": 57.42,
+      "created": "2026-11-22T15:46:56Z",
+      "seconds": 57.91,
       "web": false
     },
     {
