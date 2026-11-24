@@ -38,21 +38,20 @@
     },
     {
       "file": "sunberry-quick.json",
-      "sha256": "c15aad78f089eaf0bb9ef862eacc290541e8dacbef9ccaec9ecb6ecda6ca7ad4",
+      "sha256": "a8d97c78266cfa8772059082f2ef324bcd1d349cea139667c008e2a6b9e18c11",
       "decompiler": "sunberry",
-      "version": "0.5.5",
+      "version": "0.5.6",
       "tier": "quick",
       "hash": "b90ea066cf5e767e",
       "score": {
-        "passed": 804,
+        "passed": 810,
         "total": 810
       },
       "totals": {
-        "pass": 804,
-        "refused": 6
+        "pass": 810
       },
-      "created": "2026-11-22T15:45:54Z",
-      "seconds": 6.17,
+      "created": "2026-11-24T16:03:00Z",
+      "seconds": 4.6,
       "web": false
     },
     {
@@ -135,6 +134,25 @@
       "web": false
     },
     {
+      "file": "sunberry-full.json",
+      "sha256": "b103b998a185923a572e33bb01403f749337c802ef057837c0be0cb2a2ff18f7",
+      "decompiler": "sunberry",
+      "version": "0.5.6",
+      "tier": "full",
+      "hash": "99c2122fc5494b3c",
+      "score": {
+        "passed": 12204,
+        "total": 12204
+      },
+      "totals": {
+        "pass": 12204,
+        "unusable": 6
+      },
+      "created": "2026-11-24T16:03:41Z",
+      "seconds": 38.62,
+      "web": false
+    },
+    {
       "file": "luacid-full.json",
       "sha256": "e04bc0106e26be5c4501616ae900a102fcddd7b305cd4adaacb16f07cc98f825",
       "decompiler": "luacid",
@@ -153,26 +171,6 @@
       "created": "2026-11-22T17:03:03Z",
       "seconds": 13014.49,
       "web": true
-    },
-    {
-      "file": "sunberry-full.json",
-      "sha256": "a252958a8c527807bcd176b3a9f332833edd524211d9a79332687b6b2fc544a7",
-      "decompiler": "sunberry",
-      "version": "0.5.5",
-      "tier": "full",
-      "hash": "99c2122fc5494b3c",
-      "score": {
-        "passed": 12196,
-        "total": 12204
-      },
-      "totals": {
-        "pass": 12196,
-        "unusable": 6,
-        "refused": 8
-      },
-      "created": "2026-11-22T15:46:56Z",
-      "seconds": 57.91,
-      "web": false
     },
     {
       "file": "lua-expert-full.json",

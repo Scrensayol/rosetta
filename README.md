@@ -213,8 +213,8 @@ of the cases, 12,204 usable round trips each). Every result file is on
 
 | decompiler | pass | wrong | doesn't recompile | refused | cases | generated | mutants |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| sunberry 0.5.6 (new core) | 12,204 (100%) | 0 | 0 | 0 | 210/210 | 5,994/5,994 | 6,000/6,000 |
 | luacid | 12,198 (99.95%) | 6 | 0 | 0 | 210/210 | 5,990/5,994 | 5,998/6,000 |
-| sunberry 0.5.5 (new core) | 12,196 (99.93%) | 0 | 0 | 8 | 210/210 | 5,994/5,994 | 5,992/6,000 |
 | lua.expert | 12,090 (99.1%) | 4 | 0 | 110 | 210/210 | 5,886/5,994 | 5,994/6,000 |
 | Composite | 11,989 (98.2%) | 82 | 0 | 133 | 210/210 | 5,825/5,994 | 5,954/6,000 |
 | Tovek 2.7 | 11,841 (97.0%) | 4 | 0 | 359 | 208/210 | 5,772/5,994 | 5,861/6,000 |
@@ -223,8 +223,7 @@ of the cases, 12,204 usable round trips each). Every result file is on
 
 luacid's other two wrong ones are mutants mut1-475 and mut1-510 at O2g2, which print a different
 function value than the original: the program printed its second function and the decompiled
-one prints its first. sunberry's refusals are `a condition that isn't an expression`, Tovek's
-mostly `residual goto/label would be invalid Luau`.
+one prints its first. Tovek's refusals are mostly `residual goto/label would be invalid Luau`.
 
 ### How the output reads
 
