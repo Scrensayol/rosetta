@@ -122,6 +122,7 @@ $R bench --tier full --decompiler "mine=/path/to/decompiler {}" --version mine=1
 |---|---|---|
 | quick | the 41 cases, then the 50 generated programs and the 50 mutants of the full tier whose bytecode has the most features | 846 |
 | full | the 41 cases, seeds 1000..2000, 1000 mutants of the cases (seed 1) | 12,246 |
+| hard | quick's programs, with the bytecode rewritten before the decompiler gets it (below) | 846 |
 
 "Features" are the ones mutation fuzzing counts: distinct opcode pairs and triples and where
 jumps land, at each optimization level. Picking by them never looks at a decompiler, and it
@@ -131,6 +132,30 @@ one whose input was usable. The suite is pinned as `rosetta-2`: which programs r
 profiles and the Luau version are fingerprinted into a suite hash, so two results with the same
 hash ran the same programs. Anything that changes the programs gets a new suite name. `rosetta-1` was the first 35 cases;
 `rosetta-2` added six and, because mutants come from the cases, a new set of mutants.
+
+### The hard tier
+
+On Roblox, bytecode always comes from Roblox's compiler, so a decompiler can lean on the shapes
+that compiler writes. The hard tier doesn't let it: Rosetta reads each program's bytecode
+([src/chunk.rs](src/chunk.rs), every byte of Luau's format, written back byte for byte),
+rewrites it so it does exactly the same thing ([src/transform.rs](src/transform.rs)), and hands
+the decompiler that. What it measures is robustness and real control-flow and data-flow
+analysis, which matters most for other Luau embedders, so it's scored on its own and never mixed
+into quick or full. It runs quick's programs at the six profiles, each paired with a level
+(`O0g1+x1`, `O1g1+x2`, `O2g1+x3`, `O0g2+x2`, `O1g2+x3`, `O2g2+x1`):
+
+| level | what changes |
+| --- | --- |
+| x1 | registers past the parameters shifted up, so locals don't start right after them; no-op instructions and jumps to the next instruction; unreachable junk after every instruction that never falls through |
+| x2 | and basic blocks laid out in a shuffled order, glued with jumps, with insertions also between a call whose results run to the top of the stack and the instruction that takes them. Local debug info goes, since its ranges no longer mean anything |
+| x3 | and branches that always go one way guard junk (a register loaded with a boolean, or `b <= a * a` worked out at run time), functions are shuffled in the chunk, and upvalue names go |
+
+Every rewrite is seeded by the program's own bytecode, so every decompiler gets the same bytes.
+Before a decompiler sees it, the round trip runs the rewritten bytecode: if it doesn't print
+exactly what the compiler's did, that's Rosetta's bug and the program counts as unusable, for
+nobody. `rosetta transform-check` checks all of that without a decompiler, over a tier's
+programs at every profile and level; `rosetta compile --profile O2g1+x3` writes one rewrite out
+to look at.
 
 `bench` writes one JSON file per decompiler, `<name>-<tier>.json`. Each file lists every
 program with one letter per profile (`p` pass, `w` wrong output, `c` doesn't recompile,

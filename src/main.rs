@@ -1,5 +1,6 @@
 mod bench;
 mod bytecode;
+mod chunk;
 mod decompiler;
 mod generator;
 mod lex;
@@ -9,6 +10,7 @@ mod quality;
 mod reduce;
 mod rng;
 mod roundtrip;
+mod transform;
 
 use std::{
     collections::BTreeMap,
@@ -99,6 +101,21 @@ enum Command {
         #[arg(long, default_value = ".")]
         out: PathBuf,
     },
+    /// Check the transform tier without a decompiler: every program's bytecode reads and writes
+    /// back byte for byte, and rewritten at every level still prints what it printed
+    TransformCheck {
+        #[arg(long, value_enum, default_value = "quick")]
+        tier: bench::Tier,
+        /// Failures to print
+        #[arg(long, default_value = "20")]
+        show: usize,
+        /// Only programs with this name
+        #[arg(long)]
+        only: Option<String>,
+    },
+    /// Run a bytecode file with Rosetta's Luau and print what it prints
+    #[command(hide = true)]
+    Run { bytecode: PathBuf },
     /// Print the program a seed generates
     Gen {
         seed: u64,
@@ -179,6 +196,15 @@ fn main() -> ExitCode {
             print!("{}", generator::generate(seed, grammar).render());
             ExitCode::SUCCESS
         }
+        Command::Run { bytecode } => {
+            let observed = luau::run(&fs::read(&bytecode).expect("read bytecode"));
+            for line in &observed.log {
+                println!("{line}");
+            }
+            println!("-- {:?}", observed.ending);
+            ExitCode::SUCCESS
+        }
+        Command::TransformCheck { tier, show, only } => bench::transform_check(tier, show, only.as_deref()),
         Command::Compile { input, profile, grammar, output } => {
             let Some(profile) = Profile::parse(&profile) else {
                 eprintln!("profiles look like O1g1");
@@ -188,7 +214,7 @@ fn main() -> ExitCode {
                 Some(seed) => generator::generate(seed, grammar).render(),
                 None => fs::read_to_string(&input).expect("read input"),
             };
-            match luau::compile(&source, profile) {
+            match luau::compile(&source, profile).and_then(|b| if profile.extra.transform > 0 { transform::apply(&b, profile.extra.transform) } else { Ok(b) }) {
                 Ok(bytecode) => {
                     fs::write(&output, bytecode).expect("write output");
                     ExitCode::SUCCESS
@@ -439,7 +465,7 @@ fn run(common: &Common, cases: Vec<Case>, reduce: bool, generator_version: &str)
     let decompiler_count = decompilers.len();
     let jobs = cases
         .iter()
-        .flat_map(|case| profiles.iter().flat_map(move |p| (0..decompiler_count).map(move |d| (case, Profile { extra: case.extra, ..*p }, d))))
+        .flat_map(|case| profiles.iter().flat_map(move |p| (0..decompiler_count).map(move |d| (case, Profile { extra: Extra { transform: p.extra.transform, ..case.extra }, ..*p }, d))))
         .collect::<Vec<_>>();
     let started = std::time::Instant::now();
     let results = jobs

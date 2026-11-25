@@ -64,7 +64,7 @@ async function board() {
 					<td class="num hide-sm dim">${r.web ? "web api" : `${Number(r.seconds).toFixed(1)}s`}</td></tr>`;
 			}).join("") || '<tr><td colspan="6" class="dim" style="padding:18px 14px">no official results yet.</td></tr>'}</tbody>
 		</table>
-		<div class="board-foot">${info ? `${Object.entries(info.sections).map(([k, v]) => `${v.count} ${k}`).join(" · ")} · each at ${info.profiles} profiles. ` : ""}${old ? "an older suite: its scores don't compare with the current one's. " : ""}time is the wall clock for the whole run on one machine; web apis are rate-limited, so theirs measures the network.</div>`;
+		<div class="board-foot">${info ? `${Object.entries(info.sections).map(([k, v]) => `${v.count} ${k}`).join(" · ")} · each at ${info.profiles} profiles. ` : ""}${old ? "an older suite: its scores don't compare with the current one's. " : ""}${tier === "hard" ? "hard rewrites each program's bytecode before the decompiler sees it (same behavior, not the compiler's shapes): robustness, scored apart from quick and full. " : ""}time is the wall clock for the whole run on one machine; web apis are rate-limited, so theirs measures the network.</div>`;
 	document.querySelectorAll(".suite-name").forEach(s => (s.textContent = suites[0] || s.textContent));
 	el.querySelectorAll("[data-suite]").forEach(b => b.addEventListener("click", () => { suite = b.dataset.suite; board(); }));
 	el.querySelectorAll("[data-tier]").forEach(b => b.addEventListener("click", () => { tier = b.dataset.tier; board(); }));

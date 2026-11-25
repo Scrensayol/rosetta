@@ -4,6 +4,7 @@ use crate::{
     decompiler::Decompiler,
     luau::{self, Ending, Observation, Profile},
     quality::{self, Quality},
+    transform,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize)]
@@ -56,6 +57,21 @@ pub fn check(source: &str, profile: Profile, decompiler: &dyn Decompiler) -> Ver
     if want.ending == Ending::Errored(luau::OUT_OF_MEMORY.into()) {
         return Verdict::new(Kind::Unusable, "input exhausts the memory limit");
     }
+    // the transform tier: the decompiler gets rewritten bytecode, which has to do exactly what
+    // the compiler's did. If it doesn't, that's Rosetta's bug, and the program counts for nobody
+    let bytecode = match profile.extra.transform {
+        0 => bytecode,
+        level => match transform::apply(&bytecode, level) {
+            Ok(t) => {
+                let seen = luau::run(&t);
+                if seen != want {
+                    return Verdict::new(Kind::Unusable, format!("the transform changed what the program does: {}", first_difference(&want, &seen)));
+                }
+                t
+            }
+            Err(e) => return Verdict::new(Kind::Unusable, format!("the transform can't read the bytecode: {e}")),
+        },
+    };
 
     let (output, cpu) = decompiler.decompile(&bytecode);
     let output = match output {

@@ -31,6 +31,9 @@ pub struct Extra {
     pub mutable: u8,
     // a mask over DISABLED_BUILTINS: these compile to plain calls instead of FASTCALL
     pub disabled: u16,
+    // not a compiler option: the bytecode is rewritten at this level after compiling (see
+    // transform.rs)
+    pub transform: u8,
 }
 
 pub const MUTABLE_GLOBALS: [&str; 8] = ["math", "string", "table", "bit32", "buffer", "utf8", "os", "coroutine"];
@@ -44,7 +47,7 @@ impl Extra {
         *self == Extra::default()
     }
 
-    // "+c2+t1+m5+d300", the inverse of Display
+    // "+c2+t1+m5+d300+x2", the inverse of Display
     pub fn parse(mut text: &str) -> Option<Extra> {
         let mut extra = Extra::default();
         while let Some(rest) = text.strip_prefix('+') {
@@ -55,6 +58,7 @@ impl Extra {
                 "t" => extra.type_info = value.parse().ok().filter(|v| *v <= 1)?,
                 "m" => extra.mutable = value.parse().ok()?,
                 "d" => extra.disabled = value.parse().ok()?,
+                "x" => extra.transform = value.parse().ok().filter(|v| (1..=crate::transform::LEVELS).contains(v))?,
                 _ => return None,
             }
             text = &rest[end..];
@@ -65,7 +69,7 @@ impl Extra {
 
 impl fmt::Display for Extra {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for (flag, value) in [("c", self.coverage as u32), ("t", self.type_info as u32), ("m", self.mutable as u32), ("d", self.disabled as u32)] {
+        for (flag, value) in [("c", self.coverage as u32), ("t", self.type_info as u32), ("m", self.mutable as u32), ("d", self.disabled as u32), ("x", self.transform as u32)] {
             if value != 0 {
                 write!(f, "+{flag}{value}")?;
             }
@@ -76,12 +80,12 @@ impl fmt::Display for Extra {
 
 impl Profile {
     pub const ALL: [Profile; 6] = [
-        Profile { opt: 0, debug: 1, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0 } },
-        Profile { opt: 1, debug: 1, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0 } },
-        Profile { opt: 2, debug: 1, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0 } },
-        Profile { opt: 0, debug: 2, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0 } },
-        Profile { opt: 1, debug: 2, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0 } },
-        Profile { opt: 2, debug: 2, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0 } },
+        Profile { opt: 0, debug: 1, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0 } },
+        Profile { opt: 1, debug: 1, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0 } },
+        Profile { opt: 2, debug: 1, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0 } },
+        Profile { opt: 0, debug: 2, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0 } },
+        Profile { opt: 1, debug: 2, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0 } },
+        Profile { opt: 2, debug: 2, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0 } },
     ];
 
     pub fn new(opt: u8, debug: u8) -> Profile {

@@ -39,6 +39,9 @@ pub enum Tier {
     Quick,
     /// The cases, 1000 generated programs and 1000 mutants: about 12,000 round trips
     Full,
+    /// Quick's programs with their bytecode rewritten before the decompiler sees it (see
+    /// transform.rs), each profile at one of the three levels: robustness, scored on its own
+    Hard,
 }
 
 impl Tier {
@@ -46,15 +49,29 @@ impl Tier {
         match self {
             Tier::Quick => "quick",
             Tier::Full => "full",
+            Tier::Hard => "hard",
         }
     }
 
     // how many generated programs and mutants the tier keeps
     fn size(self) -> usize {
         match self {
-            Tier::Quick => 50,
+            Tier::Quick | Tier::Hard => 50,
             Tier::Full => 1000,
         }
+    }
+}
+
+// the profiles a tier runs every program at. Hard pairs each with a transform level, so every
+// optimization level meets two levels and every level two optimization levels
+pub fn profiles(tier: Tier) -> Vec<Profile> {
+    match tier {
+        Tier::Quick | Tier::Full => Profile::ALL.to_vec(),
+        Tier::Hard => Profile::ALL
+            .iter()
+            .zip([1, 2, 3, 2, 3, 1])
+            .map(|(p, x)| Profile { extra: Extra { transform: x, ..p.extra }, ..*p })
+            .collect(),
     }
 }
 
@@ -260,7 +277,10 @@ fn fingerprint(tier: Tier, sections: &[Section]) -> String {
     feed(SUITE);
     feed(tier.name());
     feed(LUAU);
-    for p in Profile::ALL {
+    if tier == Tier::Hard {
+        feed(crate::transform::VERSION);
+    }
+    for p in profiles(tier) {
         feed(&p.to_string());
     }
     for s in sections {
@@ -272,6 +292,94 @@ fn fingerprint(tier: Tier, sections: &[Section]) -> String {
         }
     }
     format!("{h:016x}")
+}
+
+// Checks the transform tier against a tier's programs without any decompiler: that reading and
+// writing every program's bytecode gives back the same bytes, and that the bytecode rewritten at
+// every level prints exactly what the compiler's did, at every profile
+pub fn transform_check(tier: Tier, show: usize, only: Option<&str>) -> ExitCode {
+    let started = Instant::now();
+    let sections = sections(tier);
+    let programs = sections.iter().flat_map(|s| &s.programs).filter(|p| only.is_none_or(|o| p.name == o)).collect::<Vec<_>>();
+    let jobs = programs.iter().flat_map(|p| Profile::ALL.into_iter().map(move |base| (*p, base))).collect::<Vec<_>>();
+    #[derive(Default)]
+    struct Tally {
+        runs: usize,
+        unusable: usize,
+        identity: Vec<String>,
+        changed: Vec<String>,
+        unreadable: Vec<String>,
+        functions: usize,
+        rewritten: usize,
+    }
+    let tallies = jobs
+        .par_iter()
+        .map(|&(program, base)| {
+            let mut t = Tally::default();
+            let profile = Profile { extra: program.extra, ..base };
+            let Ok(bytecode) = crate::luau::compile(&program.source, profile) else {
+                t.unusable += 1;
+                return t;
+            };
+            match crate::chunk::Chunk::parse(&bytecode) {
+                Ok(c) if c.write() == bytecode => {}
+                Ok(_) => t.identity.push(format!("{} {profile}: written back differently", program.name)),
+                Err(e) => t.identity.push(format!("{} {profile}: {e}", program.name)),
+            }
+            let want = crate::luau::run(&bytecode);
+            if want.ending == crate::luau::Ending::TimedOut {
+                t.unusable += 1;
+                return t;
+            }
+            for level in 1..=crate::transform::LEVELS {
+                t.runs += 1;
+                if std::env::var_os("ROSETTA_TRACE_TRANSFORM").is_some() {
+                    eprintln!("run {} {profile}+x{level}", program.name);
+                }
+                match crate::transform::apply_counted(&bytecode, level) {
+                    Ok((rewritten, done, total)) => {
+                        t.functions += total;
+                        t.rewritten += done;
+                        if let Err(e) = crate::transform::verify(&rewritten) {
+                            t.unreadable.push(format!("{} {profile}+x{level}: rewritten badly: {e}", program.name));
+                            continue;
+                        }
+                        let seen = crate::luau::run(&rewritten);
+                        if seen != want {
+                            t.changed.push(format!("{} {profile}+x{level}: {:?} vs {:?}", program.name, seen.log.len(), want.log.len()));
+                        }
+                    }
+                    Err(e) => t.unreadable.push(format!("{} {profile}+x{level}: {e}", program.name)),
+                }
+            }
+            t
+        })
+        .reduce(Tally::default, |mut a, b| {
+            a.runs += b.runs;
+            a.unusable += b.unusable;
+            a.identity.extend(b.identity);
+            a.changed.extend(b.changed);
+            a.unreadable.extend(b.unreadable);
+            a.functions += b.functions;
+            a.rewritten += b.rewritten;
+            a
+        });
+    println!(
+        "{} programs, {} rewrites in {:.1}s: {} not written back byte for byte, {} the transform couldn't read, {} that changed behavior ({} inputs unusable); {} of {} functions rewritten",
+        programs.len(),
+        tallies.runs,
+        started.elapsed().as_secs_f64(),
+        tallies.identity.len(),
+        tallies.unreadable.len(),
+        tallies.changed.len(),
+        tallies.unusable,
+        tallies.rewritten,
+        tallies.functions
+    );
+    for line in tallies.identity.iter().chain(&tallies.unreadable).chain(&tallies.changed).take(show) {
+        println!("  {line}");
+    }
+    if tallies.identity.is_empty() && tallies.unreadable.is_empty() && tallies.changed.is_empty() { ExitCode::SUCCESS } else { ExitCode::FAILURE }
 }
 
 // UTC, to the second, without pulling in a date crate
@@ -324,18 +432,20 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path) -> Exi
     let started = Instant::now();
     let sections = sections(tier);
     let hash = fingerprint(tier, &sections);
+    let tier_profiles = profiles(tier);
+    let per_program = tier_profiles.len();
     let programs = sections.iter().map(|s| s.programs.len()).sum::<usize>();
     println!(
         "suite {SUITE} {} ({hash}): {programs} programs at {} profiles, ready in {:.1}s",
         tier.name(),
-        Profile::ALL.len(),
+        per_program,
         started.elapsed().as_secs_f64()
     );
 
     let jobs = sections
         .iter()
         .enumerate()
-        .flat_map(|(s, section)| (0..section.programs.len()).flat_map(move |p| (0..Profile::ALL.len()).map(move |q| (s, p, q))))
+        .flat_map(|(s, section)| (0..section.programs.len()).flat_map(move |p| (0..per_program).map(move |q| (s, p, q))))
         .collect::<Vec<_>>();
     for decompiler in &decompilers {
         let started = Instant::now();
@@ -343,7 +453,9 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path) -> Exi
             .par_iter()
             .map(|&(s, p, q)| {
                 let program = &sections[s].programs[p];
-                let profile = Profile { extra: program.extra, ..Profile::ALL[q] };
+                // (a program's own compiler options, and the tier's transform level)
+                let base = tier_profiles[q];
+                let profile = Profile { extra: Extra { transform: base.extra.transform, ..program.extra }, ..base };
                 let verdict = roundtrip::check(&program.source, profile, decompiler);
                 (verdict.kind, verdict.detail, verdict.quality)
             })
@@ -363,7 +475,7 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path) -> Exi
                 .map(|program| {
                     let mut results = String::new();
                     let mut details = BTreeMap::new();
-                    for base in Profile::ALL {
+                    for base in &tier_profiles {
                         let (kind, detail, quality) = next.next().unwrap();
                         results.push(letter(*kind));
                         *totals.entry(*kind).or_default() += 1;
@@ -396,7 +508,7 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path) -> Exi
             created: now_utc(),
             seconds,
             threads: rayon::current_num_threads(),
-            profiles: Profile::ALL.iter().map(Profile::to_string).collect(),
+            profiles: tier_profiles.iter().map(Profile::to_string).collect(),
             letters: LETTERS.into_iter().collect(),
             score: overall,
             totals,
