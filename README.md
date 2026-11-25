@@ -204,8 +204,9 @@ Once the site is live, the workflow posts every official result the push added o
 the Discord's score updates channel, with its rank and how it moved. A push that renames the
 suite or changes the cases posts to the benchmark updates channel instead
 ([announce.yml](.github/workflows/announce.yml)), which can also send a message written by hand
-from the Actions tab. The webhooks are the repository secrets `DISCORD_WEBHOOK_SCORES` and
-`DISCORD_WEBHOOK_BENCHMARK`; without them (in a fork) [announce.py](.github/announce.py)
+from the Actions tab, to any of the three channels (general updates by default). The webhooks are
+the repository secrets `DISCORD_WEBHOOK_SCORES`, `DISCORD_WEBHOOK_BENCHMARK` and
+`DISCORD_WEBHOOK_SITE`; without them (in a fork) [announce.py](.github/announce.py)
 prints what it would have sent.
 
 ## Results

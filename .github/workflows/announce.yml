@@ -1,5 +1,6 @@
 # Posts benchmark news to Discord: a new suite name or changed hand-written cases on a push to
-# main, or a message written by hand from the Actions tab. Score updates are posted by pages.yml,
+# main, or a message written by hand from the Actions tab (general updates by default: the site
+# and anything else that isn't a suite or a score). Score updates are posted by pages.yml,
 # after the site that the links point to has deployed.
 name: announce
 
@@ -15,8 +16,8 @@ on:
       channel:
         description: "which channel"
         type: choice
-        options: [benchmark, scores]
-        default: benchmark
+        options: [general, benchmark, scores]
+        default: general
 
 permissions:
   contents: read
@@ -36,6 +37,6 @@ jobs:
       - name: Post a message
         if: github.event_name == 'workflow_dispatch'
         env:
-          DISCORD_WEBHOOK: ${{ inputs.channel == 'scores' && secrets.DISCORD_WEBHOOK_SCORES || secrets.DISCORD_WEBHOOK_BENCHMARK }}
+          DISCORD_WEBHOOK: ${{ inputs.channel == 'scores' && secrets.DISCORD_WEBHOOK_SCORES || inputs.channel == 'benchmark' && secrets.DISCORD_WEBHOOK_BENCHMARK || secrets.DISCORD_WEBHOOK_SITE }}
           MESSAGE: ${{ inputs.message }}
         run: python3 .github/announce.py message "$MESSAGE"
