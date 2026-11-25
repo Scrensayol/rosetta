@@ -41,7 +41,9 @@ pub enum Tier {
     Full,
     /// Quick's programs with their bytecode rewritten before the decompiler sees it (see
     /// transform.rs), each profile at one of the three levels: robustness, scored on its own
-    Hard,
+    HardQuick,
+    /// Full's programs, rewritten the same way: about 12,000 round trips
+    HardFull,
 }
 
 impl Tier {
@@ -49,15 +51,16 @@ impl Tier {
         match self {
             Tier::Quick => "quick",
             Tier::Full => "full",
-            Tier::Hard => "hard",
+            Tier::HardQuick => "hard-quick",
+            Tier::HardFull => "hard-full",
         }
     }
 
     // how many generated programs and mutants the tier keeps
     fn size(self) -> usize {
         match self {
-            Tier::Quick | Tier::Hard => 50,
-            Tier::Full => 1000,
+            Tier::Quick | Tier::HardQuick => 50,
+            Tier::Full | Tier::HardFull => 1000,
         }
     }
 }
@@ -67,7 +70,7 @@ impl Tier {
 pub fn profiles(tier: Tier) -> Vec<Profile> {
     match tier {
         Tier::Quick | Tier::Full => Profile::ALL.to_vec(),
-        Tier::Hard => Profile::ALL
+        Tier::HardQuick | Tier::HardFull => Profile::ALL
             .iter()
             .zip([1, 2, 3, 2, 3, 1])
             .map(|(p, x)| Profile { extra: Extra { transform: x, ..p.extra }, ..*p })
@@ -224,7 +227,7 @@ fn sections(tier: Tier) -> Vec<Section> {
 
     let generated = hardest(generated, tier.size());
     let mutants = hardest(mutants, tier.size());
-    let picked = if tier == Tier::Full { String::new() } else { format!(", the {} with the most bytecode features", tier.size()) };
+    let picked = if tier.size() == FULL { String::new() } else { format!(", the {} with the most bytecode features", tier.size()) };
 
     vec![
         Section {
@@ -277,7 +280,7 @@ fn fingerprint(tier: Tier, sections: &[Section]) -> String {
     feed(SUITE);
     feed(tier.name());
     feed(LUAU);
-    if tier == Tier::Hard {
+    if matches!(tier, Tier::HardQuick | Tier::HardFull) {
         feed(crate::transform::VERSION);
     }
     for p in profiles(tier) {

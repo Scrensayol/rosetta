@@ -122,7 +122,8 @@ $R bench --tier full --decompiler "mine=/path/to/decompiler {}" --version mine=1
 |---|---|---|
 | quick | the 41 cases, then the 50 generated programs and the 50 mutants of the full tier whose bytecode has the most features | 846 |
 | full | the 41 cases, seeds 1000..2000, 1000 mutants of the cases (seed 1) | 12,246 |
-| hard | quick's programs, with the bytecode rewritten before the decompiler gets it (below) | 846 |
+| hard-quick | quick's programs, with the bytecode rewritten before the decompiler gets it (below) | 846 |
+| hard-full | full's programs, rewritten the same way | 12,246 |
 
 "Features" are the ones mutation fuzzing counts: distinct opcode pairs and triples and where
 jumps land, at each optimization level. Picking by them never looks at a decompiler, and it
@@ -133,15 +134,16 @@ profiles and the Luau version are fingerprinted into a suite hash, so two result
 hash ran the same programs. Anything that changes the programs gets a new suite name. `rosetta-1` was the first 35 cases;
 `rosetta-2` added six and, because mutants come from the cases, a new set of mutants.
 
-### The hard tier
+### The hard tiers
 
 On Roblox, bytecode always comes from Roblox's compiler, so a decompiler can lean on the shapes
-that compiler writes. The hard tier doesn't let it: Rosetta reads each program's bytecode
+that compiler writes. The hard tiers don't let it: Rosetta reads each program's bytecode
 ([src/chunk.rs](src/chunk.rs), every byte of Luau's format, written back byte for byte),
 rewrites it so it does exactly the same thing ([src/transform.rs](src/transform.rs)), and hands
 the decompiler that. What it measures is robustness and real control-flow and data-flow
-analysis, which matters most for other Luau embedders, so it's scored on its own and never mixed
-into quick or full. It runs quick's programs at the six profiles, each paired with a level
+analysis, which matters most for other Luau embedders, so they're scored on their own and never
+mixed into quick or full. hard-quick runs quick's programs and hard-full full's, at the six
+profiles, each paired with a level
 (`O0g1+x1`, `O1g1+x2`, `O2g1+x3`, `O0g2+x2`, `O1g2+x3`, `O2g2+x1`):
 
 | level | what changes |
@@ -153,7 +155,8 @@ into quick or full. It runs quick's programs at the six profiles, each paired wi
 Every rewrite is seeded by the program's own bytecode, so every decompiler gets the same bytes.
 Before a decompiler sees it, the round trip runs the rewritten bytecode: if it doesn't print
 exactly what the compiler's did, that's Rosetta's bug and the program counts as unusable, for
-nobody. `rosetta transform-check` checks all of that without a decompiler, over a tier's
+nobody. On the leaderboard, a hard tab says what x3 does to everyone until some decompiler passes every
+one of its round trips. `rosetta transform-check` checks all of that without a decompiler, over a tier's
 programs at every profile and level; `rosetta compile --profile O2g1+x3` writes one rewrite out
 to look at.
 
