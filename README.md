@@ -170,7 +170,7 @@ readability of its passes, the wall time and the suite.
 
 [site/](site) is a static site for GitHub Pages, in the spirit of sUNC's result pages. It shows
 the leaderboard and a result viewer. Drop a result file on the viewer, or open one with
-`result.html?r=<name>`, `?url=<link to a JSON file>` or a share link. The file is read in
+`result?r=<name>`, `?url=<link to a JSON file>` or a share link. The file is read in
 the browser and never uploaded. The viewer puts every result in one of three states:
 
 - **verified**: byte for byte an official result in [site/results/](site/results), whose
@@ -189,7 +189,7 @@ Rubiš link, a download) and changing a single byte of it breaks that.
 
 To share a result that isn't official, `bench --upload` (or the viewer's "upload & copy link"
 button) puts it on [Rubiš](https://rubis.app), a paste service with an open API, as a public
-scrap, and gives a link that opens it in the viewer (`result.html?rubis=<id>`). That's sharing,
+scrap, and gives a link that opens it in the viewer (`result?rubis=<id>`). That's sharing,
 not proof: the viewer still says verified, unverified or spoofed the same way. Nothing is ever
 uploaded unless you ask for it.
 
@@ -198,7 +198,7 @@ When the suite changes, the old suite's results move into a directory named afte
 
 To publish an official result, copy it into `site/results/` and run `site/build-index.sh`
 (it needs `jq`). The Pages workflow refuses to deploy if the index is stale. To preview
-locally, run `python3 -m http.server -d site`.
+locally, serve site/ with something that maps `/result` to `result.html` the way GitHub Pages does, like `npx serve site` (or open `result.html` itself).
 
 Once the site is live, the workflow posts every official result the push added or changed to
 the Discord's score updates channel, with its rank and how it moved. A push that renames the

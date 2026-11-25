@@ -73,7 +73,7 @@ async function board() {
 	document.querySelectorAll(".suite-name").forEach(s => (s.textContent = suites[0] || s.textContent));
 	el.querySelectorAll("[data-suite]").forEach(b => b.addEventListener("click", () => { suite = b.dataset.suite; board(); }));
 	el.querySelectorAll("[data-tier]").forEach(b => b.addEventListener("click", () => { tier = b.dataset.tier; board(); }));
-	el.querySelectorAll("tr[data-file]").forEach(tr => tr.addEventListener("click", () => (location.href = `result.html?r=${encodeURIComponent(tr.dataset.file)}`)));
+	el.querySelectorAll("tr[data-file]").forEach(tr => tr.addEventListener("click", () => (location.href = `result?r=${encodeURIComponent(tr.dataset.file)}`)));
 	animateIn(el);
 }
 board();

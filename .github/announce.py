@@ -55,7 +55,7 @@ def fmt_pct(v):
 
 
 def page(entry):
-    return f"{SITE}result.html?r={entry['file'].removesuffix('.json')}"
+    return f"{SITE}result?r={entry['file'].removesuffix('.json')}"
 
 
 def scores(before, after):

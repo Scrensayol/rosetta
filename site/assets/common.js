@@ -51,7 +51,7 @@ function nav(here) {
 		<a class="logo" href="./"><span><b>r</b>osetta</span><small>${esc(here)}</small></a>
 		<nav class="nav-links">
 			<a href="./" title="home">${icon("home")}</a>
-			<a href="result.html" title="view a result">${icon("result")}</a>
+			<a href="result" title="view a result">${icon("result")}</a>
 			<a href="${REPO}#readme" title="docs" target="_blank" rel="noopener">${icon("docs")}</a>
 			<a href="${REPO}" title="github" target="_blank" rel="noopener">${icon("github")}</a>
 			<a href="${DISCORD}" title="discord" target="_blank" rel="noopener">${icon("discord")}</a>

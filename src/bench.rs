@@ -637,5 +637,5 @@ fn share(path: &Path, title: &str) -> Result<String, String> {
     }
     let reply: serde_json::Value = serde_json::from_slice(&output.stdout).map_err(|_| format!("unexpected reply: {}", String::from_utf8_lossy(&output.stdout).chars().take(200).collect::<String>()))?;
     let id = reply["scrapID"].as_str().filter(|id| !id.is_empty() && id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')).ok_or_else(|| format!("no scrap id in the reply: {reply}"))?;
-    Ok(format!("{SITE}result.html?rubis={id}"))
+    Ok(format!("{SITE}result?rubis={id}"))
 }

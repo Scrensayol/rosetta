@@ -178,7 +178,7 @@ function sidePanel(data, check, bytes, source) {
 		<button class="btn" data-download>${icon("download")}download json</button>
 		${shareable ? `<button class="btn" data-share title="uploads this result to rubis.app, where anyone with the link can read it">${icon("link")}<span>upload &amp; copy link</span></button>` : ""}
 		${params.get("rubis") ? `<button class="btn" data-copy>${icon("link")}<span>copy link</span></button>` : ""}
-		<a class="btn" href="result.html">${icon("upload")}view another result</a>`;
+		<a class="btn" href="result">${icon("upload")}view another result</a>`;
 }
 
 async function show(bytes, source) {
@@ -251,7 +251,7 @@ async function showPicker(error) {
 	const drop = document.getElementById("drop");
 	const input = drop.querySelector("input");
 	const take = async file => {
-		history.replaceState(null, "", "result.html");
+		history.replaceState(null, "", "result");
 		show(new Uint8Array(await file.arrayBuffer()), { file: file.name });
 	};
 	input.addEventListener("change", () => input.files[0] && take(input.files[0]));
@@ -264,7 +264,7 @@ async function showPicker(error) {
 	const index = await officialResults();
 	if (index.results.length) {
 		document.getElementById("official").innerHTML = `<div class="section-head rise" style="--i:2"><h2>official results</h2></div>` +
-			index.results.map((r, i) => `<a class="tile rise pass" style="--i:${i + 3};height:46px" href="result.html?r=${encodeURIComponent(r.file.replace(/\.json$/, ""))}">
+			index.results.map((r, i) => `<a class="tile rise pass" style="--i:${i + 3};height:46px" href="result?r=${encodeURIComponent(r.file.replace(/\.json$/, ""))}">
 				${icon("check", 'class="icon" style="fill:var(--accent)"')}
 				<span class="name" style="font-family:var(--ui)">${esc(r.decompiler)} <span class="keep" style="color:var(--text-dim)">${esc(r.version || "")}</span> · ${esc(r.tier)}</span>
 				<span class="count" style="color:var(--text-muted);font-variant-numeric:tabular-nums">${fmtPct(pct(r.score))}</span></a>`).join("");
