@@ -12,9 +12,11 @@ permissions:
   pages: write
   id-token: write
 
+# queued, not cancelled: a cancelled run would skip announcing its results, and the next push's
+# range starts after them
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 # upload and deploy are separate jobs: deploy-pages in the same job as the upload can look the
 # artifact up before GitHub lists it ("Found 0 artifact(s)")
@@ -44,3 +46,17 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # posts official results that are new or changed in this push to Discord, once they're live
+  announce:
+    needs: deploy
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Announce score updates
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_SCORES }}
+        run: python3 .github/announce.py scores "${{ github.event.before }}" "${{ github.sha }}"

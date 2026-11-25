@@ -1,0 +1,41 @@
+# Posts benchmark news to Discord: a new suite name or changed hand-written cases on a push to
+# main, or a message written by hand from the Actions tab. Score updates are posted by pages.yml,
+# after the site that the links point to has deployed.
+name: announce
+
+on:
+  push:
+    branches: [main]
+    paths: ["cases/**", "src/bench.rs"]
+  workflow_dispatch:
+    inputs:
+      message:
+        description: "what to post (markdown, up to 2000 characters)"
+        required: true
+      channel:
+        description: "which channel"
+        type: choice
+        options: [benchmark, scores]
+        default: benchmark
+
+permissions:
+  contents: read
+
+jobs:
+  announce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Announce suite changes
+        if: github.event_name == 'push'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_BENCHMARK }}
+        run: python3 .github/announce.py suite "${{ github.event.before }}" "${{ github.sha }}"
+      - name: Post a message
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          DISCORD_WEBHOOK: ${{ inputs.channel == 'scores' && secrets.DISCORD_WEBHOOK_SCORES || secrets.DISCORD_WEBHOOK_BENCHMARK }}
+          MESSAGE: ${{ inputs.message }}
+        run: python3 .github/announce.py message "$MESSAGE"

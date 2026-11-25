@@ -6,6 +6,8 @@ Every decompiler claims to be accurate. Rosetta checks it the only way that can'
 it compiles a program, runs it, hands the bytecode to the decompiler, compiles what comes back,
 runs that, and compares the two runs. Same output, it passes. Anything else is graded.
 
+New suites and official scores are posted on [Discord](https://discord.gg/7qE27wRwnd) as they land.
+
 ## How a program is graded
 
 Each program is compiled at six Luau profiles (`-O0`, `-O1`, `-O2`, each at debug level 1 and 2)
@@ -151,6 +153,14 @@ the browser and never uploaded. The viewer puts every result in one of three sta
 To publish an official result, copy it into `site/results/` and run `site/build-index.sh`
 (it needs `jq`). The Pages workflow refuses to deploy if the index is stale. To preview
 locally, run `python3 -m http.server -d site`.
+
+Once the site is live, the workflow posts every official result the push added or changed to
+the Discord's score updates channel, with its rank and how it moved. A push that renames the
+suite or changes the cases posts to the benchmark updates channel instead
+([announce.yml](.github/workflows/announce.yml)), which can also send a message written by hand
+from the Actions tab. The webhooks are the repository secrets `DISCORD_WEBHOOK_SCORES` and
+`DISCORD_WEBHOOK_BENCHMARK`; without them (in a fork) [announce.py](.github/announce.py)
+prints what it would have sent.
 
 ## Results
 
