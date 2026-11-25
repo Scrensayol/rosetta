@@ -543,7 +543,7 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
     ExitCode::SUCCESS
 }
 
-const SITE: &str = "https://scrensayol.github.io/rosetta/";
+const SITE: &str = "https://rosetta.wtf/";
 
 // The private half of the key the website checks signed results with. It never goes in the repo:
 // ROSETTA_SIGNING_KEY names it, or it's ~/.config/rosetta/signing-key.pem

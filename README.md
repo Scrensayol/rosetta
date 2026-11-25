@@ -210,11 +210,11 @@ prints what it would have sent.
 
 ## Results
 
-> rosetta-2 reruns are landing on [the website](https://scrensayol.github.io/rosetta/) now, web APIs last.
+> rosetta-2 reruns are landing on [the website](https://rosetta.wtf/) now, web APIs last.
 > The tables below are still rosetta-1's (35 cases) until they're all in.
 
 The leaderboard and every official `bench` result are on the website,
-[scrensayol.github.io/rosetta](https://scrensayol.github.io/rosetta/). The fuzz and check
+[rosetta.wtf](https://rosetta.wtf/). The fuzz and check
 tables below are per-command runs (sunberry 0.5.4), which also compare readability across
 decompilers on the round trips they all passed.
 
@@ -268,7 +268,7 @@ not represent every prototype`). luacid and Fission never refuse: they always pr
 
 **The benchmark's full tier** (`bench --tier full`: the 35 cases, seeds 1000..2000 and 1000 mutants
 of the cases, 12,204 usable round trips each). Every result file is on
-[the website](https://scrensayol.github.io/rosetta/), with each program's verdict at each profile:
+[the website](https://rosetta.wtf/), with each program's verdict at each profile:
 
 | decompiler | pass | wrong | doesn't recompile | refused | cases | generated | mutants |
 | --- | --- | --- | --- | --- | --- | --- | --- |

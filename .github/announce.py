@@ -18,7 +18,7 @@ import sys
 import urllib.error
 import urllib.request
 
-SITE = "https://scrensayol.github.io/rosetta/"
+SITE = "https://rosetta.wtf/"
 REPO = "https://github.com/Scrensayol/rosetta"
 ACCENT = 0xFF8AB4
 ZERO = "0" * 40
