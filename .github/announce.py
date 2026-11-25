@@ -90,6 +90,11 @@ def scores(before, after):
                 f"#{rank} {who}: **{s['passed']:,} / {s['total']:,}** ({fmt_pct(pct(s))})"
                 f" · {failures(r['totals']):,} wrong · {r['totals'].get('refused', 0):,} refused · [result]({page(r)})"
             )
+            # the hard tier's top level, passed in full: the "can it run crysis" moment
+            x3 = (r.get("levels") or {}).get("3")
+            was_x3 = ((was.get(r["file"]) or {}).get("levels") or {}).get("3")
+            if x3 and x3["total"] and x3["passed"] == x3["total"] and not (was_x3 and was_x3["passed"] == was_x3["total"]):
+                line += "\n**cleared x3.** everyone else still gets killed there"
             prev = was.get(r["file"])
             if prev and prev["hash"] == r["hash"]:
                 delta = r["score"]["passed"] - prev["score"]["passed"]

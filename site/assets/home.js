@@ -28,7 +28,8 @@ document.getElementById("features").innerHTML = FEATURES.map(([ic, title, text],
 // the newest by default, older ones (archived under results/<suite>/) a click away
 const suiteNumber = name => Number((name || "").match(/(\d+)$/)?.[1] || 0);
 let suite = null;
-let tier = "quick";
+// ?tier=hard opens the board on that tier
+let tier = new URLSearchParams(location.search).get("tier") || "quick";
 async function board() {
 	const index = await officialResults();
 	const suiteOf = r => index.suites[r.hash]?.name || "?";
@@ -46,6 +47,7 @@ async function board() {
 	el.innerHTML = `
 		<div class="board-head"><h3>suite <span class="keep">${esc(suite)}</span>${old ? ' <small class="dim">archived</small>' : ""}</h3>
 			<div class="chips">${suites.length > 1 ? suites.map(s => `<button class="chip ${s === suite ? "on" : ""}" data-suite="${esc(s)}">${esc(s)}</button>`).join("") + '<span class="chip-gap"></span>' : ""}${tiers.map(t => `<button class="chip ${t === tier ? "on" : ""}" data-tier="${t}">${t}</button>`).join("")}</div></div>
+		${tier === "hard" ? x3(rows) : ""}
 		<table>
 			<thead><tr><th class="rank">#</th><th>decompiler</th><th class="meter">round trips passed</th>
 				<th class="num">wrong</th><th class="num hide-sm">refused</th><th class="num hide-sm">time</th></tr></thead>
@@ -72,6 +74,17 @@ async function board() {
 	animateIn(el);
 }
 board();
+
+// the hard tier's top level: cleared means every one of its round trips passed
+function x3(rows) {
+	const at3 = rows.filter(r => r.levels?.["3"]?.total);
+	const cleared = at3.filter(r => r.levels["3"].passed === r.levels["3"].total);
+	const best = at3.slice().sort((a, b) => b.levels["3"].passed - a.levels["3"].passed)[0];
+	if (cleared.length) {
+		return `<div class="board-callout cleared">${icon("check")}<span><b>x3 cleared</b> by ${cleared.map(r => esc(r.decompiler)).join(", ")}</span></div>`;
+	}
+	return `<div class="board-callout">${icon("warn")}<span><b>x3:</b> everyone just gets fucking killed here${best && best.levels["3"].passed ? ` <small>best so far: ${esc(best.decompiler)}, ${best.levels["3"].passed} / ${best.levels["3"].total}</small>` : ""}</span></div>`;
+}
 
 // ---- the three kinds of result ----
 const STATES = [

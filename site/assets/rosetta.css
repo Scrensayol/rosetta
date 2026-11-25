@@ -129,6 +129,10 @@ button { font: inherit; color: inherit; text-transform: inherit; }
 .chip:hover { background: var(--hover); color: var(--text); }
 .chip.on { background: var(--accent-10); color: var(--accent); }
 .chip-gap { width: 1px; margin: 6px 8px; background: var(--border, rgba(242, 239, 246, 0.12)); }
+.board-callout { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--accent-10); color: var(--text); font-size: 14px; border-bottom: 1px solid var(--accent); }
+.board-callout svg { width: 18px; height: 18px; fill: var(--accent); flex: none; }
+.board-callout small { color: var(--text-muted); margin-left: 8px; font-size: 12px; }
+.board-callout.cleared b { color: var(--accent); }
 .board-head h3 small { font: 400 12px var(--ui); color: var(--text-dim); margin-left: 6px; }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 6px; padding-top: 6px; }
