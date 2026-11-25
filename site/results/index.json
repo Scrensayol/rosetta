@@ -1,7 +1,7 @@
 {
   "results": [
     {
-      "file": "lua-expert-quick.json",
+      "file": "rosetta-1/lua-expert-quick.json",
       "sha256": "5125a08c07a09f80ef8b4981d1574f2eb1305f710d79e32b33ef59fc5aae16fb",
       "decompiler": "lua.expert",
       "version": null,
@@ -16,10 +16,11 @@
       },
       "created": "2026-11-22T13:14:37Z",
       "seconds": 382.18,
-      "web": true
+      "web": true,
+      "archived": true
     },
     {
-      "file": "luacid-quick.json",
+      "file": "rosetta-1/luacid-quick.json",
       "sha256": "cfeec5c2e74be91f963083a67a864a2942d94a1ea7d28179f96fdfeaac84a8bf",
       "decompiler": "luacid",
       "version": null,
@@ -34,10 +35,11 @@
       },
       "created": "2026-11-22T13:26:04Z",
       "seconds": 1063.26,
-      "web": true
+      "web": true,
+      "archived": true
     },
     {
-      "file": "sunberry-quick.json",
+      "file": "rosetta-1/sunberry-quick.json",
       "sha256": "a8d97c78266cfa8772059082f2ef324bcd1d349cea139667c008e2a6b9e18c11",
       "decompiler": "sunberry",
       "version": "0.5.6",
@@ -52,10 +54,11 @@
       },
       "created": "2026-11-24T16:03:00Z",
       "seconds": 4.6,
-      "web": false
+      "web": false,
+      "archived": true
     },
     {
-      "file": "composite-quick.json",
+      "file": "rosetta-1/composite-quick.json",
       "sha256": "8543a961a71c99db05dca917286aed8618eebe73f76a82fa67f85311d6845759",
       "decompiler": "composite",
       "version": null,
@@ -72,10 +75,11 @@
       },
       "created": "2026-11-22T13:15:11Z",
       "seconds": 417.16,
-      "web": true
+      "web": true,
+      "archived": true
     },
     {
-      "file": "tovek-quick.json",
+      "file": "rosetta-1/tovek-quick.json",
       "sha256": "2b5cf8f370144eabdbf728980832d4db1a4fa165adff9fb67cd2096ecf7b9587",
       "decompiler": "tovek",
       "version": "2.7",
@@ -91,10 +95,11 @@
       },
       "created": "2026-11-22T13:08:27Z",
       "seconds": 4.83,
-      "web": false
+      "web": false,
+      "archived": true
     },
     {
-      "file": "fission-quick.json",
+      "file": "rosetta-1/fission-quick.json",
       "sha256": "a1369f8382a71d87f60b5ae2e3d7da94170da9976dff968f420216dd0f15d9be",
       "decompiler": "fission",
       "version": "1.0.5-beta",
@@ -111,10 +116,11 @@
       },
       "created": "2026-11-22T13:08:35Z",
       "seconds": 7.75,
-      "web": false
+      "web": false,
+      "archived": true
     },
     {
-      "file": "sunberry-old-core-quick.json",
+      "file": "rosetta-1/sunberry-old-core-quick.json",
       "sha256": "e66e48cd66739bedcc07225fb2a2a0ed37ba50868909a422947374e5e082abd4",
       "decompiler": "sunberry-old-core",
       "version": "0.5.4",
@@ -131,10 +137,11 @@
       },
       "created": "2026-11-22T13:08:22Z",
       "seconds": 4.62,
-      "web": false
+      "web": false,
+      "archived": true
     },
     {
-      "file": "sunberry-full.json",
+      "file": "rosetta-1/sunberry-full.json",
       "sha256": "b103b998a185923a572e33bb01403f749337c802ef057837c0be0cb2a2ff18f7",
       "decompiler": "sunberry",
       "version": "0.5.6",
@@ -150,10 +157,11 @@
       },
       "created": "2026-11-24T16:03:41Z",
       "seconds": 38.62,
-      "web": false
+      "web": false,
+      "archived": true
     },
     {
-      "file": "luacid-full.json",
+      "file": "rosetta-1/luacid-full.json",
       "sha256": "e04bc0106e26be5c4501616ae900a102fcddd7b305cd4adaacb16f07cc98f825",
       "decompiler": "luacid",
       "version": null,
@@ -170,10 +178,11 @@
       },
       "created": "2026-11-22T17:03:03Z",
       "seconds": 13014.49,
-      "web": true
+      "web": true,
+      "archived": true
     },
     {
-      "file": "lua-expert-full.json",
+      "file": "rosetta-1/lua-expert-full.json",
       "sha256": "b714134b453ef898527810c37d3cb4c70615e8da3f881a2bf540238406e5b1ec",
       "decompiler": "lua.expert",
       "version": null,
@@ -191,10 +200,11 @@
       },
       "created": "2026-11-22T14:43:30Z",
       "seconds": 5329.97,
-      "web": true
+      "web": true,
+      "archived": true
     },
     {
-      "file": "composite-full.json",
+      "file": "rosetta-1/composite-full.json",
       "sha256": "ffed014e848d096d2abfcbcc5fd45f904f43d16d40fa0f68a3997e5c9c21d46c",
       "decompiler": "composite",
       "version": null,
@@ -212,10 +222,11 @@
       },
       "created": "2026-11-22T14:42:54Z",
       "seconds": 5260.17,
-      "web": true
+      "web": true,
+      "archived": true
     },
     {
-      "file": "tovek-full.json",
+      "file": "rosetta-1/tovek-full.json",
       "sha256": "6ba0741e087b4cbdad4f0a3f93d9c70c1c4c5a276be10ef30e5222d7683242cd",
       "decompiler": "tovek",
       "version": "2.7",
@@ -233,10 +244,11 @@
       },
       "created": "2026-11-22T13:11:00Z",
       "seconds": 53.02,
-      "web": false
+      "web": false,
+      "archived": true
     },
     {
-      "file": "fission-full.json",
+      "file": "rosetta-1/fission-full.json",
       "sha256": "3212b5ed420051ae0b4525ce89d75d720d6105ae84bee22af9b716f6a03d601a",
       "decompiler": "fission",
       "version": "1.0.5-beta",
@@ -254,10 +266,11 @@
       },
       "created": "2026-11-22T13:12:58Z",
       "seconds": 118.84,
-      "web": false
+      "web": false,
+      "archived": true
     },
     {
-      "file": "sunberry-old-core-full.json",
+      "file": "rosetta-1/sunberry-old-core-full.json",
       "sha256": "6ddb8c6e4a6196f2df9ecb1da4f60ae63511c63e54c4909c3505b003cb62ede5",
       "decompiler": "sunberry-old-core",
       "version": "0.5.4",
@@ -275,7 +288,8 @@
       },
       "created": "2026-11-22T13:10:07Z",
       "seconds": 46.7,
-      "web": false
+      "web": false,
+      "archived": true
     }
   ],
   "suites": {

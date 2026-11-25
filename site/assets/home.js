@@ -24,19 +24,28 @@ document.getElementById("features").innerHTML = FEATURES.map(([ic, title, text],
 	`<div class="feature rise${i === 5 ? "" : ""}" style="--i:${i}"><h3>${icon(ic)}${title}</h3><p>${text}</p></div>`).join("");
 
 // ---- leaderboard ----
+// results from different suites ran different programs, so the board shows one suite at a time:
+// the newest by default, older ones (archived under results/<suite>/) a click away
+const suiteNumber = name => Number((name || "").match(/(\d+)$/)?.[1] || 0);
+let suite = null;
 let tier = "quick";
 async function board() {
 	const index = await officialResults();
-	const tiers = [...new Set(index.results.map(r => r.tier))].sort((a, b) => (a === "quick" ? -1 : b === "quick" ? 1 : 0));
+	const suiteOf = r => index.suites[r.hash]?.name || "?";
+	const suites = [...new Set(index.results.map(suiteOf))].sort((a, b) => suiteNumber(b) - suiteNumber(a) || a.localeCompare(b));
+	if (!suites.includes(suite)) suite = suites[0] || "rosetta";
+	const inSuite = index.results.filter(r => suiteOf(r) === suite);
+	const tiers = [...new Set(inSuite.map(r => r.tier))].sort((a, b) => (a === "quick" ? -1 : b === "quick" ? 1 : 0));
 	if (!tiers.includes(tier)) tier = tiers[0] || "quick";
-	const rows = index.results
+	const rows = inSuite
 		.filter(r => r.tier === tier)
 		.sort((a, b) => pct(b.score) - pct(a.score) || failures(a.totals) - failures(b.totals));
 	const el = document.getElementById("board");
-	const suite = rows[0] ? index.suites[rows[0].hash] : null;
+	const info = rows[0] ? index.suites[rows[0].hash] : null;
+	const old = suite !== suites[0];
 	el.innerHTML = `
-		<div class="board-head"><h3>suite <span class="keep">rosetta-1</span></h3>
-			<div class="chips">${tiers.map(t => `<button class="chip ${t === tier ? "on" : ""}" data-tier="${t}">${t}</button>`).join("")}</div></div>
+		<div class="board-head"><h3>suite <span class="keep">${esc(suite)}</span>${old ? ' <small class="dim">archived</small>' : ""}</h3>
+			<div class="chips">${suites.length > 1 ? suites.map(s => `<button class="chip ${s === suite ? "on" : ""}" data-suite="${esc(s)}">${esc(s)}</button>`).join("") + '<span class="chip-gap"></span>' : ""}${tiers.map(t => `<button class="chip ${t === tier ? "on" : ""}" data-tier="${t}">${t}</button>`).join("")}</div></div>
 		<table>
 			<thead><tr><th class="rank">#</th><th>decompiler</th><th class="meter">round trips passed</th>
 				<th class="num">wrong</th><th class="num hide-sm">refused</th><th class="num hide-sm">time</th></tr></thead>
@@ -55,7 +64,9 @@ async function board() {
 					<td class="num hide-sm dim">${r.web ? "web api" : `${Number(r.seconds).toFixed(1)}s`}</td></tr>`;
 			}).join("") || '<tr><td colspan="6" class="dim" style="padding:18px 14px">no official results yet.</td></tr>'}</tbody>
 		</table>
-		<div class="board-foot">${suite ? `${Object.entries(suite.sections).map(([k, v]) => `${v.count} ${k}`).join(" · ")} · each at ${suite.profiles} profiles. ` : ""}time is the wall clock for the whole run on one machine; web apis are rate-limited, so theirs measures the network.</div>`;
+		<div class="board-foot">${info ? `${Object.entries(info.sections).map(([k, v]) => `${v.count} ${k}`).join(" · ")} · each at ${info.profiles} profiles. ` : ""}${old ? "an older suite: its scores don't compare with the current one's. " : ""}time is the wall clock for the whole run on one machine; web apis are rate-limited, so theirs measures the network.</div>`;
+	document.querySelectorAll(".suite-name").forEach(s => (s.textContent = suites[0] || s.textContent));
+	el.querySelectorAll("[data-suite]").forEach(b => b.addEventListener("click", () => { suite = b.dataset.suite; board(); }));
 	el.querySelectorAll("[data-tier]").forEach(b => b.addEventListener("click", () => { tier = b.dataset.tier; board(); }));
 	el.querySelectorAll("tr[data-file]").forEach(tr => tr.addEventListener("click", () => (location.href = `result.html?r=${encodeURIComponent(tr.dataset.file)}`)));
 	animateIn(el);

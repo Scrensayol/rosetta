@@ -239,7 +239,8 @@ async function start() {
 		if (location.hash.startsWith("#z=")) return show(await unpack(location.hash.slice(3)), null);
 		const r = params.get("r"), url = params.get("url");
 		if (r || url) {
-			const path = r ? `results/${r.replace(/[^\w.-]/g, "")}.json` : url;
+			// a name, or <suite>/<name> for an archived result: nothing that climbs out of results/
+			const path = r ? `results/${r.replace(/[^\w./-]/g, "").split("/").filter(p => p && !p.startsWith(".")).join("/")}.json` : url;
 			const res = await fetch(path, { cache: "no-cache" });
 			if (!res.ok) throw new Error(`couldn't load ${r || url} (HTTP ${res.status})`);
 			return show(new Uint8Array(await res.arrayBuffer()), { file: path.split("/").pop() });

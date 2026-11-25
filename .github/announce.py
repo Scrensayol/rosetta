@@ -62,7 +62,8 @@ def scores(before, after):
     old = json.loads(show(before, "site/results/index.json") or '{"results": [], "suites": {}}')
     new = json.loads(show(after, "site/results/index.json") or '{"results": [], "suites": {}}')
     was = {r["file"]: r for r in old["results"]}
-    changed = [r for r in new["results"] if was.get(r["file"], {}).get("sha256") != r["sha256"]]
+    # results moved into an archive directory when the suite changed aren't news
+    changed = [r for r in new["results"] if not r.get("archived") and was.get(r["file"], {}).get("sha256") != r["sha256"]]
     if not changed:
         print("no official result changed")
         return []
@@ -77,7 +78,7 @@ def scores(before, after):
     embeds = []
     for (suite, tier, hash), rows in sorted(groups.items(), key=lambda g: (g[0][0], g[0][1] != "quick")):
         board = sorted(
-            (r for r in new["results"] if r["hash"] == hash),
+            (r for r in new["results"] if r["hash"] == hash and not r.get("archived")),
             key=lambda r: (-pct(r["score"]), failures(r["totals"])),
         )
         lines = []
