@@ -25,7 +25,7 @@ use crate::{
 };
 
 // Bump when anything below changes which programs run or how they're graded
-pub const SUITE: &str = "rosetta-1";
+pub const SUITE: &str = "rosetta-2";
 pub const LUAU: &str = "0.747";
 const MUTATION_SEED: u64 = 1;
 const FUZZ_START: u64 = 1000;

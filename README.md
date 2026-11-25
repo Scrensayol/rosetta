@@ -57,8 +57,10 @@ the original program, so it's reproducible and anyone can check it.
   functions, loop exits, closures and upvalues, numbers (NaN sign, `x^3` folding), contextual
   keywords (`while continue do`), dead branches, `if`s nested 150 deep, Luau's experimental
   `if local` / `while local`, comparisons with NaN, operator precedence, string escapes and
-  number edges, table constructors, iterators, metamethods, builtins, Roblox-style scripts.
-  New edge cases are welcome.
+  number edges, table constructors, iterators, metamethods, builtins, Roblox-style scripts,
+  evaluation order with side effects, `getfenv` / `setfenv`, type syntax compiled with type
+  information, generalized iteration and `__iter`, a function at the local and register
+  limits, and vector constants. New edge cases are welcome.
 - **generated**: `fuzz` builds random programs from a seed with a grammar (`full`, `straight`
   for straight-line code, `branches` for no loops), so a run is reproducible from its seed range.
 - **mutants**: `mutate` is mutation fuzzing in the style of Bin2Wrong. It starts from existing programs (the cases by default, plus `--pool` directories and
@@ -118,16 +120,17 @@ $R bench --tier full --decompiler "mine=/path/to/decompiler {}" --version mine=1
 
 | tier | programs | round trips |
 |---|---|---|
-| quick | the 35 cases, then the 50 generated programs and the 50 mutants of the full tier whose bytecode has the most features | 810 |
-| full | the 35 cases, seeds 1000..2000, 1000 mutants of the cases (seed 1) | 12,210 |
+| quick | the 41 cases, then the 50 generated programs and the 50 mutants of the full tier whose bytecode has the most features | 846 |
+| full | the 41 cases, seeds 1000..2000, 1000 mutants of the cases (seed 1) | 12,246 |
 
 "Features" are the ones mutation fuzzing counts: distinct opcode pairs and triples and where
 jumps land, at each optimization level. Picking by them never looks at a decompiler, and it
 makes quick harder than the full tier on average, not an easy sample of it. Every program runs at
 all six profiles. The score is the round trips that passed, out of every
-one whose input was usable. The suite is pinned as `rosetta-1`: which programs run, the
+one whose input was usable. The suite is pinned as `rosetta-2`: which programs run, the
 profiles and the Luau version are fingerprinted into a suite hash, so two results with the same
-hash ran the same programs. Anything that changes the programs gets a new suite name.
+hash ran the same programs. Anything that changes the programs gets a new suite name. `rosetta-1` was the first 35 cases;
+`rosetta-2` added six and, because mutants come from the cases, a new set of mutants.
 
 `bench` writes one JSON file per decompiler, `<name>-<tier>.json`. Each file lists every
 program with one letter per profile (`p` pass, `w` wrong output, `c` doesn't recompile,
@@ -149,6 +152,9 @@ the browser and never uploaded. The viewer puts every result in one of three sta
 - **unverified**: anything else that parses. A result someone edited by hand while keeping
   it consistent also lands here. Without a server there's nothing to sign with, so only
   official results are proof.
+
+When the suite changes, the old suite's results move into a directory named after it
+(`site/results/rosetta-1/`). They stay verified, and the leaderboard can still switch to them.
 
 To publish an official result, copy it into `site/results/` and run `site/build-index.sh`
 (it needs `jq`). The Pages workflow refuses to deploy if the index is stale. To preview
