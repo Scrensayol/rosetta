@@ -211,15 +211,60 @@ prints what it would have sent.
 
 ## Results
 
-> rosetta-2 reruns are landing on [the website](https://rosetta.wtf/) now, web APIs last.
-> The tables below are still rosetta-1's (35 cases) until they're all in.
-
 The leaderboard and every official `bench` result are on the website,
-[rosetta.wtf](https://rosetta.wtf/). The fuzz and check
-tables below are per-command runs (sunberry 0.5.4), which also compare readability across
+[rosetta.wtf](https://rosetta.wtf/). The `bench` tables come first (suite rosetta-2, 41 cases, run
+2026-11-25 on Luau 0.747). The fuzz and check tables after them are older per-command runs
+(rosetta-1's 35 cases, sunberry 0.5.4), which also compare readability across
 decompilers on the round trips they all passed.
 
-Run on 2026-11-22 (Luau 0.747) with seven decompilers: sunberry 0.5.4 (its new core with `--strict`, and
+**The full tier** (`bench --tier full`: the 41 cases, seeds 1000..2000 and 1000 mutants of the
+cases, 12,240 usable round trips each). Every result file is on [the website](https://rosetta.wtf/),
+with each program's verdict at each profile:
+
+| decompiler | pass | wrong | doesn't recompile | refused | cases | generated | mutants |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| sunberry 0.5.6 (new core) | 12,238 (99.98%) | 0 | 0 | 2 | 246/246 | 5,994/5,994 | 5,998/6,000 |
+| luacid | 12,201 (99.7%) | 37 | 0 | 2 | 244/246 | 5,990/5,994 | 5,967/6,000 |
+| lua.expert | 12,132 (99.1%) | 4 | 0 | 104 | 246/246 | 5,886/5,994 | 6,000/6,000 |
+| Composite | 11,923 (97.4%) | 76 | 0 | 241 | 246/246 | 5,873/5,994 | 5,804/6,000 |
+| Tovek 2.7 | 11,843 (96.8%) | 4 | 0 | 393 | 244/246 | 5,772/5,994 | 5,827/6,000 |
+| Fission 1.0.5-beta | 10,009 (81.8%) | 1,281 | 950 | 0 | 210/246 | 4,426/5,994 | 5,373/6,000 |
+| sunberry (old core) | 8,991 (73.5%) | 2,932 | 317 | 0 | 200/246 | 3,685/5,994 | 5,106/6,000 |
+
+sunberry's two refusals are mutant mut1-606 at O2g1 and O2g2 (`a condition that isn't an
+expression`). The quick tier (846 round trips) has the same order at the top: sunberry and lua.expert
+pass all 846, luacid 843, Composite 834, Tovek 756, Fission 684 and the old core 584.
+
+**The hard tiers** (the same programs with their bytecode rewritten; see [The hard tiers](#the-hard-tiers)).
+x1, x2 and x3 each cover a third of the round trips. hard-full, 12,240 usable round trips each:
+
+| decompiler | pass | x1 | x2 | x3 | wrong | doesn't recompile | refused |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| luacid | 5,613 (45.9%) | 3,726/4,080 | 1,391/4,080 | 496/4,080 | 577 | 5 | 6,045 |
+| lua.expert | 3,852 (31.5%) | 3,722/4,080 | 128/4,080 | 2/4,080 | 1 | 0 | 8,387 |
+| Tovek 2.7 | 3,784 (30.9%) | 3,598/4,080 | 179/4,080 | 7/4,080 | 1 | 0 | 8,455 |
+| Fission 1.0.5-beta | 2,995 (24.5%) | 2,954/4,080 | 25/4,080 | 16/4,080 | 8,442 | 803 | 0 |
+| Composite | 2,919 (23.8%) | 2,145/4,080 | 752/4,080 | 22/4,080 | 722 | 0 | 8,599 |
+| sunberry (old core) | 1,317 (10.8%) | 933/4,080 | 372/4,080 | 12/4,080 | 10,887 | 36 | 0 |
+| sunberry 0.5.6 (new core) | 379 (3.1%) | 372/4,080 | 5/4,080 | 2/4,080 | 2 | 0 | 11,859 |
+
+hard-quick, 846 round trips each:
+
+| decompiler | pass | x1 | x2 | x3 | wrong | doesn't recompile | refused |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| luacid | 344 (40.7%) | 239/282 | 77/282 | 28/282 | 30 | 0 | 472 |
+| lua.expert | 256 (30.3%) | 240/282 | 16/282 | 0/282 | 0 | 0 | 590 |
+| Tovek 2.7 | 223 (26.4%) | 207/282 | 16/282 | 0/282 | 0 | 0 | 623 |
+| Fission 1.0.5-beta | 216 (25.5%) | 203/282 | 7/282 | 6/282 | 579 | 51 | 0 |
+| Composite | 213 (25.2%) | 142/282 | 69/282 | 2/282 | 41 | 0 | 592 |
+| sunberry (old core) | 73 (8.6%) | 54/282 | 17/282 | 2/282 | 770 | 3 | 0 |
+| sunberry 0.5.6 (new core) | 35 (4.1%) | 34/282 | 1/282 | 0/282 | 0 | 0 | 811 |
+
+Nobody passes every x3 round trip. luacid gets the furthest by a long way, but it pays for it in
+wrong output (577 on hard-full), where lua.expert and Tovek mostly refuse what they can't follow.
+sunberry's new core refuses nearly everything past x1: it won't print code it can't prove matches.
+
+The per-command runs were on 2026-11-22 (Luau 0.747), with seven decompilers: sunberry 0.5.4 (its new core with `--strict`, and
 its original core with `--core old`), Tovek 2.7, Fission 1.0.5-beta, and the three web APIs lua.expert,
 Composite and luacid. Fission runs as its own HTTP server on this machine; it and the web APIs go
 through the scripts in [adapters/](adapters), all with default options (Composite with telemetry
@@ -266,24 +311,6 @@ What the wrong ones were:
 lua.expert's refusals are `Provided bytecode is not supported`; Composite's are internal
 errors (`readable HIR preparation introduced a nonstructural node`, `structure recovery could
 not represent every prototype`). luacid and Fission never refuse: they always print something.
-
-**The benchmark's full tier** (`bench --tier full`: the 35 cases, seeds 1000..2000 and 1000 mutants
-of the cases, 12,204 usable round trips each). Every result file is on
-[the website](https://rosetta.wtf/), with each program's verdict at each profile:
-
-| decompiler | pass | wrong | doesn't recompile | refused | cases | generated | mutants |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| sunberry 0.5.6 (new core) | 12,204 (100%) | 0 | 0 | 0 | 210/210 | 5,994/5,994 | 6,000/6,000 |
-| luacid | 12,198 (99.95%) | 6 | 0 | 0 | 210/210 | 5,990/5,994 | 5,998/6,000 |
-| lua.expert | 12,090 (99.1%) | 4 | 0 | 110 | 210/210 | 5,886/5,994 | 5,994/6,000 |
-| Composite | 11,989 (98.2%) | 82 | 0 | 133 | 210/210 | 5,825/5,994 | 5,954/6,000 |
-| Tovek 2.7 | 11,841 (97.0%) | 4 | 0 | 359 | 208/210 | 5,772/5,994 | 5,861/6,000 |
-| Fission | 9,557 (78.3%) | 1,409 | 1,238 | 0 | 183/210 | 4,426/5,994 | 4,948/6,000 |
-| sunberry (old core) | 9,189 (75.3%) | 2,735 | 280 | 0 | 176/210 | 3,685/5,994 | 5,328/6,000 |
-
-luacid's other two wrong ones are mutants mut1-475 and mut1-510 at O2g2, which print a different
-function value than the original: the program printed its second function and the decompiled
-one prints its first. Tovek's refusals are mostly `residual goto/label would be invalid Luau`.
 
 ### How the output reads
 

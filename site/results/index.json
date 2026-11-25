@@ -171,6 +171,29 @@
       "levels": null
     },
     {
+      "file": "luacid-full.json",
+      "sha256": "fa694eba0a379390c0eedbc29f721cd1be2d953883042dae7756e65927ac1771",
+      "decompiler": "luacid",
+      "version": null,
+      "tier": "full",
+      "hash": "7193a5a671859c20",
+      "score": {
+        "passed": 12201,
+        "total": 12240
+      },
+      "totals": {
+        "pass": 12201,
+        "unusable": 6,
+        "refused": 2,
+        "mismatch": 37
+      },
+      "created": "2026-11-25T18:18:29Z",
+      "seconds": 13078.78,
+      "web": true,
+      "archived": false,
+      "levels": null
+    },
+    {
       "file": "lua-expert-full.json",
       "sha256": "b14ee35530f1ed0a51529365b909c9138af8deebf4f4639b7a00877338784cfb",
       "decompiler": "lua.expert",
@@ -286,6 +309,114 @@
       "levels": null
     },
     {
+      "file": "luacid-hard-full.json",
+      "sha256": "0d5e03368da4425d3136e44e545b4e8da8ee411fbddd0019bed3741c2f972acb",
+      "decompiler": "luacid",
+      "version": null,
+      "tier": "hard-full",
+      "hash": "4280f326d51a106a",
+      "score": {
+        "passed": 5613,
+        "total": 12240
+      },
+      "totals": {
+        "pass": 5613,
+        "unusable": 6,
+        "refused": 6045,
+        "recompile_failed": 5,
+        "mismatch": 577
+      },
+      "created": "2026-11-25T22:21:58Z",
+      "seconds": 13619.25,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 4080,
+          "passed": 3726
+        },
+        "2": {
+          "total": 4080,
+          "passed": 1391
+        },
+        "3": {
+          "total": 4080,
+          "passed": 496
+        }
+      }
+    },
+    {
+      "file": "luacid-hard-quick.json",
+      "sha256": "7baea7b906aea2e60d0f2c75e2882c2b8b5acd093fb756b79334ea43cc859826",
+      "decompiler": "luacid",
+      "version": null,
+      "tier": "hard-quick",
+      "hash": "f6bbc849d6126c23",
+      "score": {
+        "passed": 344,
+        "total": 846
+      },
+      "totals": {
+        "pass": 344,
+        "refused": 472,
+        "mismatch": 30
+      },
+      "created": "2026-11-25T18:34:55Z",
+      "seconds": 969.77,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 282,
+          "passed": 239
+        },
+        "2": {
+          "total": 282,
+          "passed": 77
+        },
+        "3": {
+          "total": 282,
+          "passed": 28
+        }
+      }
+    },
+    {
+      "file": "lua-expert-hard-full.json",
+      "sha256": "1b71bd3bced4ae2b1f6ce6898099e078bd8a09dab9e97f1ebcead87853f642de",
+      "decompiler": "lua.expert",
+      "version": null,
+      "tier": "hard-full",
+      "hash": "4280f326d51a106a",
+      "score": {
+        "passed": 3852,
+        "total": 12240
+      },
+      "totals": {
+        "pass": 3852,
+        "unusable": 6,
+        "refused": 8387,
+        "mismatch": 1
+      },
+      "created": "2026-11-25T17:33:43Z",
+      "seconds": 4499.78,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 4080,
+          "passed": 3722
+        },
+        "2": {
+          "total": 4080,
+          "passed": 128
+        },
+        "3": {
+          "total": 4080,
+          "passed": 2
+        }
+      }
+    },
+    {
       "file": "tovek-hard-full.json",
       "sha256": "3778f5e6217c3c7cab91e88ef5457db17efa4732028cc090f5b3440914109bd4",
       "decompiler": "tovek",
@@ -318,6 +449,40 @@
         "3": {
           "total": 4080,
           "passed": 7
+        }
+      }
+    },
+    {
+      "file": "lua-expert-hard-quick.json",
+      "sha256": "af6835c728ba245e34c0ff18a1e77ea48b0e315b173f35d5b410c2e28bd673e0",
+      "decompiler": "lua.expert",
+      "version": null,
+      "tier": "hard-quick",
+      "hash": "f6bbc849d6126c23",
+      "score": {
+        "passed": 256,
+        "total": 846
+      },
+      "totals": {
+        "pass": 256,
+        "refused": 590
+      },
+      "created": "2026-11-25T16:18:39Z",
+      "seconds": 367.11,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 282,
+          "passed": 240
+        },
+        "2": {
+          "total": 282,
+          "passed": 16
+        },
+        "3": {
+          "total": 282,
+          "passed": 0
         }
       }
     },
@@ -391,6 +556,41 @@
       }
     },
     {
+      "file": "composite-hard-quick.json",
+      "sha256": "5749311f8354af3ab4bfdc94a7e67cd1f12aac848378a163fc0c4b362303b2e6",
+      "decompiler": "composite",
+      "version": null,
+      "tier": "hard-quick",
+      "hash": "f6bbc849d6126c23",
+      "score": {
+        "passed": 213,
+        "total": 846
+      },
+      "totals": {
+        "pass": 213,
+        "refused": 592,
+        "mismatch": 41
+      },
+      "created": "2026-11-25T16:21:09Z",
+      "seconds": 514.8,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 282,
+          "passed": 142
+        },
+        "2": {
+          "total": 282,
+          "passed": 69
+        },
+        "3": {
+          "total": 282,
+          "passed": 2
+        }
+      }
+    },
+    {
       "file": "fission-hard-full.json",
       "sha256": "40e4d7417073b125ece58e84402ac8ca8273eebc6c3aff33ebefc684f471ce2e",
       "decompiler": "fission",
@@ -423,6 +623,42 @@
         "3": {
           "total": 4080,
           "passed": 16
+        }
+      }
+    },
+    {
+      "file": "composite-hard-full.json",
+      "sha256": "10cf56fe1e4cf247c8582622bf6ae6229bfc0dacc2137ec789fc3d32b55a2980",
+      "decompiler": "composite",
+      "version": null,
+      "tier": "hard-full",
+      "hash": "4280f326d51a106a",
+      "score": {
+        "passed": 2919,
+        "total": 12240
+      },
+      "totals": {
+        "pass": 2919,
+        "unusable": 6,
+        "refused": 8599,
+        "mismatch": 722
+      },
+      "created": "2026-11-25T17:50:52Z",
+      "seconds": 5379.46,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 4080,
+          "passed": 2145
+        },
+        "2": {
+          "total": 4080,
+          "passed": 752
+        },
+        "3": {
+          "total": 4080,
+          "passed": 22
         }
       }
     },
@@ -893,25 +1129,6 @@
         }
       }
     },
-    "eb2e66b08f531f01": {
-      "name": "rosetta-2",
-      "tier": "quick",
-      "profiles": 6,
-      "sections": {
-        "cases": {
-          "count": 41,
-          "names": "ededa3b9f7ce28dc81aa2ef16478dba5937801ff54eb133000bd55c1d73f2413"
-        },
-        "generated": {
-          "count": 50,
-          "names": "fbe4fb3b6f5bc20615b14940a817edd91c01dbd1439a4fc00da7bc62dd587c0c"
-        },
-        "mutants": {
-          "count": 50,
-          "names": "cb9d916a4194608ab649c11a8fbe6e5924c21ee29e7b4ff1b082f8c9567812f0"
-        }
-      }
-    },
     "4280f326d51a106a": {
       "name": "rosetta-2",
       "tier": "hard-full",
@@ -934,6 +1151,25 @@
     "f6bbc849d6126c23": {
       "name": "rosetta-2",
       "tier": "hard-quick",
+      "profiles": 6,
+      "sections": {
+        "cases": {
+          "count": 41,
+          "names": "ededa3b9f7ce28dc81aa2ef16478dba5937801ff54eb133000bd55c1d73f2413"
+        },
+        "generated": {
+          "count": 50,
+          "names": "fbe4fb3b6f5bc20615b14940a817edd91c01dbd1439a4fc00da7bc62dd587c0c"
+        },
+        "mutants": {
+          "count": 50,
+          "names": "cb9d916a4194608ab649c11a8fbe6e5924c21ee29e7b4ff1b082f8c9567812f0"
+        }
+      }
+    },
+    "eb2e66b08f531f01": {
+      "name": "rosetta-2",
+      "tier": "quick",
       "profiles": 6,
       "sections": {
         "cases": {
