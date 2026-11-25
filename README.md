@@ -195,6 +195,9 @@ prints what it would have sent.
 
 ## Results
 
+> rosetta-2 reruns are landing on [the website](https://scrensayol.github.io/rosetta/) now, web APIs last.
+> The tables below are still rosetta-1's (35 cases) until they're all in.
+
 The leaderboard and every official `bench` result are on the website,
 [scrensayol.github.io/rosetta](https://scrensayol.github.io/rosetta/). The fuzz and check
 tables below are per-command runs (sunberry 0.5.4), which also compare readability across
