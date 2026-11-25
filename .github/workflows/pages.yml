@@ -32,6 +32,11 @@ jobs:
           jq -S . site/results/index.json >"$RUNNER_TEMP/committed.json"
           sh site/build-index.sh
           diff <(jq -S . site/results/index.json) "$RUNNER_TEMP/committed.json"
+      # a new deploy's scripts and styles get new URLs, so no cache in front of the site (Cloudflare,
+      # browsers) serves the old ones with the new pages
+      - name: Stamp asset URLs with the commit
+        shell: bash
+        run: sed -i -E "s#(assets/[a-z]+\.(js|css))\"#\1?v=${GITHUB_SHA::7}\"#g" site/*.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
