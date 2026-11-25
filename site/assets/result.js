@@ -104,7 +104,7 @@ function sidePanel(data, check, bytes, source) {
 	const p = pct(data.score);
 	const failed = failures(data.totals);
 	const refused = data.totals.refused || 0;
-	const [title, text] = VERIFY_TEXT[check.state];
+	const [title, text] = check.signed ? ["verified test result", "an official run, signed with rosetta's key: byte for byte what the bench wrote."] : VERIFY_TEXT[check.state];
 	const glyph = { verified: icon("check", 'style="fill:var(--accent)"'), unverified: icon("bang", 'style="fill:var(--state-warn)"'), spoofed: icon("warn", 'style="fill:var(--state-error)"') }[check.state];
 	const problems = check.problems.length ? `<ul class="keep">${check.problems.slice(0, 6).map(p => `<li>${esc(p)}</li>`).join("")}</ul>` : "";
 	const unknown = check.unknownSuite ? `<ul><li>its suite (${esc(data.suite?.hash)}) isn't one the site knows</li></ul>` : "";

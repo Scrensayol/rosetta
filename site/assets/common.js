@@ -182,8 +182,29 @@ function failures(totals) {
 	return (totals.mismatch || 0) + (totals.recompile_failed || 0) + (totals.decompile_failed || 0);
 }
 
+// The public half of the key official runs are signed with (bench --sign). A signed file carries
+// its signature as a last "signature" field, over the file as it was before that field went in
+const SIGNING_KEY = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJdKhnv4wR4WkYO+v8ldOR0I8M3a0ljdyko0wxQnaksJ1mC1aXJCyI2/k/iv6rT8GcGz6s+18Xn2XCzdFDxUnIw==";
+
+// true: signed with that key and not changed since; false: it says it's signed, but isn't (or
+// was changed after); null: not signed
+async function signature(bytes) {
+	const text = new TextDecoder().decode(bytes);
+	const m = /,"signature":"([A-Za-z0-9+/=]+)"\}\n?$/.exec(text);
+	if (!m) return text.includes('"signature":') ? false : null;
+	if (!crypto.subtle) return null;
+	const raw = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+	try {
+		const key = await crypto.subtle.importKey("spki", raw(SIGNING_KEY), { name: "ECDSA", namedCurve: "P-256" }, false, ["verify"]);
+		const message = new TextEncoder().encode(text.slice(0, m.index) + "}\n");
+		return await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, key, raw(m[1]), message);
+	} catch {
+		return false;
+	}
+}
+
 // Is the file what it says it is? Verified: byte for byte an official run listed in
-// results/index.json. Spoofed: its own numbers don't add up, or it claims a known suite but has
+// results/index.json, or signed with the key above. Spoofed: its own numbers don't add up, or it claims a known suite but has
 // different programs. Unverified: everything else that parses
 async function verify(bytes, data) {
 	const index = await officialResults();
@@ -191,6 +212,9 @@ async function verify(bytes, data) {
 	const hash = await sha256(bytes);
 	const official = hash && index.results.find(r => r.sha256 === hash);
 	if (official) return { state: "verified", official, problems };
+	const signed = await signature(bytes);
+	if (signed) return { state: "verified", signed: true, problems };
+	if (signed === false) problems.push("its signature doesn't match: it was changed after it was signed, or never signed by rosetta");
 
 	if (data.format !== "rosetta-result") problems.push("not a rosetta result file");
 	if (data.schema !== 1) problems.push(`unknown schema ${data.schema}`);

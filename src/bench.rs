@@ -407,7 +407,7 @@ fn first_line(detail: &str) -> String {
     if line.len() > 240 { format!("{}...", &line[..line.floor_char_boundary(240)]) } else { line.to_string() }
 }
 
-pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload: bool) -> ExitCode {
+pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload: bool, sign_results: bool) -> ExitCode {
     if specs.is_empty() {
         eprintln!("give at least one --decompiler name=command");
         return ExitCode::from(2);
@@ -530,6 +530,9 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
             parts.join(", "),
             path.display()
         );
+        if sign_results && let Err(e) = sign(&path) {
+            eprintln!("  couldn't sign {}: {e}", path.display());
+        }
         if upload {
             match share(&path, &format!("rosetta {} {name} {}", SUITE, tier.name())) {
                 Ok(link) => println!("  shared: {link}"),
@@ -541,6 +544,81 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
 }
 
 const SITE: &str = "https://scrensayol.github.io/rosetta/";
+
+// The private half of the key the website checks signed results with. It never goes in the repo:
+// ROSETTA_SIGNING_KEY names it, or it's ~/.config/rosetta/signing-key.pem
+fn signing_key() -> PathBuf {
+    std::env::var_os("ROSETTA_SIGNING_KEY").map(PathBuf::from).unwrap_or_else(|| {
+        PathBuf::from(std::env::var_os("HOME").unwrap_or_default()).join(".config/rosetta/signing-key.pem")
+    })
+}
+
+// Signs a result file in place: an ECDSA P-256 signature (SHA-256, r and s as 64 raw bytes, the
+// form the browser's WebCrypto checks) over the file exactly as bench wrote it, added as a last
+// "signature" field. The viewer takes that field back off and checks the rest. Needs openssl
+pub fn sign(path: &Path) -> Result<(), String> {
+    let bytes = fs::read(path).map_err(|e| e.to_string())?;
+    let text = String::from_utf8(bytes.clone()).map_err(|_| "not UTF-8")?;
+    if text.contains("\"signature\":") {
+        return Err("already signed".into());
+    }
+    let Some(body) = text.strip_suffix("}\n") else { return Err("doesn't end the way bench writes a result".into()) };
+    let key = signing_key();
+    if !key.exists() {
+        return Err(format!("no signing key at {}", key.display()));
+    }
+    let mut child = std::process::Command::new("openssl")
+        .args(["dgst", "-sha256", "-binary", "-sign"])
+        .arg(&key)
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("openssl: {e}"))?;
+    use std::io::Write;
+    child.stdin.take().unwrap().write_all(&bytes).map_err(|e| e.to_string())?;
+    let out = child.wait_with_output().map_err(|e| e.to_string())?;
+    if !out.status.success() {
+        return Err(String::from_utf8_lossy(&out.stderr).trim().to_string());
+    }
+    let raw = der_to_raw(&out.stdout).ok_or("openssl's signature isn't the DER openssl writes")?;
+    fs::write(path, format!("{body},\"signature\":\"{}\"}}\n", base64(&raw))).map_err(|e| e.to_string())
+}
+
+// DER's SEQUENCE { INTEGER r, INTEGER s } as r and s, 32 bytes each
+fn der_to_raw(der: &[u8]) -> Option<[u8; 64]> {
+    let mut at = 2;
+    if der.first() != Some(&0x30) {
+        return None;
+    }
+    let mut out = [0u8; 64];
+    for half in 0..2 {
+        if der.get(at) != Some(&0x02) {
+            return None;
+        }
+        let len = *der.get(at + 1)? as usize;
+        let int = der.get(at + 2..at + 2 + len)?;
+        let int = &int[int.iter().position(|&b| b != 0).unwrap_or(int.len())..];
+        if int.len() > 32 {
+            return None;
+        }
+        out[half * 32 + 32 - int.len()..half * 32 + 32].copy_from_slice(int);
+        at += 2 + len;
+    }
+    Some(out)
+}
+
+fn base64(bytes: &[u8]) -> String {
+    const A: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let mut s = String::new();
+    for chunk in bytes.chunks(3) {
+        let n = (chunk[0] as u32) << 16 | (*chunk.get(1).unwrap_or(&0) as u32) << 8 | *chunk.get(2).unwrap_or(&0) as u32;
+        for k in 0..4 {
+            s.push(if k <= chunk.len() { A[(n >> (18 - 6 * k) & 63) as usize] as char } else { '=' });
+        }
+    }
+    s
+}
 
 // Uploads a result to Rubiš (https://rubis.app), a paste service with an open API, as a public
 // scrap, and returns a link that opens it in the website's viewer. Sharing, not verification:

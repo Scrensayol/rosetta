@@ -181,6 +181,12 @@ the browser and never uploaded. The viewer puts every result in one of three sta
   it consistent also lands here. Without a server there's nothing to sign with, so only
   official results are proof.
 
+Official runs can also be signed: `bench --sign` (or `rosetta sign FILE`) adds an ECDSA P-256
+signature over the file as bench wrote it, with a private key that never leaves the machine of
+whoever runs the official results. The site has the public half, and the viewer checks the
+signature in the browser, so a signed result shows as verified wherever it's opened from (a
+Rubiš link, a download) and changing a single byte of it breaks that.
+
 To share a result that isn't official, `bench --upload` (or the viewer's "upload & copy link"
 button) puts it on [Rubiš](https://rubis.app), a paste service with an open API, as a public
 scrap, and gives a link that opens it in the viewer (`result.html?rubis=<id>`). That's sharing,

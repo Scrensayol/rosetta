@@ -104,7 +104,14 @@ enum Command {
         /// website's result viewer. Needs curl
         #[arg(long)]
         upload: bool,
+        /// Sign each result with the key at ROSETTA_SIGNING_KEY (or ~/.config/rosetta/signing-key.pem),
+        /// so the website shows it as verified wherever it's opened from. Only for whoever holds
+        /// the key the website trusts. Needs openssl
+        #[arg(long)]
+        sign: bool,
     },
+    /// Sign result files in place, as bench --sign does
+    Sign { files: Vec<PathBuf> },
     /// Check the transform tier without a decompiler: every program's bytecode reads and writes
     /// back byte for byte, and rewritten at every level still prints what it printed
     TransformCheck {
@@ -195,7 +202,20 @@ fn main() -> ExitCode {
     }
 
     match Cli::parse().command {
-        Command::Bench { decompilers, tier, versions, out, upload } => bench::run(&decompilers, tier, &versions, &out, upload),
+        Command::Bench { decompilers, tier, versions, out, upload, sign } => bench::run(&decompilers, tier, &versions, &out, upload, sign),
+        Command::Sign { files } => {
+            let mut failed = false;
+            for f in &files {
+                match bench::sign(f) {
+                    Ok(()) => println!("signed {}", f.display()),
+                    Err(e) => {
+                        eprintln!("{}: {e}", f.display());
+                        failed = true;
+                    }
+                }
+            }
+            if failed { ExitCode::FAILURE } else { ExitCode::SUCCESS }
+        }
         Command::Gen { seed, grammar } => {
             print!("{}", generator::generate(seed, grammar).render());
             ExitCode::SUCCESS
