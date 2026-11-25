@@ -131,6 +131,24 @@ function sidePanel(data, check, bytes, source) {
 	const bars = data.sections.map(s => `
 		<div><div class="bar-label"><span>${esc(s.title)}</span><span>${s.score.passed} / ${s.score.total}</span></div>
 		<div class="track2"><i data-w="${pct(s.score)}%"></i></div></div>`).join("");
+	// the hard tier: how the rewritten bytecode went at each transform level
+	const LEVEL = { 1: "registers, no-ops, junk", 2: "+ blocks, swaps", 3: "+ fake branches" };
+	const levelOf = data.profiles.map(p => Number(/\+x(\d)/.exec(p)?.[1] || 0));
+	let levelCard = "";
+	if (levelOf.some(l => l)) {
+		const by = {};
+		for (const s of data.sections) for (const t of s.tests) [...t.results].forEach((v, j) => {
+			const l = levelOf[j];
+			if (!l || v === "u") return;
+			by[l] ??= { passed: 0, total: 0 };
+			by[l].total++;
+			if (v === "p") by[l].passed++;
+		});
+		levelCard = `<div class="card"><h4>by transform level</h4><div class="bars">${Object.keys(by).sort().map(l => `
+			<div><div class="bar-label"><span>x${l} · ${esc(LEVEL[l] || "")}</span><span>${by[l].passed} / ${by[l].total}</span></div>
+			<div class="track2"><i data-w="${pct(by[l])}%"></i></div></div>`).join("")}</div>
+			<p class="note">the bytecode each decompiler got was rewritten to do exactly the same thing at these levels: see the readme's hard tier.</p></div>`;
+	}
 	const shareable = check.state !== "verified" && "CompressionStream" in self;
 	return `
 		<div class="card edge ${check.state}">
@@ -154,6 +172,7 @@ function sidePanel(data, check, bytes, source) {
 			</div>
 			<p class="note">each tile's bars are its profiles: <span class="keep">${data.profiles.map(esc).join(", ")}</span>.</p>
 		</div>
+		${levelCard}
 		${quality}
 		<button class="btn" data-download>${icon("download")}download json</button>
 		${shareable ? `<button class="btn" data-share>${icon("link")}copy share link</button>` : ""}

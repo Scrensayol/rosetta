@@ -147,7 +147,7 @@ into quick or full. It runs quick's programs at the six profiles, each paired wi
 | level | what changes |
 | --- | --- |
 | x1 | registers past the parameters shifted up, so locals don't start right after them; no-op instructions and jumps to the next instruction; unreachable junk after every instruction that never falls through |
-| x2 | and basic blocks laid out in a shuffled order, glued with jumps, with insertions also between a call whose results run to the top of the stack and the instruction that takes them. Local debug info goes, since its ranges no longer mean anything |
+| x2 | and registers renumbered in a shuffled order (keeping what calls, loops and CLOSEUPVALS need), instructions swapped for others that do the same (JUMPX for JUMP, an inverted test over a JUMP, AND or OR of a register with itself for MOVE, LOADK for LOADN / LOADNIL / LOADB, a constant loaded into a register for arithmetic with it, GETGLOBAL and GETTABLEKS for GETIMPORT), basic blocks laid out in a shuffled order and glued with jumps, and insertions also between a call whose results run to the top of the stack and the instruction that takes them. Local debug info goes, since its ranges no longer mean anything |
 | x3 | and branches that always go one way guard junk (a register loaded with a boolean, or `b <= a * a` worked out at run time), functions are shuffled in the chunk, and upvalue names go |
 
 Every rewrite is seeded by the program's own bytecode, so every decompiler gets the same bytes.

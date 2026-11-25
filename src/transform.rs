@@ -403,51 +403,266 @@ fn reg_fields(i: &Ins) -> (Vec<u32>, Vec<u32>, Option<(u8, i32)>) {
     (main, aux, range)
 }
 
-// moves every register past the parameters up by k
-fn shift_registers(ins: &mut [Ins], p: &mut Proto, k: u8) -> bool {
-    let np = p.num_params;
-    if k == 0 || p.max_stack as u32 + k as u32 > 240 {
-        return false;
-    }
-    // a run that starts among the parameters and reaches past them can't come apart
-    for i in ins.iter() {
-        if let (_, _, Some((start, count))) = reg_fields(i)
-            && start < np
-            && (count < 0 || start as i32 + count > np as i32)
-        {
-            return false;
-        }
-    }
+// whether every run of registers an instruction reaches stays clear of the parameters, which
+// can't move: a run that starts among them and reaches past them can't come apart
+fn runs_clear_params(ins: &[Ins], np: u8) -> bool {
+    ins.iter().all(|i| match reg_fields(i) {
+        (_, _, Some((start, count))) => start >= np || (count >= 0 && start as i32 + count <= np as i32),
+        _ => true,
+    })
+}
+
+// renames every register through map (parameters always map to themselves)
+fn remap_registers(ins: &mut [Ins], p: &mut Proto, map: &[u8]) {
     for i in ins.iter_mut() {
         let (main, aux, _) = reg_fields(i);
         for s in main {
             let r = (i.word >> s) as u8;
-            if r >= np {
-                i.word = (i.word & !(0xff << s)) | ((r + k) as u32) << s;
-            }
+            i.word = (i.word & !(0xff << s)) | (map[r as usize] as u32) << s;
         }
         if let Some(mut x) = i.aux {
             for s in aux {
                 let r = (x >> s) as u8;
-                if r >= np {
-                    x = (x & !(0xff << s)) | ((r + k) as u32) << s;
-                }
+                x = (x & !(0xff << s)) | (map[r as usize] as u32) << s;
             }
             i.aux = Some(x);
         }
     }
-    p.max_stack += k;
     if let Some(d) = &mut p.debug {
-        for l in d.locals.iter_mut().filter(|l| l.reg >= np) {
-            l.reg += k;
+        for l in &mut d.locals {
+            l.reg = map[l.reg as usize];
         }
     }
     if let Some(t) = &mut p.types {
-        for l in t.locals.iter_mut().filter(|l| l.reg >= np) {
-            l.reg += k;
+        for l in &mut t.locals {
+            l.reg = map[l.reg as usize];
         }
     }
+}
+
+// moves every register past the parameters up by k
+fn shift_registers(ins: &mut [Ins], p: &mut Proto, k: u8) -> bool {
+    let np = p.num_params;
+    if k == 0 || p.max_stack as u32 + k as u32 > 240 || !runs_clear_params(ins, np) {
+        return false;
+    }
+    let map = (0..=255u32).map(|r| if (r as u8) < np { r as u8 } else { (r + k as u32).min(255) as u8 }).collect::<Vec<_>>();
+    remap_registers(ins, p, &map);
+    p.max_stack += k;
     true
+}
+
+// Renumbers the registers past the parameters in a shuffled order, so locals no longer sit in
+// the order they were declared. What has to hold still does: a run of registers an instruction
+// reaches (call arguments, results, loop state, a concatenation) moves as one; CLOSEUPVALS A
+// closes everything from A up, and a call overwrites everything from its A up, so nothing
+// crosses either; and from the first register a result list runs to the top from, nothing moves
+fn permute_registers(ins: &mut [Ins], p: &mut Proto, rng: &mut Rng) -> bool {
+    let np = p.num_params as usize;
+    let top = p.max_stack as usize;
+    if top <= np + 1 || !runs_clear_params(ins, np as u8) {
+        return false;
+    }
+    let mut cuts = vec![np, top];
+    let mut runs = Vec::new();
+    let mut fixed_from = top;
+    for i in ins.iter() {
+        // CLOSEUPVALS closes from A up; a call's frame (and an iterator's, a concatenation's
+        // metamethod's) overwrites everything above its first register: nothing live may cross
+        // either
+        if matches!(i.op, 11 | op::CALL | op::FORGLOOP | op::FORGPREP | op::FORGPREP_INEXT | op::FORGPREP_NEXT) {
+            cuts.push(i.a() as usize);
+        }
+        if i.op == op::CONCAT {
+            cuts.push(i.b() as usize);
+        }
+        if let (_, _, Some((start, count))) = reg_fields(i) {
+            let start = start as usize;
+            if count < 0 {
+                fixed_from = fixed_from.min(start);
+            } else if count > 1 {
+                runs.push((start, (start + count as usize).min(top)));
+            }
+        }
+    }
+    cuts.push(fixed_from);
+    cuts.retain(|&c| c >= np && c <= top);
+    cuts.sort_unstable();
+    cuts.dedup();
+    // a run across a cut would have to come apart
+    if runs.iter().any(|&(s, e)| cuts.iter().any(|&c| c > s && c < e)) {
+        return false;
+    }
+    let mut map = (0..=255u8).collect::<Vec<_>>();
+    for w in cuts.windows(2) {
+        let (lo, hi) = (w[0], w[1]);
+        if lo >= fixed_from || hi - lo < 2 {
+            continue;
+        }
+        // units: runs merged where they overlap, and every other register on its own
+        let mut spans = runs.iter().copied().filter(|&(s, _)| s >= lo && s < hi).collect::<Vec<_>>();
+        spans.sort_unstable();
+        let mut merged: Vec<(usize, usize)> = Vec::new();
+        for (s, e) in spans {
+            match merged.last_mut() {
+                Some(last) if s < last.1 => last.1 = last.1.max(e),
+                _ => merged.push((s, e)),
+            }
+        }
+        let mut units: Vec<Vec<usize>> = Vec::new();
+        let mut r = lo;
+        let mut m = merged.iter().peekable();
+        while r < hi {
+            match m.peek() {
+                Some(&&(s, e)) if s == r => {
+                    units.push((s..e.min(hi)).collect());
+                    r = e.min(hi);
+                    m.next();
+                }
+                _ => {
+                    units.push(vec![r]);
+                    r += 1;
+                }
+            }
+        }
+        for k in (1..units.len()).rev() {
+            units.swap(k, rng.below(k + 1));
+        }
+        let mut next = lo;
+        for u in &units {
+            for &r in u {
+                map[r] = next as u8;
+                next += 1;
+            }
+        }
+    }
+    if std::env::var_os("ROSETTA_TRACE_TRANSFORM").is_some() {
+        eprintln!("permute np={np} top={top} cuts={cuts:?} runs={runs:?} map={:?}", &map[..top]);
+    }
+    remap_registers(ins, p, &map);
+    true
+}
+
+// the index of constant c, added if it isn't there, for LOADK (which takes up to 32767)
+fn constant(p: &mut Proto, c: Constant) -> Option<u16> {
+    let k = match p.constants.iter().position(|x| *x == c) {
+        Some(k) => k,
+        None => {
+            p.constants.push(c);
+            p.constants.len() - 1
+        }
+    };
+    (k < 32768).then_some(k as u16)
+}
+
+// Swaps instructions for others that do the same: JUMP for JUMPX, a conditional jump for its
+// opposite over a JUMP, MOVE for AND or OR of a register with itself, LOADN, LOADNIL and LOADB
+// for LOADK, arithmetic with a constant (but x ^ k) for LOADK into a scratch register and the
+// register form, and GETIMPORT for GETGLOBAL and a GETTABLEKS per name
+fn substitute(ins: Vec<Ins>, p: &mut Proto, rng: &mut Rng, scratch: Option<u8>) -> Vec<Ins> {
+    let s = spots(&ins);
+    let mut picks = Vec::with_capacity(ins.len());
+    for k in 0..ins.len() {
+        picks.push(s.plain[k] && rng.chance(35));
+    }
+    let mut r = Rng::new(rng.next());
+    let num = |n: f64| Constant::Number(n.to_bits());
+    replace(ins, |k, i| {
+        if !picks[k] {
+            return None;
+        }
+        let line = i.lines.0;
+        let (a, b, c) = (i.a(), i.b(), i.c());
+        match i.op {
+            op::JUMP => Some(vec![Ins { target: i.target, ..Ins::new(op::JUMPX, 0, 0, 0, line) }]),
+            op::JUMPIF | op::JUMPIFNOT => {
+                let flip = if i.op == op::JUMPIF { op::JUMPIFNOT } else { op::JUMPIF };
+                Some(vec![Ins::local_jump(flip, a, 2, line), Ins { target: i.target, ..Ins::new(op::JUMP, 0, 0, 0, line) }])
+            }
+            op::MOVE => Some(vec![Ins::new(if r.chance(50) { 45 } else { 46 }, a, b, b, line)]),
+            op::LOADN => {
+                let d = ((i.word as i32) >> 16) as f64;
+                constant(p, num(d)).map(|k| vec![Ins::ad(op::LOADK, a, k as i16, line)])
+            }
+            op::LOADNIL => constant(p, Constant::Nil).map(|k| vec![Ins::ad(op::LOADK, a, k as i16, line)]),
+            op::LOADB if c == 0 => constant(p, Constant::Boolean(b)).map(|k| vec![Ins::ad(op::LOADK, a, k as i16, line)]),
+            // ADDK..MODK, IDIVK: R(A) = R(B) op K(C). Not POWK: with a constant 2 or 3 the VM
+            // multiplies (x * x * x), where POW calls pow(), and the last digits differ
+            39..=43 | op::IDIVK if s.writes[k] => {
+                let sc = scratch?;
+                let reg_op = if i.op == op::IDIVK { op::IDIV } else { i.op - 6 };
+                Some(vec![Ins::ad(op::LOADK, sc, c as i16, line), Ins::new(reg_op, a, b, sc, line)])
+            }
+            // SUBRK, DIVRK: R(A) = K(B) op R(C)
+            op::SUBRK | op::DIVRK if s.writes[k] => {
+                let sc = scratch?;
+                let reg_op = if i.op == op::SUBRK { op::SUB } else { 36 };
+                Some(vec![Ins::ad(op::LOADK, sc, b as i16, line), Ins::new(reg_op, a, sc, c, line)])
+            }
+            // GETIMPORT A, D, aux: up to three names, each a string constant
+            12 => {
+                let id = i.aux?;
+                let count = (id >> 30) as usize;
+                let names = (0..count).map(|j| (id >> (20 - 10 * j)) & 1023).collect::<Vec<_>>();
+                if names.iter().any(|&n| !matches!(p.constants.get(n as usize), Some(Constant::String(_)))) {
+                    return None;
+                }
+                let mut out = vec![Ins { aux: Some(names[0]), ..Ins::new(7, a, 0, 0, line) }];
+                for &n in &names[1..] {
+                    out.push(Ins { aux: Some(n), ..Ins::new(15, a, a, 0, line) });
+                }
+                Some(out)
+            }
+            _ => None,
+        }
+    })
+}
+
+// Replaces instruction k with make(k) where that returns Some. The replacement's first
+// instruction takes k's place (jumps to k land on it, and it's k for the debug info); in it,
+// local targets index the replacement, its length meaning the instruction after k
+fn replace(ins: Vec<Ins>, mut make: impl FnMut(usize, &Ins) -> Option<Vec<Ins>>) -> Vec<Ins> {
+    enum Fix {
+        Orig(usize),
+        At(usize),
+    }
+    let n = ins.len();
+    let mut out = Vec::with_capacity(n + n / 4);
+    let mut fixes = Vec::new();
+    let mut index = vec![0; n + 1];
+    for (k, i) in ins.into_iter().enumerate() {
+        index[k] = out.len();
+        match make(k, &i) {
+            Some(block) if !block.is_empty() => {
+                let (start, len) = (out.len(), block.len());
+                for (j, mut b) in block.into_iter().enumerate() {
+                    if j == 0 {
+                        b.orig = i.orig;
+                    }
+                    if let Some(l) = b.local.take() {
+                        fixes.push((out.len(), if l >= len { Fix::Orig(k + 1) } else { Fix::At(start + l) }));
+                    } else if let Some(t) = b.target {
+                        fixes.push((out.len(), Fix::Orig(t)));
+                    }
+                    out.push(b);
+                }
+            }
+            _ => {
+                if let Some(t) = i.target {
+                    fixes.push((out.len(), Fix::Orig(t)));
+                }
+                out.push(i);
+            }
+        }
+    }
+    index[n] = out.len();
+    for (at, fix) in fixes {
+        out[at].target = Some(match fix {
+            Fix::Orig(t) => index[t],
+            Fix::At(p) => p,
+        });
+    }
+    out
 }
 
 // Splits the code into basic blocks and lays them out in a shuffled order, glued with jumps
@@ -521,15 +736,35 @@ fn off(piece: &str) -> bool {
 
 fn transform_proto(p: &mut Proto, rng: &mut Rng, level: u8) -> Result<(), String> {
     let Func { mut ins, starts, size } = decode(p)?;
-    // constants LOADK may load: nil, booleans, numbers, strings and vectors
-    let consts = p.constants.iter().enumerate().filter(|(k, c)| *k < 32768 && matches!(c, Constant::Nil | Constant::Boolean(_) | Constant::Number(_) | Constant::String(_) | Constant::Vector(_))).map(|(k, _)| k).collect::<Vec<_>>();
+    // constants LOADK may load: nil, booleans, numbers, strings and vectors (worked out after
+    // substitution, which may add some)
+    let consts_of = |p: &Proto| p.constants.iter().enumerate().filter(|(k, c)| *k < 32768 && matches!(c, Constant::Nil | Constant::Boolean(_) | Constant::Number(_) | Constant::String(_) | Constant::Vector(_))).map(|(k, _)| k).collect::<Vec<_>>();
 
-    // level 1: registers up; no-ops, jumps to the next instruction, and junk after the
-    // instructions that never fall through (inside an open result list from level 2)
+    // registers: shuffled from level 2, then shifted up past the parameters
     let shift = rng.range(1, 6) as u8;
+    let mut r = Rng::new(rng.next());
+    if level >= 2 && !off("permute") {
+        permute_registers(&mut ins, p, &mut r);
+    }
     if !off("shift") {
         shift_registers(&mut ins, p, shift);
     }
+    // scratch registers past every other: one for substitutions, two for the always-one-way
+    // branches, apart so a branch inserted between a substitution's two instructions can't
+    // overwrite the value it passes
+    let scratch = (level >= 2 && p.max_stack <= 249).then(|| {
+        p.max_stack += 3;
+        p.max_stack - 3
+    });
+    // instructions swapped for others that do the same, from level 2
+    if level >= 2 && !off("subst") {
+        let mut r = Rng::new(rng.next());
+        ins = substitute(ins, p, &mut r, scratch);
+    }
+    let consts = consts_of(p);
+
+    // level 1: no-ops, jumps to the next instruction, and junk after the instructions that never
+    // fall through (inside an open result list from level 2)
     let regs = p.max_stack;
     let s = spots(&ins);
     let originals = (0..ins.len()).filter(|&k| s.plain[k]).collect::<Vec<_>>();
@@ -554,9 +789,9 @@ fn transform_proto(p: &mut Proto, rng: &mut Rng, level: u8) -> Result<(), String
     // level 3: branches that always go one way guarding junk, testing scratch registers past
     // every other (blocks move at level 2, below)
     if level >= 3 {
-        if p.max_stack <= 250 && !off("branches") {
-            let scratch = p.max_stack;
-            p.max_stack += 2;
+        if let Some(scratch) = scratch.map(|s| s + 1)
+            && !off("branches")
+        {
             let s = spots(&ins);
             let originals = (0..ins.len()).filter(|&k| s.plain[k]).collect::<Vec<_>>();
             let lines = ins.iter().map(|i| i.lines.0).collect::<Vec<_>>();
