@@ -407,7 +407,7 @@ fn first_line(detail: &str) -> String {
     if line.len() > 240 { format!("{}...", &line[..line.floor_char_boundary(240)]) } else { line.to_string() }
 }
 
-pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path) -> ExitCode {
+pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload: bool) -> ExitCode {
     if specs.is_empty() {
         eprintln!("give at least one --decompiler name=command");
         return ExitCode::from(2);
@@ -530,6 +530,34 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path) -> Exi
             parts.join(", "),
             path.display()
         );
+        if upload {
+            match share(&path, &format!("rosetta {} {name} {}", SUITE, tier.name())) {
+                Ok(link) => println!("  shared: {link}"),
+                Err(e) => eprintln!("  couldn't upload {}: {e}", path.display()),
+            }
+        }
     }
     ExitCode::SUCCESS
+}
+
+const SITE: &str = "https://scrensayol.github.io/rosetta/";
+
+// Uploads a result to Rubiš (https://rubis.app), a paste service with an open API, as a public
+// scrap, and returns a link that opens it in the website's viewer. Sharing, not verification:
+// the viewer still checks it against the official results
+fn share(path: &Path, title: &str) -> Result<String, String> {
+    let encoded = title.bytes().map(|b| if b.is_ascii_alphanumeric() || b"-_.".contains(&b) { (b as char).to_string() } else { format!("%{b:02X}") }).collect::<String>();
+    let url = format!("https://api.rubis.app/v2/scrap?public=true&title={encoded}");
+    let output = std::process::Command::new("curl")
+        .args(["-sS", "-m", "60", "-X", "POST", "-H", "Content-Type: text/plain", "--data-binary"])
+        .arg(format!("@{}", path.display()))
+        .arg(&url)
+        .output()
+        .map_err(|e| format!("curl: {e}"))?;
+    if !output.status.success() {
+        return Err(String::from_utf8_lossy(&output.stderr).trim().to_string());
+    }
+    let reply: serde_json::Value = serde_json::from_slice(&output.stdout).map_err(|_| format!("unexpected reply: {}", String::from_utf8_lossy(&output.stdout).chars().take(200).collect::<String>()))?;
+    let id = reply["scrapID"].as_str().filter(|id| !id.is_empty() && id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')).ok_or_else(|| format!("no scrap id in the reply: {reply}"))?;
+    Ok(format!("{SITE}result.html?rubis={id}"))
 }

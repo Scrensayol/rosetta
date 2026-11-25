@@ -1,4 +1,5 @@
-// the result page: a file from results/, a link, or one dropped in
+// the result page: a file from results/, a link, one shared through Rubiš, or one dropped in
+const RUBIS = "https://api.rubis.app/v2";
 "use strict";
 
 nav("test result");
@@ -149,7 +150,7 @@ function sidePanel(data, check, bytes, source) {
 			<div class="track2"><i data-w="${pct(by[l])}%"></i></div></div>`).join("")}</div>
 			<p class="note">the bytecode each decompiler got was rewritten to do exactly the same thing at these levels: see the readme's hard tier.</p></div>`;
 	}
-	const shareable = check.state !== "verified" && "CompressionStream" in self;
+	const shareable = check.state !== "verified" && !params.get("rubis");
 	return `
 		<div class="card edge ${check.state}">
 			<div class="verify ${check.state}">${glyph}<div><h3>${title}</h3><p>${text}</p>${problems}${unknown}</div></div>
@@ -175,7 +176,8 @@ function sidePanel(data, check, bytes, source) {
 		${levelCard}
 		${quality}
 		<button class="btn" data-download>${icon("download")}download json</button>
-		${shareable ? `<button class="btn" data-share>${icon("link")}copy share link</button>` : ""}
+		${shareable ? `<button class="btn" data-share title="uploads this result to rubis.app, where anyone with the link can read it">${icon("link")}<span>upload &amp; copy link</span></button>` : ""}
+		${params.get("rubis") ? `<button class="btn" data-copy>${icon("link")}<span>copy link</span></button>` : ""}
 		<a class="btn" href="result.html">${icon("upload")}view another result</a>`;
 }
 
@@ -209,10 +211,26 @@ async function show(bytes, source) {
 		a.download = source?.file || `${data.decompiler.name}-${data.suite.tier}.json`;
 		a.click();
 	});
+	// sharing uploads the file to Rubiš (public), and only when clicked
 	side.querySelector("[data-share]")?.addEventListener("click", async e => {
-		const url = `${location.origin}${location.pathname}#z=${await pack(bytes)}`;
-		await navigator.clipboard.writeText(url);
-		e.currentTarget.lastChild.textContent = "link copied";
+		const label = e.currentTarget.querySelector("span");
+		label.textContent = "uploading…";
+		try {
+			const title = encodeURIComponent(`rosetta ${data.suite.name} ${data.decompiler.name} ${data.suite.tier}`);
+			const res = await fetch(`${RUBIS}/scrap?public=true&title=${title}`, { method: "POST", headers: { "Content-Type": "text/plain" }, body: bytes });
+			const reply = await res.json();
+			if (!res.ok || !/^[\w-]{1,64}$/.test(reply.scrapID || "")) throw new Error();
+			const url = `${location.origin}${location.pathname}?rubis=${reply.scrapID}`;
+			history.replaceState(null, "", url);
+			await navigator.clipboard.writeText(url);
+			label.textContent = "link copied";
+		} catch {
+			label.textContent = "upload failed, try again";
+		}
+	});
+	side.querySelector("[data-copy]")?.addEventListener("click", async e => {
+		await navigator.clipboard.writeText(location.href);
+		e.currentTarget.querySelector("span").textContent = "link copied";
 	});
 }
 
@@ -223,7 +241,7 @@ async function showPicker(error) {
 			<label class="drop rise" id="drop">
 				${icon("upload")}
 				<h2>drop a result here</h2>
-				<p>the json <span class="keep"><code>rosetta bench</code></span> writes. it's read in your browser and never uploaded.</p>
+				<p>the json <span class="keep"><code>rosetta bench</code></span> writes. it's read in your browser and only uploaded if you share it.</p>
 				${error ? `<p style="color:var(--state-error)">${esc(error)}</p>` : ""}
 				<input type="file" accept=".json,application/json" hidden>
 				<span class="btn accent">choose a file</span>
@@ -256,6 +274,14 @@ async function showPicker(error) {
 async function start() {
 	try {
 		if (location.hash.startsWith("#z=")) return show(await unpack(location.hash.slice(3)), null);
+		// a result shared through Rubiš (rubis.app): fetched from there, checked like any other
+		const rubis = params.get("rubis");
+		if (rubis) {
+			if (!/^[\w-]{1,64}$/.test(rubis)) throw new Error("that isn't a rubiš scrap id");
+			const res = await fetch(`${RUBIS}/scrap/${rubis}/raw`);
+			if (!res.ok) throw new Error(`couldn't load scrap ${rubis} from rubiš (HTTP ${res.status})`);
+			return show(new Uint8Array(await res.arrayBuffer()), { file: `${rubis}.json` });
+		}
 		const r = params.get("r"), url = params.get("url");
 		if (r || url) {
 			// a name, or <suite>/<name> for an archived result: nothing that climbs out of results/

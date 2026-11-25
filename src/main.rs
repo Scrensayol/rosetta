@@ -100,6 +100,10 @@ enum Command {
         /// Directory for the result files
         #[arg(long, default_value = ".")]
         out: PathBuf,
+        /// Also upload each result to Rubiš (rubis.app, public) and print a link to it on the
+        /// website's result viewer. Needs curl
+        #[arg(long)]
+        upload: bool,
     },
     /// Check the transform tier without a decompiler: every program's bytecode reads and writes
     /// back byte for byte, and rewritten at every level still prints what it printed
@@ -191,7 +195,7 @@ fn main() -> ExitCode {
     }
 
     match Cli::parse().command {
-        Command::Bench { decompilers, tier, versions, out } => bench::run(&decompilers, tier, &versions, &out),
+        Command::Bench { decompilers, tier, versions, out, upload } => bench::run(&decompilers, tier, &versions, &out, upload),
         Command::Gen { seed, grammar } => {
             print!("{}", generator::generate(seed, grammar).render());
             ExitCode::SUCCESS

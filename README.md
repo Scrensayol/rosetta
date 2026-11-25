@@ -181,6 +181,12 @@ the browser and never uploaded. The viewer puts every result in one of three sta
   it consistent also lands here. Without a server there's nothing to sign with, so only
   official results are proof.
 
+To share a result that isn't official, `bench --upload` (or the viewer's "upload & copy link"
+button) puts it on [Rubiš](https://rubis.app), a paste service with an open API, as a public
+scrap, and gives a link that opens it in the viewer (`result.html?rubis=<id>`). That's sharing,
+not proof: the viewer still says verified, unverified or spoofed the same way. Nothing is ever
+uploaded unless you ask for it.
+
 When the suite changes, the old suite's results move into a directory named after it
 (`site/results/rosetta-1/`). They stay verified, and the leaderboard can still switch to them.
 
