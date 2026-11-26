@@ -386,7 +386,14 @@ pub fn transform_check(tier: Tier, show: usize, only: Option<&str>) -> ExitCode 
                         }
                         let seen = crate::luau::run_with(&rewritten, program.library.as_ref());
                         if seen != want {
-                            t.changed.push(format!("{} {profile}+x{level}: {:?} vs {:?}", program.name, seen.log.len(), want.log.len()));
+                            t.changed.push(format!(
+                                "{} {profile}+x{level}: {} lines, {:?} vs {} lines, {:?}",
+                                program.name,
+                                seen.log.len(),
+                                seen.ending,
+                                want.log.len(),
+                                want.ending
+                            ));
                         }
                     }
                     Err(e) => t.unreadable.push(format!("{} {profile}+x{level}: {e}", program.name)),

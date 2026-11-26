@@ -29,7 +29,7 @@ use crate::{
 
 pub const LEVELS: u8 = 3;
 // Bump when a rewrite changes: the hard tier's fingerprint includes it
-pub const VERSION: &str = "transform-1";
+pub const VERSION: &str = "transform-2";
 
 mod op {
     pub const NOP: u8 = 0;
@@ -539,7 +539,17 @@ fn permute_registers(ins: &mut [Ins], p: &mut Proto, rng: &mut Rng) -> bool {
     if std::env::var_os("ROSETTA_TRACE_TRANSFORM").is_some() {
         eprintln!("permute np={np} top={top} cuts={cuts:?} runs={runs:?} map={:?}", &map[..top]);
     }
+    // CLOSEUPVALS A closes every register from A up, so it names a boundary, not a register:
+    // renumbered like one, it would close from wherever A's own value landed and leave captured
+    // locals shuffled below that open. A is a cut, so the registers from A up still map onto
+    // themselves, and A itself stays put
+    let closes = ins.iter().map(|i| (i.op == 11).then(|| i.a())).collect::<Vec<_>>();
     remap_registers(ins, p, &map);
+    for (i, a) in ins.iter_mut().zip(closes) {
+        if let Some(a) = a {
+            i.word = (i.word & !0xff00) | (a as u32) << 8;
+        }
+    }
     true
 }
 

@@ -70,7 +70,8 @@ local function busted_same(a, b, seen)
 	return true
 end
 
-local assert = {}
+-- callable like luassert, so specs with their own runner keep using plain assert(...)
+local assert = setmetatable({}, { __call = function(_, ...) return assert(...) end })
 assert.are = assert
 assert.is = assert
 
@@ -128,6 +129,14 @@ function assert.error(f, ...)
 	busted_count += 1
 	if pcall(f, ...) then
 		busted_fail("expected an error")
+	end
+end
+
+function assert.not_error(f, ...)
+	busted_count += 1
+	local ok, err = pcall(f, ...)
+	if not ok then
+		busted_fail(`expected no error, got {busted_show(err)}`)
 	end
 end
 

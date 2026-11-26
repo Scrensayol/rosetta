@@ -266,10 +266,13 @@ fn main() -> ExitCode {
                             continue;
                         }
                     };
-                    let passed = observed.log.iter().filter(|l| l.starts_with("ok\t")).count();
-                    let failed = observed.log.iter().filter(|l| !l.starts_with("ok\t")).collect::<Vec<_>>();
+                    // the busted shim's lines, and the runners json.lua and lume ship with
+                    let is_pass = |l: &str| ["ok\t", "[pass]", "[PASS]"].iter().any(|p| l.starts_with(p));
+                    let is_fail = |l: &str| ["FAIL\t", "[fail]", "[FAIL]"].iter().any(|p| l.starts_with(p));
+                    let passed = observed.log.iter().filter(|l| is_pass(l)).count();
+                    let failed = observed.log.iter().filter(|l| is_fail(l)).collect::<Vec<_>>();
                     println!(
-                        "{name} {profile}: {passed} passed, {} other lines, {:?}, {:.0} ms",
+                        "{name} {profile}: {passed} passed, {} failed, {:?}, {:.0} ms",
                         failed.len(),
                         observed.ending,
                         started.elapsed().as_secs_f64() * 1000.0

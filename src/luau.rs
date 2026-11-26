@@ -148,6 +148,9 @@ impl Observation {
 }
 
 pub const STEP_BUDGET: u64 = 2_000_000;
+// real libraries doing real work (LibDeflate compressing a few kilobytes at every level) need
+// more, and their specs are fixed, so nothing generated can wander into the extra room
+pub const LIBRARY_STEP_BUDGET: u64 = 40_000_000;
 // A net under the step budget for programs that spend their steps in library calls doing
 // unbounded work, like table.insert(t, 1, v) on a table that keeps growing. Only programs that
 // are broken anyway get near it
@@ -205,16 +208,17 @@ pub fn run_with(bytecode: &[u8], library: Option<&Library>) -> Observation {
     };
     lua.globals().set("print", print).unwrap();
 
+    let budget = if library.is_some() { LIBRARY_STEP_BUDGET } else { STEP_BUDGET };
     {
         let steps = steps.clone();
         let deadline = Instant::now() + WALL_LIMIT;
         lua.set_interrupt(move |_| {
             let mut n = steps.get() + 1;
             if n % 4096 == 0 && Instant::now() > deadline {
-                n = STEP_BUDGET + 1;
+                n = budget + 1;
             }
             steps.set(n);
-            if n > STEP_BUDGET {
+            if n > budget {
                 Err(mlua::Error::runtime("rosetta: step budget exhausted"))
             } else {
                 Ok(VmState::Continue)
@@ -245,7 +249,7 @@ pub fn run_with(bytecode: &[u8], library: Option<&Library>) -> Observation {
             lua.load(&library.tests[..]).set_mode(ChunkMode::Binary).set_name("=tests").exec()
         })(),
     };
-    let ending = if steps.get() > STEP_BUDGET {
+    let ending = if steps.get() > budget {
         Ending::TimedOut
     } else {
         match result {
