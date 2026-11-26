@@ -231,7 +231,9 @@ button { font: inherit; color: inherit; text-transform: inherit; }
 .drawer-head h3 { margin: 0; font: 600 15px var(--mono); flex: 1; text-transform: none; }
 .drawer-body { padding: 16px 18px 20px; }
 .drawer-body .about { margin: 0 0 14px; color: var(--text-muted); font-size: 13.5px; }
-.prow { display: grid; grid-template-columns: 62px 150px 1fr; gap: 12px; align-items: baseline; padding: 9px 10px; font-size: 13px; }
+.prow { display: grid; grid-template-columns: 62px 150px 1fr auto; gap: 12px; align-items: baseline; padding: 9px 10px; font-size: 13px; }
+.prow.on { background: var(--accent-10) !important; box-shadow: inset 2px 0 0 var(--accent); }
+.prow .act .chip { padding: 3px 10px; font-size: 12px; color: var(--accent); }
 .prow:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
 .prow .profile { font-family: var(--mono); color: var(--text-muted); }
 .prow .v { font-weight: 600; }
@@ -241,6 +243,44 @@ button { font: inherit; color: inherit; text-transform: inherit; }
 .prow .v.u { color: var(--text-dim); }
 .prow .detail { font: 12px var(--mono); color: var(--text-muted); word-break: break-word; }
 .drawer-foot { padding: 0 18px 18px; font-size: 12px; color: var(--text-dim); }
+.drawer.wide { width: min(1040px, calc(100vw - 32px)); }
+
+/* ---- failure gallery, inside the drawer ---- */
+.gx { margin-top: 14px; padding-bottom: 4px; background: var(--surface-header); position: relative; }
+.gx::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--state-error); }
+.gx-head { display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 12px; font-size: 13px; }
+.gx-head .profile { font-family: var(--mono); color: var(--text-muted); }
+.gx-head .v { font-weight: 600; color: var(--state-error); }
+.gx-head .v.p { color: var(--accent); }
+.gx-head .btn { padding: 6px; }
+.gx-head .grow { flex: 1; }
+.gx h4 { display: flex; align-items: center; gap: 10px; margin: 14px 12px 6px; font: 600 12.5px var(--ui); color: var(--text); }
+.gx h4 > span:first-child { flex: 1; }
+.gx-sub { font: 400 12px var(--ui); color: var(--text-dim); }
+.gx-pad { margin: 0 12px; }
+.gx-copy { padding: 3px; }
+.gx-copy svg { width: 14px; height: 14px; }
+.gx pre {
+	margin: 0 12px; padding: 10px 12px; max-height: 340px; overflow: auto; font: 12.5px/1.6 var(--mono); color: var(--text);
+	background: rgba(13, 10, 16, 0.8); box-shadow: inset 1px 0 0 var(--accent); tab-size: 4;
+	scrollbar-width: thin; scrollbar-color: rgba(255, 138, 180, 0.35) transparent;
+}
+.gx pre.err { color: var(--state-error); box-shadow: inset 1px 0 0 var(--state-error); white-space: pre-wrap; word-break: break-word; }
+.gx-cmp { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2px; margin: 0 12px; }
+.gx-cmp pre { margin: 0; max-height: 260px; white-space: pre-wrap; word-break: break-all; }
+.gx .gx-cmp pre .l { min-width: 0; padding-left: 5.5ch; text-indent: -5.5ch; }
+.gx mark { background: none; color: var(--accent); text-decoration: underline 1px; text-underline-offset: 3px; }
+.gx .hit.got mark { color: var(--state-error); }
+.gx-label { padding: 0 0 4px; font-size: 11.5px; color: var(--text-dim); }
+.gx pre .l { display: block; min-width: max-content; }
+.gx pre .ln { display: inline-block; width: 4ch; margin-right: 1.5ch; text-align: right; color: var(--text-dim); user-select: none; }
+.gx .hit.want { background: var(--accent-10); }
+.gx .hit.got { background: rgba(229, 103, 122, 0.14); }
+.gx-end { padding: 6px 12px; font: 12px var(--mono); color: var(--text-muted); background: rgba(13, 10, 16, 0.8); text-transform: none; }
+.gx-end.hit { color: var(--accent); }
+.gx-end.hit.got { color: var(--state-error); }
+.gx-note { margin: 6px 12px 0; font-size: 12.5px; color: var(--state-warn); }
+.gx-foot { margin: 12px 12px 8px; font-size: 11.5px; color: var(--text-dim); }
 .drawer-foot code { color: var(--text-muted); }
 
 /* ---- landing ---- */
@@ -380,8 +420,13 @@ footer a:hover { color: var(--accent); }
 	.drawer { width: calc(100vw - 16px); max-height: 86vh; }
 	.drawer-head { padding: 10px 10px 10px 14px; }
 	.drawer-body { padding: 12px 12px 16px; }
-	.prow { grid-template-columns: 56px 1fr; gap: 4px 10px; }
+	.prow { grid-template-columns: 56px 1fr auto; gap: 4px 10px; }
+	.drawer.wide { width: calc(100vw - 16px); }
+	.gx-cmp { grid-template-columns: minmax(0, 1fr); }
+	.gx pre { margin: 0 8px; }
+	.gx-cmp { margin: 0 8px; }
 	.prow .detail { grid-column: 1 / -1; }
+	.prow .act { grid-column: 3; grid-row: 1; }
 	.drawer-foot { padding: 0 12px 14px; }
 
 	.drop { min-height: 220px; padding: 28px 16px; }

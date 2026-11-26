@@ -3,7 +3,8 @@
 # the site checks a dropped file against) and a summary for the leaderboard, plus, for every suite
 # they ran, a hash of each section's program names, so a file that claims the suite but ran other
 # programs shows up as spoofed. Hard-tier results also get their score at each transform level.
-# Run it after adding or replacing a result. Needs jq and sha256sum.
+# Run it after adding or replacing a result. Needs jq and sha256sum. Failure galleries
+# (<result>.gallery.json, see `rosetta gallery`) sit beside their results and aren't indexed.
 # Results of an older suite live in a directory named after it (results/rosetta-1/): they stay
 # verified and the leaderboard can still show them, as archived.
 set -eu
@@ -16,6 +17,8 @@ trap 'rm -f "$entries" "$suites"' EXIT
 for f in *.json */*.json; do
 	[ -f "$f" ] || continue
 	[ "$f" = index.json ] && continue
+	# a result's failure gallery rides along with it but isn't a result
+	case $f in *.gallery.json) continue ;; esac
 	case $f in */*) archived=true ;; *) archived=false ;; esac
 	sum=$(sha256sum "$f" | cut -d' ' -f1)
 	jq -c --arg file "$f" --arg sum "$sum" --argjson web "$web" --argjson archived "$archived" '{

@@ -2,6 +2,7 @@ mod bench;
 mod bytecode;
 mod chunk;
 mod decompiler;
+mod gallery;
 mod generator;
 mod lex;
 mod luau;
@@ -109,6 +110,25 @@ enum Command {
         /// the key the website trusts. Needs openssl
         #[arg(long)]
         sign: bool,
+        /// Also write each result's failure gallery (<result>.gallery.json): every wrong round
+        /// trip with its program, the decompiler's output and where the printed lines part
+        #[arg(long)]
+        gallery: bool,
+        /// With --gallery, shrink each failing program first (each attempt is a decompile, so
+        /// this is for local decompilers, not rate-limited web APIs)
+        #[arg(long, requires = "gallery")]
+        reduce: bool,
+    },
+    /// Write the failure gallery for an existing result file, rerunning only its failed round
+    /// trips with the same decompiler
+    Gallery {
+        result: PathBuf,
+        /// name=command, the decompiler the result is for
+        #[arg(long)]
+        decompiler: String,
+        /// Shrink each failing program first
+        #[arg(long)]
+        reduce: bool,
     },
     /// Sign result files in place, as bench --sign does
     Sign { files: Vec<PathBuf> },
@@ -211,7 +231,8 @@ fn main() -> ExitCode {
     }
 
     match Cli::parse().command {
-        Command::Bench { decompilers, tier, versions, out, upload, sign } => bench::run(&decompilers, tier, &versions, &out, upload, sign),
+        Command::Bench { decompilers, tier, versions, out, upload, sign, gallery, reduce } => bench::run(&decompilers, tier, &versions, &out, upload, sign, gallery, reduce),
+        Command::Gallery { result, decompiler, reduce } => bench::backfill(&result, &decompiler, reduce),
         Command::Sign { files } => {
             let mut failed = false;
             for f in &files {

@@ -17,6 +17,7 @@ use serde::Serialize;
 
 use crate::{
     decompiler::{Decompiler, External},
+    gallery,
     generator::{self, Grammar},
     luau::{Extra, Library, Profile},
     mutate,
@@ -47,6 +48,10 @@ pub enum Tier {
 }
 
 impl Tier {
+    fn from_name(name: &str) -> Option<Tier> {
+        [Tier::Quick, Tier::Full, Tier::HardQuick, Tier::HardFull].into_iter().find(|t| t.name() == name)
+    }
+
     fn name(self) -> &'static str {
         match self {
             Tier::Quick => "quick",
@@ -156,6 +161,45 @@ struct BenchResult {
     // measures it over the passes they share instead)
     #[serde(skip_serializing_if = "Option::is_none")]
     quality: Option<Summary>,
+}
+
+// what bench --gallery and `rosetta gallery` write beside a result: see gallery.rs
+#[derive(Serialize)]
+struct GalleryFile<'a> {
+    format: &'static str,
+    schema: u32,
+    suite: &'a SuiteInfo,
+    decompiler: String,
+    created: String,
+    // whether failures were shrunk to smaller programs first
+    reduced: bool,
+    per_section: usize,
+    entries: Vec<gallery::Entry>,
+    // section -> failures past per_section that aren't in the file
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    omitted: BTreeMap<&'static str, usize>,
+}
+
+fn write_gallery(path: &Path, suite: &SuiteInfo, decompiler: &str, reduced: bool, entries: Vec<gallery::Entry>, omitted: BTreeMap<&'static str, usize>) -> usize {
+    let count = entries.len();
+    let file = GalleryFile {
+        format: "rosetta-gallery",
+        schema: 1,
+        suite,
+        decompiler: decompiler.to_string(),
+        created: now_utc(),
+        reduced,
+        per_section: gallery::PER_SECTION,
+        entries,
+        omitted,
+    };
+    fs::write(path, serde_json::to_string(&file).unwrap() + "\n").expect("write gallery");
+    count
+}
+
+fn gallery_path(result: &Path) -> PathBuf {
+    let name = result.file_name().unwrap_or_default().to_string_lossy();
+    result.with_file_name(format!("{}.gallery.json", name.strip_suffix(".json").unwrap_or(&name)))
 }
 
 const LETTERS: [(char, Kind); 6] = [
@@ -451,7 +495,7 @@ fn first_line(detail: &str) -> String {
     if line.len() > 240 { format!("{}...", &line[..line.floor_char_boundary(240)]) } else { line.to_string() }
 }
 
-pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload: bool, sign_results: bool) -> ExitCode {
+pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload: bool, sign_results: bool, gallery: bool, reduce: bool) -> ExitCode {
     if specs.is_empty() {
         eprintln!("give at least one --decompiler name=command");
         return ExitCode::from(2);
@@ -503,8 +547,17 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
                 // (a program's own compiler options, and the tier's transform level)
                 let base = tier_profiles[q];
                 let profile = Profile { extra: Extra { transform: base.extra.transform, ..program.extra }, ..base };
-                let verdict = roundtrip::check(&program.source, program.library.as_ref(), profile, decompiler);
-                (verdict.kind, verdict.detail, verdict.quality)
+                let mut verdict = roundtrip::check(&program.source, program.library.as_ref(), profile, decompiler);
+                let (kind, detail, quality) = (verdict.kind, std::mem::take(&mut verdict.detail), verdict.quality.take());
+                // without --reduce the verdict in hand is the entry; with it, only the failures that
+                // make the gallery are reduced, after the run
+                let entry = (gallery && kind.is_failure()).then(|| {
+                    verdict.detail = detail.clone();
+                    let section = &sections[s];
+                    let e = (!reduce).then(|| gallery::entry(section.id, &program.name, &program.source, program.library.as_ref(), profile, decompiler, verdict, false));
+                    (section.id, (s, p, q, e))
+                });
+                (kind, detail, quality, entry)
             })
             .collect::<Vec<_>>();
         let seconds = (started.elapsed().as_secs_f64() * 100.0).round() / 100.0;
@@ -523,7 +576,7 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
                     let mut results = String::new();
                     let mut details = BTreeMap::new();
                     for base in &tier_profiles {
-                        let (kind, detail, quality) = next.next().unwrap();
+                        let (kind, detail, quality, _) = next.next().unwrap();
                         results.push(letter(*kind));
                         *totals.entry(*kind).or_default() += 1;
                         if *kind != Kind::Unusable {
@@ -565,6 +618,24 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
         let file_name: String = name.chars().map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' { c } else { '-' }).collect();
         let path: PathBuf = out.join(format!("{file_name}-{}.json", tier.name()));
         fs::write(&path, serde_json::to_string(&result).unwrap() + "\n").expect("write result");
+        if gallery {
+            let (kept, omitted) = gallery::cap(outcomes.into_iter().filter_map(|o| o.3).collect());
+            let entries = kept
+                .into_par_iter()
+                .map(|(s, p, q, e)| {
+                    e.unwrap_or_else(|| {
+                        let program = &sections[s].programs[p];
+                        let base = tier_profiles[q];
+                        let profile = Profile { extra: Extra { transform: base.extra.transform, ..program.extra }, ..base };
+                        let verdict = roundtrip::check(&program.source, program.library.as_ref(), profile, decompiler);
+                        let shrink = verdict.kind.is_failure();
+                        gallery::entry(sections[s].id, &program.name, &program.source, program.library.as_ref(), profile, decompiler, verdict, shrink)
+                    })
+                })
+                .collect::<Vec<_>>();
+            let count = write_gallery(&gallery_path(&path), &result.suite, &name, reduce, entries, omitted);
+            println!("  gallery: {count} failures -> {}", gallery_path(&path).display());
+        }
         let parts = result.sections.iter().map(|s| format!("{} {}/{}", s.id, s.score.passed, s.score.total)).collect::<Vec<_>>();
         println!(
             "{name}: {}/{} ({:.1}%) | {} | {seconds:.1}s -> {}",
@@ -682,4 +753,75 @@ fn share(path: &Path, title: &str) -> Result<String, String> {
     let reply: serde_json::Value = serde_json::from_slice(&output.stdout).map_err(|_| format!("unexpected reply: {}", String::from_utf8_lossy(&output.stdout).chars().take(200).collect::<String>()))?;
     let id = reply["scrapID"].as_str().filter(|id| !id.is_empty() && id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')).ok_or_else(|| format!("no scrap id in the reply: {reply}"))?;
     Ok(format!("{SITE}result?rubis={id}"))
+}
+
+// `rosetta gallery`: the gallery for a result that already exists, from rerunning only the round
+// trips it says failed. The programs come from this build, so the suite hash has to match
+pub fn backfill(result: &Path, spec: &str, reduce: bool) -> ExitCode {
+    let fail = |e: String| {
+        eprintln!("{}: {e}", result.display());
+        ExitCode::from(2)
+    };
+    let data: serde_json::Value = match fs::read_to_string(result).map_err(|e| e.to_string()).and_then(|t| serde_json::from_str(&t).map_err(|e| e.to_string())) {
+        Ok(d) => d,
+        Err(e) => return fail(e),
+    };
+    let field = |path: &[&str]| path.iter().try_fold(&data, |v, k| v.get(k)).and_then(|v| v.as_str()).unwrap_or_default().to_string();
+    if field(&["format"]) != "rosetta-result" {
+        return fail("not a rosetta result".into());
+    }
+    if field(&["suite", "name"]) != SUITE {
+        return fail(format!("suite {}, but this build runs {SUITE}", field(&["suite", "name"])));
+    }
+    let Some(tier) = Tier::from_name(&field(&["suite", "tier"])) else { return fail("unknown tier".into()) };
+    let sections = sections(tier);
+    let hash = fingerprint(tier, &sections);
+    if field(&["suite", "hash"]) != hash {
+        return fail(format!("suite hash {}, but this build's {} is {hash}", field(&["suite", "hash"]), tier.name()));
+    }
+    let decompiler = match External::parse(spec) {
+        Ok(d) => d,
+        Err(e) => return fail(format!("--decompiler: {e}")),
+    };
+    let tier_profiles = profiles(tier);
+    let mut jobs = Vec::new();
+    for section in data["sections"].as_array().into_iter().flatten() {
+        let Some(s) = sections.iter().position(|x| Some(x.id) == section["id"].as_str()) else { continue };
+        for test in section["tests"].as_array().into_iter().flatten() {
+            let Some(p) = sections[s].programs.iter().position(|x| Some(x.name.as_str()) == test["name"].as_str()) else { continue };
+            for (q, l) in test["results"].as_str().unwrap_or_default().chars().enumerate() {
+                if let Some(&(_, kind)) = LETTERS.iter().find(|(c, _)| *c == l)
+                    && kind.is_failure()
+                    && q < tier_profiles.len()
+                {
+                    jobs.push((sections[s].id, (s, p, q, kind)));
+                }
+            }
+        }
+    }
+    let (jobs, omitted) = gallery::cap(jobs);
+    let started = Instant::now();
+    println!("rerunning {} failed round trips of {} ({} past the per-section cap left out)", jobs.len(), result.display(), omitted.values().sum::<usize>());
+    let entries = jobs
+        .par_iter()
+        .map(|&(s, p, q, recorded)| {
+            let program = &sections[s].programs[p];
+            let base = tier_profiles[q];
+            let profile = Profile { extra: Extra { transform: base.extra.transform, ..program.extra }, ..base };
+            let verdict = roundtrip::check(&program.source, program.library.as_ref(), profile, &decompiler);
+            let differs = verdict.kind != recorded;
+            let shrink = reduce && verdict.kind.is_failure();
+            let mut e = gallery::entry(sections[s].id, &program.name, &program.source, program.library.as_ref(), profile, &decompiler, verdict, shrink);
+            if differs {
+                e.recorded = Some(recorded);
+            }
+            e
+        })
+        .collect::<Vec<_>>();
+    let changed = entries.iter().filter(|e| e.recorded.is_some()).count();
+    let suite = SuiteInfo { name: SUITE, tier: tier.name(), hash };
+    let path = gallery_path(result);
+    let count = write_gallery(&path, &suite, &field(&["decompiler", "name"]), reduce, entries, omitted);
+    println!("{count} failures -> {} ({changed} ended differently this time) in {:.1}s", path.display(), started.elapsed().as_secs_f64());
+    ExitCode::SUCCESS
 }

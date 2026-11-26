@@ -57,11 +57,72 @@ function sectionView(section, si) {
 }
 
 let current;
+// the failure gallery: <result>.gallery.json beside an official result, loaded the first time a
+// failed test is opened. Only for results loaded by name or url; a dropped or shared file has none
+let galleryUrl = null, galleryLoad = null;
+function loadGallery() {
+	if (!galleryUrl) return Promise.resolve(null);
+	galleryLoad ??= fetch(galleryUrl, { cache: "no-cache" })
+		.then(res => res.ok ? res.json() : null)
+		.then(g => {
+			// it has to be this result's: same suite build, same decompiler
+			if (g?.format !== "rosetta-gallery" || g.suite?.hash !== current.suite.hash || g.decompiler !== current.decompiler.name) return null;
+			g.byKey = new Map(g.entries.map(e => [`${e.test}\n${e.profile}`, e]));
+			return g;
+		})
+		.catch(() => null);
+	return galleryLoad;
+}
+
+const GX_HEAD = { mismatch: "wrong output", recompile_failed: "doesn't recompile", decompile_failed: "decompiler crashed", pass: "pass", refused: "refused" };
+// the window of printed lines around the first difference; on that line, the point where the two
+// sides part is marked
+function gxLines(lines, other, from, first, side) {
+	return lines.map((l, i) => {
+		const n = from + i;
+		if (n !== first) return `<span class="l"><span class="ln">${n}</span>${esc(l) || " "}</span>`;
+		const o = other[i] ?? "";
+		let k = 0;
+		while (k < l.length && k < o.length && l[k] === o[k]) k++;
+		return `<span class="l hit ${side}"><span class="ln">${n}</span>${esc(l.slice(0, k))}<mark>${esc(l.slice(k)) || " "}</mark></span>`;
+	}).join("");
+}
+const lines = n => `${n.toLocaleString()} line${n === 1 ? "" : "s"}`;
+function gxBlock(title, text, cls = "") {
+	return `<h4><span>${title}</span><button class="btn ghost gx-copy" data-copy-text title="copy">${icon("copy")}</button></h4><pre class="${cls}">${esc(text)}</pre>`;
+}
+function galleryPanel(section, t, e, g) {
+	const c = e.compare;
+	const recorded = e.recorded
+		? `<p class="gx-note">the result says ${esc(GX_HEAD[e.recorded] || e.recorded)}, but when the gallery was made this run ended as ${esc(GX_HEAD[e.kind] || e.kind)}: the decompiler may have changed since.</p>`
+		: "";
+	const printed = c && (c.want.length || c.got.length);
+	const sub = !c ? "" : c.first ? `first difference on line ${c.first} · ${lines(c.want_lines)} vs ${lines(c.got_lines)}`
+		: printed ? `every line matched: only how it ended differs · ${lines(c.want_lines)}` : "nothing printed: only how it ended differs";
+	const cmp = c ? `
+		<h4><span>what it printed</span><span class="gx-sub">${sub}</span></h4>
+		<div class="gx-cmp">
+			<div><div class="gx-label">the original</div>${printed ? `<pre>${gxLines(c.want, c.got, c.from, c.first, "want")}</pre>` : ""}<div class="gx-end${c.first ? "" : " hit"}">${esc(c.want_ending)}</div></div>
+			<div><div class="gx-label">the decompiled output</div>${printed ? `<pre>${gxLines(c.got, c.want, c.from, c.first, "got")}</pre>` : ""}<div class="gx-end${c.first ? "" : " hit got"}">${esc(c.got_ending)}</div></div>
+		</div>` : "";
+	const why = e.kind === "recompile_failed" ? gxBlock("why it doesn't recompile", e.detail, "err")
+		: e.kind === "decompile_failed" ? gxBlock("what the decompiler said", e.detail, "err") : "";
+	const output = e.output != null ? gxBlock(`the decompiler's output${e.reduced ? " for the smaller program" : ""}`, e.output) : "";
+	const program = e.reduced ? gxBlock("a smaller program it also gets wrong", e.reduced)
+		: e.source != null ? gxBlock("the program", e.source)
+		: section.id === "libraries" ? `<h4><span>the program</span></h4><p class="gx-sub gx-pad">the library and its spec are in <code>libraries/${esc(t.name)}/</code>.</p>` : "";
+	return `
+		<div class="gx-head"><span class="profile">${esc(e.profile)}</span><span class="v ${e.kind === "pass" ? "p" : "w"}">${esc(GX_HEAD[e.kind] || e.kind)}</span><span class="grow"></span>
+			<button class="btn ghost" data-gx-close title="close">${icon("close")}</button></div>
+		${recorded}${cmp}${why}${output}${program}
+		<p class="gx-foot">${e.reduced ? "the program was shrunk while the decompiler kept getting it wrong (the same kind of failure, not always the same line), so what it printed is the smaller program's. " : ""}long text is cut at 16 kb.</p>`;
+}
+
 function openTest(section, t) {
 	const d = document.getElementById("drawer"), s = document.getElementById("scrim");
 	const rows = current.profiles.map((p, i) => {
 		const l = t.results[i];
-		return `<div class="prow"><span class="profile">${esc(p)}</span><span class="v ${l}">${VERDICT[l] || l}</span><span class="detail">${esc(t.details?.[p] || "")}</span></div>`;
+		return `<div class="prow" data-p="${esc(p)}"><span class="profile">${esc(p)}</span><span class="v ${l}">${VERDICT[l] || l}</span><span class="detail">${esc(t.details?.[p] || "")}</span><span class="act"></span></div>`;
 	}).join("");
 	const repro = section.id === "generated"
 		? `rosetta gen ${t.name.replace("seed", "")}`
@@ -72,6 +133,7 @@ function openTest(section, t) {
 		<div class="drawer-body">
 			${t.about ? `<p class="about keep">${esc(t.about)}</p>` : ""}
 			${rows}
+			<div class="gx" id="gx" hidden></div>
 		</div>
 		<div class="drawer-foot">the program: <code>${esc(repro)}</code>. <span class="keep">O</span> is the optimization level, <span class="keep">g</span> the debug level.</div>`;
 	if (params.get("r")) {
@@ -80,12 +142,59 @@ function openTest(section, t) {
 		history.replaceState(null, "", url);
 	}
 	s.classList.add("open"); d.classList.add("open");
+	d.classList.remove("wide");
 	d.querySelector("[data-close]").focus();
+	// failed rows with a gallery entry get a button that opens it
+	if ([...t.results].some(l => FAILING.has(l))) loadGallery().then(g => {
+		if (!g || d.dataset.test !== t.name) return;
+		for (const row of d.querySelectorAll(".prow")) {
+			const e = g.byKey.get(`${t.name}\n${row.dataset.p}`);
+			if (e) row.querySelector(".act").innerHTML = `<button class="chip" data-g="${esc(row.dataset.p)}">see why</button>`;
+		}
+		const wanted = params.get("profile");
+		if (wanted && g.byKey.has(`${t.name}\n${wanted}`)) showEntry(section, t, wanted);
+	});
+	d.dataset.test = t.name;
+	d.onclick = e => {
+		const b = e.target.closest("[data-g]");
+		if (b) return showEntry(section, t, b.dataset.g);
+		if (e.target.closest("[data-gx-close]")) return hideEntry();
+		const copy = e.target.closest("[data-copy-text]");
+		if (copy) navigator.clipboard.writeText(copy.closest("h4").nextElementSibling.textContent);
+	};
+}
+async function showEntry(section, t, profile) {
+	const g = await loadGallery();
+	const e = g?.byKey.get(`${t.name}\n${profile}`);
+	const d = document.getElementById("drawer"), panel = document.getElementById("gx");
+	if (!e || !panel) return;
+	for (const row of d.querySelectorAll(".prow")) row.classList.toggle("on", row.dataset.p === profile);
+	panel.innerHTML = galleryPanel(section, t, e, g);
+	panel.hidden = false;
+	d.classList.add("wide");
+	panel.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+	if (params.get("r")) {
+		const url = new URL(location.href);
+		url.searchParams.set("profile", profile);
+		history.replaceState(null, "", url);
+	}
+}
+function hideEntry() {
+	const d = document.getElementById("drawer"), panel = document.getElementById("gx");
+	panel.hidden = true;
+	d.classList.remove("wide");
+	for (const row of d.querySelectorAll(".prow")) row.classList.remove("on");
+	if (params.get("r")) {
+		const url = new URL(location.href);
+		url.searchParams.delete("profile");
+		history.replaceState(null, "", url);
+	}
 }
 function closeTest() {
 	if (params.get("r")) {
 		const url = new URL(location.href);
 		url.searchParams.delete("test");
+		url.searchParams.delete("profile");
 		history.replaceState(null, "", url);
 	}
 	document.getElementById("drawer").classList.remove("open");
@@ -289,6 +398,7 @@ async function start() {
 			const path = r ? `results/${r.replace(/[^\w./-]/g, "").split("/").filter(p => p && !p.startsWith(".")).join("/")}.json` : url;
 			const res = await fetch(path, { cache: "no-cache" });
 			if (!res.ok) throw new Error(`couldn't load ${r || url} (HTTP ${res.status})`);
+			galleryUrl = path.replace(/\.json(?=$|[?#])/, ".gallery.json");
 			return show(new Uint8Array(await res.arrayBuffer()), { file: path.split("/").pop() });
 		}
 		showPicker();
