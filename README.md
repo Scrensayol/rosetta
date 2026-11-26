@@ -127,19 +127,21 @@ $R bench --tier full --decompiler "mine=/path/to/decompiler {}" --version mine=1
 
 | tier | programs | round trips |
 |---|---|---|
-| quick | the 41 cases, then the 50 generated programs and the 50 mutants of the full tier whose bytecode has the most features | 846 |
-| full | the 41 cases, seeds 1000..2000, 1000 mutants of the cases (seed 1) | 12,246 |
-| hard-quick | quick's programs, with the bytecode rewritten before the decompiler gets it (below) | 846 |
-| hard-full | full's programs, rewritten the same way | 12,246 |
+| quick | the 41 cases and 6 libraries, then the 50 generated programs and the 50 mutants of the full tier whose bytecode has the most features | 882 |
+| full | the 41 cases and 6 libraries, seeds 1000..2000, 1000 mutants of the cases (seed 1) | 12,276 |
+| hard-quick | quick's programs, with the bytecode rewritten before the decompiler gets it (below) | 882 |
+| hard-full | full's programs, rewritten the same way | 12,276 |
 
 "Features" are the ones mutation fuzzing counts: distinct opcode pairs and triples and where
 jumps land, at each optimization level. Picking by them never looks at a decompiler, and it
 makes quick harder than the full tier on average, not an easy sample of it. Every program runs at
 all six profiles. The score is the round trips that passed, out of every
-one whose input was usable. The suite is pinned as `rosetta-2`: which programs run, the
+one whose input was usable. The suite is pinned as `rosetta-3`: which programs run, the
 profiles and the Luau version are fingerprinted into a suite hash, so two results with the same
 hash ran the same programs. Anything that changes the programs gets a new suite name. `rosetta-1` was the first 35 cases;
 `rosetta-2` added six and, because mutants come from the cases, a new set of mutants.
+`rosetta-3` added the libraries and fixed a hard-tier transform that left captured locals open
+(transform-2), so its hard tiers aren't comparable with rosetta-2's.
 
 ### The hard tiers
 
@@ -172,6 +174,19 @@ program with one letter per profile (`p` pass, `w` wrong output, `c` doesn't rec
 `f` crashed or timed out, `r` refused, `u` unusable input) and the first line of why a
 program didn't pass. The file also has the section and overall scores, the totals, the
 readability of its passes, the wall time and the suite.
+
+### The failure gallery
+
+`bench --gallery` also writes `<name>-<tier>.gallery.json`: for every round trip that went
+wrong (wrong output, output that doesn't recompile, a crash; refusals already say why), the
+program, the decompiler's output and the printed lines around where they part. With `--reduce`
+each failing program is first shrunk to a smaller one the decompiler still gets wrong (each try
+is a decompile, so that's for local decompilers, not rate-limited web APIs). The first 150
+failures of each section are kept. `rosetta gallery <result.json> --decompiler ...` writes the
+gallery for a result that already exists by rerunning only its failed round trips, and says
+when one ends differently this time. On the website, a failed profile in a test's drawer opens
+its gallery entry. The gallery is a separate file, so the result itself (what's hashed and
+signed) stays exactly what bench wrote.
 
 ### The website
 
