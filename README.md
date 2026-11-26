@@ -81,7 +81,8 @@ the original program, so it's reproducible and anyone can check it.
 Every decompiler runs the same way, as a command: `name=command`, where `{}` is the path of a raw
 (unencoded) bytecode file and the source comes out on stdout. Nothing runs in-process, so nobody
 gets an advantage. A decompiler that only runs as a web API or a server gets a small adapter
-script: [adapters/](adapters) has lua.expert, Composite, luacid and Fission.
+script: [adapters/](adapters) has lua.expert, Composite, luacid and Fission. luarust is a private
+API that needs its owner's key, so its adapter isn't published.
 
 ```sh
 cargo build --release
@@ -213,7 +214,7 @@ prints what it would have sent.
 
 The leaderboard and every official `bench` result are on the website,
 [rosetta.wtf](https://rosetta.wtf/). The `bench` tables come first (suite rosetta-2, 41 cases, run
-2026-11-25 on Luau 0.747). The fuzz and check tables after them are older per-command runs
+2026-11-25 on Luau 0.747, luarust 2026-11-26). The fuzz and check tables after them are older per-command runs
 (rosetta-1's 35 cases, sunberry 0.5.4), which also compare readability across
 decompilers on the round trips they all passed.
 
@@ -224,6 +225,7 @@ with each program's verdict at each profile:
 | decompiler | pass | wrong | doesn't recompile | refused | cases | generated | mutants |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | sunberry 0.5.6 (new core) | 12,238 (99.98%) | 0 | 0 | 2 | 246/246 | 5,994/5,994 | 5,998/6,000 |
+| luarust 2.5 | 12,236 (99.97%) | 0 | 0 | 4 | 246/246 | 5,994/5,994 | 5,996/6,000 |
 | luacid | 12,201 (99.7%) | 37 | 0 | 2 | 244/246 | 5,990/5,994 | 5,967/6,000 |
 | lua.expert | 12,132 (99.1%) | 4 | 0 | 104 | 246/246 | 5,886/5,994 | 6,000/6,000 |
 | Composite | 11,923 (97.4%) | 76 | 0 | 241 | 246/246 | 5,873/5,994 | 5,804/6,000 |
@@ -232,14 +234,16 @@ with each program's verdict at each profile:
 | sunberry (old core) | 8,991 (73.5%) | 2,932 | 317 | 0 | 200/246 | 3,685/5,994 | 5,106/6,000 |
 
 sunberry's two refusals are mutant mut1-606 at O2g1 and O2g2 (`a condition that isn't an
-expression`). The quick tier (846 round trips) has the same order at the top: sunberry and lua.expert
-pass all 846, luacid 843, Composite 834, Tovek 756, Fission 684 and the old core 584.
+expression`); luarust's four are mutant mut1-472 at O1 and O2 (HTTP 422, `This could not be
+decompiled`). The quick tier (846 round trips) has the same order at the top: sunberry, luarust and
+lua.expert pass all 846, luacid 843, Composite 834, Tovek 756, Fission 684 and the old core 584.
 
 **The hard tiers** (the same programs with their bytecode rewritten; see [The hard tiers](#the-hard-tiers)).
 x1, x2 and x3 each cover a third of the round trips. hard-full, 12,240 usable round trips each:
 
 | decompiler | pass | x1 | x2 | x3 | wrong | doesn't recompile | refused |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| luarust 2.5 | 12,236 (99.97%) | 4,079/4,080 | 4,079/4,080 | 4,078/4,080 | 0 | 0 | 4 |
 | luacid | 5,613 (45.9%) | 3,726/4,080 | 1,391/4,080 | 496/4,080 | 577 | 5 | 6,045 |
 | lua.expert | 3,852 (31.5%) | 3,722/4,080 | 128/4,080 | 2/4,080 | 1 | 0 | 8,387 |
 | Tovek 2.7 | 3,784 (30.9%) | 3,598/4,080 | 179/4,080 | 7/4,080 | 1 | 0 | 8,455 |
@@ -252,6 +256,7 @@ hard-quick, 846 round trips each:
 
 | decompiler | pass | x1 | x2 | x3 | wrong | doesn't recompile | refused |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| luarust 2.5 | 846 (100%) | 282/282 | 282/282 | 282/282 | 0 | 0 | 0 |
 | luacid | 344 (40.7%) | 239/282 | 77/282 | 28/282 | 30 | 0 | 472 |
 | lua.expert | 256 (30.3%) | 240/282 | 16/282 | 0/282 | 0 | 0 | 590 |
 | Tovek 2.7 | 223 (26.4%) | 207/282 | 16/282 | 0/282 | 0 | 0 | 623 |
@@ -260,8 +265,10 @@ hard-quick, 846 round trips each:
 | sunberry (old core) | 73 (8.6%) | 54/282 | 17/282 | 2/282 | 770 | 3 | 0 |
 | sunberry 0.5.6 (new core) | 35 (4.1%) | 34/282 | 1/282 | 0/282 | 0 | 0 | 811 |
 
-Nobody passes every x3 round trip. luacid gets the furthest by a long way, but it pays for it in
-wrong output (577 on hard-full), where lua.expert and Tovek mostly refuse what they can't follow.
+luarust is the first to clear the hard tiers: its hard-full score equals its full score, with the
+same four refusals and nothing wrong, and it passes all of hard-quick. Behind it, luacid gets the
+furthest by a long way, but it pays for it in wrong output (577 on hard-full), where lua.expert and
+Tovek mostly refuse what they can't follow.
 sunberry's new core refuses nearly everything past x1: it won't print code it can't prove matches.
 
 The per-command runs were on 2026-11-22 (Luau 0.747), with seven decompilers: sunberry 0.5.4 (its new core with `--strict`, and

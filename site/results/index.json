@@ -21,6 +21,26 @@
       "levels": null
     },
     {
+      "file": "luarust-quick.json",
+      "sha256": "7269ba18505c6e0f9910da405faae873f2c4f1172674580b3af2f1d332641c73",
+      "decompiler": "luarust",
+      "version": "2.5",
+      "tier": "quick",
+      "hash": "eb2e66b08f531f01",
+      "score": {
+        "passed": 846,
+        "total": 846
+      },
+      "totals": {
+        "pass": 846
+      },
+      "created": "2026-11-26T10:00:18Z",
+      "seconds": 82.12,
+      "web": true,
+      "archived": false,
+      "levels": null
+    },
+    {
       "file": "sunberry-quick.json",
       "sha256": "5a19221be2ac44f058d95669de9e593c38fe9b73f2532efa9051bb793f076d24",
       "decompiler": "sunberry",
@@ -149,6 +169,39 @@
       "levels": null
     },
     {
+      "file": "luarust-hard-quick.json",
+      "sha256": "6a2335d81f5c83737686ac263888897f4ba9d44b315f6435be069aaefc4f6f84",
+      "decompiler": "luarust",
+      "version": "2.5",
+      "tier": "hard-quick",
+      "hash": "f6bbc849d6126c23",
+      "score": {
+        "passed": 846,
+        "total": 846
+      },
+      "totals": {
+        "pass": 846
+      },
+      "created": "2026-11-26T10:02:05Z",
+      "seconds": 94.49,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 282,
+          "passed": 282
+        },
+        "2": {
+          "total": 282,
+          "passed": 282
+        },
+        "3": {
+          "total": 282,
+          "passed": 282
+        }
+      }
+    },
+    {
       "file": "sunberry-full.json",
       "sha256": "d1fe61cd5d9170eb88d5d392f082f91e25e9ff9e2fed204aaed5c5d053bc73ca",
       "decompiler": "sunberry",
@@ -169,6 +222,63 @@
       "web": false,
       "archived": false,
       "levels": null
+    },
+    {
+      "file": "luarust-full.json",
+      "sha256": "b7b888fc6e914649043eade8d25d7a1a39d7525b6f1a67f12e295382f4fe99cc",
+      "decompiler": "luarust",
+      "version": "2.5",
+      "tier": "full",
+      "hash": "7193a5a671859c20",
+      "score": {
+        "passed": 12236,
+        "total": 12240
+      },
+      "totals": {
+        "pass": 12236,
+        "unusable": 6,
+        "refused": 4
+      },
+      "created": "2026-11-26T10:20:26Z",
+      "seconds": 1196.49,
+      "web": true,
+      "archived": false,
+      "levels": null
+    },
+    {
+      "file": "luarust-hard-full.json",
+      "sha256": "f38a46b72c911fd85430d87dd66259967bb3d8661ebaad9746952e891db6484d",
+      "decompiler": "luarust",
+      "version": "2.5",
+      "tier": "hard-full",
+      "hash": "4280f326d51a106a",
+      "score": {
+        "passed": 12236,
+        "total": 12240
+      },
+      "totals": {
+        "pass": 12236,
+        "unusable": 6,
+        "refused": 4
+      },
+      "created": "2026-11-26T10:21:58Z",
+      "seconds": 1289.43,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 4080,
+          "passed": 4079
+        },
+        "2": {
+          "total": 4080,
+          "passed": 4079
+        },
+        "3": {
+          "total": 4080,
+          "passed": 4078
+        }
+      }
     },
     {
       "file": "luacid-full.json",
