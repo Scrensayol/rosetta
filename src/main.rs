@@ -37,11 +37,11 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Round-trip hand-written .luau programs (files or directories)
+    /// Round-trip hand-written .luau programs and libraries (files or directories)
     Check {
         #[command(flatten)]
         common: Common,
-        /// Defaults to the cases directory
+        /// Defaults to the cases and libraries directories
         paths: Vec<PathBuf>,
     },
     /// Round-trip generated programs
@@ -112,6 +112,15 @@ enum Command {
     },
     /// Sign result files in place, as bench --sign does
     Sign { files: Vec<PathBuf> },
+    /// Vet library cases without a decompiler: the spec has to pass in full against the compiler's
+    /// own bytecode, the same way at every profile
+    LibraryCheck {
+        /// Library directories; defaults to every one in libraries/
+        dirs: Vec<PathBuf>,
+        /// Print every test line
+        #[arg(long)]
+        verbose: bool,
+    },
     /// Check the transform tier without a decompiler: every program's bytecode reads and writes
     /// back byte for byte, and rewritten at every level still prints what it printed
     TransformCheck {
@@ -228,6 +237,64 @@ fn main() -> ExitCode {
             println!("-- {:?}", observed.ending);
             ExitCode::SUCCESS
         }
+        Command::LibraryCheck { dirs, verbose } => {
+            let (mut files, mut library_dirs) = (Vec::new(), Vec::new());
+            let dirs = if dirs.is_empty() { vec![Path::new(env!("CARGO_MANIFEST_DIR")).join("libraries")] } else { dirs };
+            for dir in dirs {
+                collect_programs(&dir, &mut files, &mut library_dirs);
+            }
+            library_dirs.sort();
+            let mut ok = true;
+            for dir in library_dirs {
+                let case = match load_library(&dir) {
+                    Ok(c) => c,
+                    Err(e) => {
+                        println!("{e}");
+                        ok = false;
+                        continue;
+                    }
+                };
+                let name = &case.library.name;
+                let mut first: Option<luau::Observation> = None;
+                for profile in Profile::ALL {
+                    let started = std::time::Instant::now();
+                    let observed = match luau::compile(&case.source, profile) {
+                        Ok(b) => luau::run_with(&b, Some(&case.library)),
+                        Err(e) => {
+                            println!("{name} {profile}: doesn't compile: {e}");
+                            ok = false;
+                            continue;
+                        }
+                    };
+                    let passed = observed.log.iter().filter(|l| l.starts_with("ok\t")).count();
+                    let failed = observed.log.iter().filter(|l| !l.starts_with("ok\t")).collect::<Vec<_>>();
+                    println!(
+                        "{name} {profile}: {passed} passed, {} other lines, {:?}, {:.0} ms",
+                        failed.len(),
+                        observed.ending,
+                        started.elapsed().as_secs_f64() * 1000.0
+                    );
+                    for line in &failed {
+                        println!("  {line}");
+                    }
+                    if verbose && first.is_none() {
+                        for line in &observed.log {
+                            println!("  {line}");
+                        }
+                    }
+                    ok &= failed.is_empty() && passed > 0 && observed.ending == luau::Ending::Returned;
+                    match &first {
+                        None => first = Some(observed),
+                        Some(f) if *f != observed => {
+                            println!("  differs from {}", Profile::ALL[0]);
+                            ok = false;
+                        }
+                        Some(_) => {}
+                    }
+                }
+            }
+            if ok { ExitCode::SUCCESS } else { ExitCode::FAILURE }
+        }
         Command::TransformCheck { tier, show, only } => bench::transform_check(tier, show, only.as_deref()),
         Command::Compile { input, profile, grammar, output } => {
             let Some(profile) = Profile::parse(&profile) else {
@@ -298,23 +365,30 @@ fn main() -> ExitCode {
             if problems.is_empty() { ExitCode::SUCCESS } else { ExitCode::FAILURE }
         }
         Command::Check { common, paths } => {
-            let paths = if paths.is_empty() {
-                vec![Path::new(env!("CARGO_MANIFEST_DIR")).join("cases")]
-            } else {
-                paths
-            };
-            let mut cases = Vec::new();
+            let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+            let paths = if paths.is_empty() { vec![root.join("cases"), root.join("libraries")] } else { paths };
+            let (mut files, mut library_dirs) = (Vec::new(), Vec::new());
             for path in paths {
-                collect_luau(&path, &mut cases);
+                collect_programs(&path, &mut files, &mut library_dirs);
             }
-            cases.sort();
-            let cases = cases
+            files.sort();
+            library_dirs.sort();
+            let mut cases = files
                 .into_iter()
                 .map(|p| {
                     let extra = fs::read_to_string(&p).ok().and_then(|text| options_directive(&text)).unwrap_or_default();
-                    Case { name: p.file_stem().unwrap().to_string_lossy().into_owned(), source: Source::File(p), extra }
+                    Case { name: p.file_stem().unwrap().to_string_lossy().into_owned(), source: Source::File(p), extra, library: None }
                 })
-                .collect();
+                .collect::<Vec<_>>();
+            for dir in library_dirs {
+                match load_library(&dir) {
+                    Ok(l) => cases.push(Case { name: l.library.name.clone(), source: Source::Text(l.source), extra: Extra::default(), library: Some(l.library) }),
+                    Err(e) => {
+                        eprintln!("{e}");
+                        return ExitCode::from(2);
+                    }
+                }
+            }
             run(&common, cases, false, generator::GENERATOR_VERSION)
         }
         Command::Fuzz { common, seeds, reduce, grammar } => {
@@ -322,7 +396,7 @@ fn main() -> ExitCode {
                 eprintln!("--seeds takes a count or a range like 100..200");
                 return ExitCode::from(2);
             };
-            let cases = seeds.map(|seed| Case { name: format!("seed{seed}"), source: Source::Seed(seed, grammar), extra: Extra::default() }).collect();
+            let cases = seeds.map(|seed| Case { name: format!("seed{seed}"), source: Source::Seed(seed, grammar), extra: Extra::default(), library: None }).collect();
             let generator = match grammar {
                 Grammar::Full => generator::GENERATOR_VERSION.to_string(),
                 Grammar::Straight => format!("{}-straight", generator::GENERATOR_VERSION),
@@ -370,7 +444,7 @@ fn main() -> ExitCode {
                     return ExitCode::SUCCESS;
                 }
             }
-            let cases = mutants.into_iter().map(|m| Case { name: m.name.clone(), extra: m.extra, source: Source::Text(m.file_text()) }).collect();
+            let cases = mutants.into_iter().map(|m| Case { name: m.name.clone(), extra: m.extra, source: Source::Text(m.file_text()), library: None }).collect();
             let options = if compile_options { "-options" } else { "" };
             let generator = format!("mutate-{}-{}-seed{seed}-pool{hash}{options}", mutate::MUTATOR_VERSION, generator::GENERATOR_VERSION);
             run(&common, cases, reduce, &generator)
@@ -400,6 +474,35 @@ fn collect_luau(path: &Path, out: &mut Vec<PathBuf>) {
     }
 }
 
+// A directory holding spec.luau is a library (see load_library); anything else is searched for
+// plain .luau programs
+fn collect_programs(path: &Path, files: &mut Vec<PathBuf>, libraries: &mut Vec<PathBuf>) {
+    if path.join("spec.luau").is_file() {
+        libraries.push(path.to_path_buf());
+    } else if path.is_dir() {
+        for entry in fs::read_dir(path).into_iter().flatten().flatten() {
+            collect_programs(&entry.path(), files, libraries);
+        }
+    } else if path.extension().is_some_and(|e| e == "luau") {
+        files.push(path.to_path_buf());
+    }
+}
+
+pub struct LibraryCase {
+    pub source: String,
+    pub library: luau::Library,
+}
+
+// libraries/<name>/ holds the library as <name>.luau, the spec that grades it as spec.luau and
+// the library's license
+pub fn load_library(dir: &Path) -> Result<LibraryCase, String> {
+    let name = dir.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+    let read = |file: &str| fs::read_to_string(dir.join(file)).map_err(|e| format!("{}: {e}", dir.join(file).display()));
+    let source = read(&format!("{name}.luau"))?;
+    let library = luau::Library::new(&name, &read("spec.luau")?)?;
+    Ok(LibraryCase { source, library })
+}
+
 enum Source {
     File(PathBuf),
     Seed(u64, Grammar),
@@ -411,6 +514,8 @@ struct Case {
     source: Source,
     // compiler options for every profile this case runs at
     extra: Extra,
+    // set when the source is a library graded by its spec
+    library: Option<luau::Library>,
 }
 
 impl Case {
@@ -497,19 +602,19 @@ fn run(common: &Common, cases: Vec<Case>, reduce: bool, generator_version: &str)
         .map(|&(case, profile, d)| {
             let source = case.text();
             let decompiler = decompilers[d].as_ref();
-            let verdict = roundtrip::check(&source, profile, decompiler);
+            let verdict = roundtrip::check(&source, case.library.as_ref(), profile, decompiler);
             let mut reduced = None;
             if verdict.kind.is_failure() || verdict.kind == Kind::Refused {
                 let kind = verdict.kind;
                 if reduce && let Source::Seed(seed, grammar) = case.source {
                     let (program, _) = reduce::reduce(
                         &generator::generate(seed, grammar),
-                        |p| roundtrip::check(&p.render(), profile, decompiler).kind == kind,
+                        |p| roundtrip::check(&p.render(), None, profile, decompiler).kind == kind,
                         400,
                     );
                     reduced = Some(program.render());
-                } else if reduce && let Source::Text(text) = &case.source {
-                    reduced = Some(mutate::reduce(text, |s| roundtrip::check(s, profile, decompiler).kind == kind, 400));
+                } else if reduce && case.library.is_none() && let Source::Text(text) = &case.source {
+                    reduced = Some(mutate::reduce(text, |s| roundtrip::check(s, None, profile, decompiler).kind == kind, 400));
                 }
             }
             // refusals too: a refusal is something to fix, just not a wrong one

@@ -65,7 +65,8 @@ function openTest(section, t) {
 	}).join("");
 	const repro = section.id === "generated"
 		? `rosetta gen ${t.name.replace("seed", "")}`
-		: section.id === "cases" ? `cases/${t.name}.luau` : "rosetta mutate --count N --seed 1 --dump dir";
+		: section.id === "cases" ? `cases/${t.name}.luau`
+		: section.id === "libraries" ? `libraries/${t.name}/` : "rosetta mutate --count N --seed 1 --dump dir";
 	d.innerHTML = `
 		<div class="drawer-head"><h3>${esc(t.name)}</h3><button class="btn ghost" data-close title="close">${icon("close")}</button></div>
 		<div class="drawer-body">

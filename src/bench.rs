@@ -18,14 +18,14 @@ use serde::Serialize;
 use crate::{
     decompiler::{Decompiler, External},
     generator::{self, Grammar},
-    luau::{Extra, Profile},
+    luau::{Extra, Library, Profile},
     mutate,
     quality::Summary,
     roundtrip::{self, Kind},
 };
 
 // Bump when anything below changes which programs run or how they're graded
-pub const SUITE: &str = "rosetta-2";
+pub const SUITE: &str = "rosetta-3";
 pub const LUAU: &str = "0.747";
 const MUTATION_SEED: u64 = 1;
 const FUZZ_START: u64 = 1000;
@@ -83,6 +83,8 @@ struct Program {
     about: Option<String>,
     source: String,
     extra: Extra,
+    // a library case's spec, which runs after the program and grades it
+    library: Option<Library>,
 }
 
 struct Section {
@@ -195,6 +197,7 @@ fn sections(tier: Tier) -> Vec<Section> {
                 about: about(&source),
                 extra: crate::options_directive(&source).unwrap_or_default(),
                 source,
+                library: None,
             }
         })
         .collect::<Vec<_>>();
@@ -211,6 +214,7 @@ fn sections(tier: Tier) -> Vec<Section> {
             about: None,
             source: generator::generate(seed, Grammar::Full).render(),
             extra: Extra::default(),
+            library: None,
         })
         .collect::<Vec<_>>();
 
@@ -221,7 +225,28 @@ fn sections(tier: Tier) -> Vec<Section> {
         .into_iter()
         .map(|m| {
             let source = m.file_text();
-            Program { name: m.name.clone(), about: Some(format!("{} of {}: {}", m.name, m.origin, m.ops.join(", "))), extra: m.extra, source }
+            Program { name: m.name.clone(), about: Some(format!("{} of {}: {}", m.name, m.origin, m.ops.join(", "))), extra: m.extra, source, library: None }
+        })
+        .collect::<Vec<_>>();
+
+    let mut library_dirs = fs::read_dir(Path::new(env!("CARGO_MANIFEST_DIR")).join("libraries"))
+        .expect("read libraries")
+        .flatten()
+        .map(|e| e.path())
+        .filter(|p| p.join("spec.luau").is_file())
+        .collect::<Vec<_>>();
+    library_dirs.sort();
+    let libraries = library_dirs
+        .iter()
+        .map(|dir| {
+            let case = crate::load_library(dir).expect("load library");
+            Program {
+                name: case.library.name.clone(),
+                about: about(&case.library.spec),
+                source: case.source,
+                extra: Extra::default(),
+                library: Some(case.library),
+            }
         })
         .collect::<Vec<_>>();
 
@@ -235,6 +260,15 @@ fn sections(tier: Tier) -> Vec<Section> {
             title: "hand-written cases",
             about: format!("the {} programs in cases/, each a shape that has tripped decompilers up", cases.len()),
             programs: cases,
+        },
+        Section {
+            id: "libraries",
+            title: "libraries",
+            about: format!(
+                "the {} open-source libraries in libraries/, each graded by its own test suite: only the library is decompiled, then its spec runs against the output",
+                libraries.len()
+            ),
+            programs: libraries,
         },
         Section {
             id: "generated",
@@ -292,6 +326,9 @@ fn fingerprint(tier: Tier, sections: &[Section]) -> String {
             feed(&p.name);
             feed(&p.source);
             feed(&p.extra.to_string());
+            if let Some(library) = &p.library {
+                feed(&library.spec);
+            }
         }
     }
     format!("{h:016x}")
@@ -329,7 +366,7 @@ pub fn transform_check(tier: Tier, show: usize, only: Option<&str>) -> ExitCode 
                 Ok(_) => t.identity.push(format!("{} {profile}: written back differently", program.name)),
                 Err(e) => t.identity.push(format!("{} {profile}: {e}", program.name)),
             }
-            let want = crate::luau::run(&bytecode);
+            let want = crate::luau::run_with(&bytecode, program.library.as_ref());
             if want.ending == crate::luau::Ending::TimedOut {
                 t.unusable += 1;
                 return t;
@@ -347,7 +384,7 @@ pub fn transform_check(tier: Tier, show: usize, only: Option<&str>) -> ExitCode 
                             t.unreadable.push(format!("{} {profile}+x{level}: rewritten badly: {e}", program.name));
                             continue;
                         }
-                        let seen = crate::luau::run(&rewritten);
+                        let seen = crate::luau::run_with(&rewritten, program.library.as_ref());
                         if seen != want {
                             t.changed.push(format!("{} {profile}+x{level}: {:?} vs {:?}", program.name, seen.log.len(), want.log.len()));
                         }
@@ -459,7 +496,7 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
                 // (a program's own compiler options, and the tier's transform level)
                 let base = tier_profiles[q];
                 let profile = Profile { extra: Extra { transform: base.extra.transform, ..program.extra }, ..base };
-                let verdict = roundtrip::check(&program.source, profile, decompiler);
+                let verdict = roundtrip::check(&program.source, program.library.as_ref(), profile, decompiler);
                 (verdict.kind, verdict.detail, verdict.quality)
             })
             .collect::<Vec<_>>();

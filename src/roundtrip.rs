@@ -2,7 +2,7 @@ use serde::Serialize;
 
 use crate::{
     decompiler::Decompiler,
-    luau::{self, Ending, Observation, Profile},
+    luau::{self, Ending, Library, Observation, Profile},
     quality::{self, Quality},
     transform,
 };
@@ -43,13 +43,14 @@ impl Verdict {
 }
 
 // The reference is the original bytecode's behavior, never the source text: the output
-// has to recompile, at the same profile, into something that prints the same thing.
-pub fn check(source: &str, profile: Profile, decompiler: &dyn Decompiler) -> Verdict {
+// has to recompile, at the same profile, into something that prints the same thing. A library
+// case's spec runs after the program both times
+pub fn check(source: &str, library: Option<&Library>, profile: Profile, decompiler: &dyn Decompiler) -> Verdict {
     let bytecode = match luau::compile(source, profile) {
         Ok(b) => b,
         Err(e) => return Verdict::new(Kind::Unusable, format!("input doesn't compile: {e}")),
     };
-    let want = luau::run(&bytecode);
+    let want = luau::run_with(&bytecode, library);
     if want.ending == Ending::TimedOut {
         return Verdict::new(Kind::Unusable, "input exhausts the step budget");
     }
@@ -63,7 +64,7 @@ pub fn check(source: &str, profile: Profile, decompiler: &dyn Decompiler) -> Ver
         0 => bytecode,
         level => match transform::apply(&bytecode, level) {
             Ok(t) => {
-                let seen = luau::run(&t);
+                let seen = luau::run_with(&t, library);
                 if seen != want {
                     return Verdict::new(Kind::Unusable, format!("the transform changed what the program does: {}", first_difference(&want, &seen)));
                 }
@@ -87,7 +88,7 @@ pub fn check(source: &str, profile: Profile, decompiler: &dyn Decompiler) -> Ver
             return Verdict { output: Some(output), want: Some(want), ..Verdict::new(Kind::RecompileFailed, e) };
         }
     };
-    let got = luau::run(&recompiled);
+    let got = luau::run_with(&recompiled, library);
     let (kind, detail) = if got == want { (Kind::Pass, String::new()) } else { (Kind::Mismatch, first_difference(&want, &got)) };
     let quality = (kind == Kind::Pass).then(|| quality::measure(source, &output, profile.debug >= 2, cpu));
     Verdict { kind, detail, output: Some(output), want: Some(want), got: Some(got), quality }

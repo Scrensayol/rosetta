@@ -61,6 +61,12 @@ the original program, so it's reproducible and anyone can check it.
   evaluation order with side effects, `getfenv` / `setfenv`, type syntax compiled with type
   information, generalized iteration and `__iter`, a function at the local and register
   limits, and vector constants. New edge cases are welcome.
+- **libraries/**: open-source Luau libraries graded by their own test suites. Only the library
+  is decompiled; its upstream spec then runs against the output in the same VM, reaching it
+  through `require`, under a small busted shim (src/busted.luau). Real code with real
+  semantics, judged by tests nobody wrote for Rosetta. `rosetta library-check` vets a new one:
+  its spec has to pass in full on the compiler's own bytecode, the same way at every profile.
+  See [libraries/README.md](libraries/README.md) for versions, licenses and what was ported.
 - **generated**: `fuzz` builds random programs from a seed with a grammar (`full`, `straight`
   for straight-line code, `branches` for no loops), so a run is reproducible from its seed range.
 - **mutants**: `mutate` is mutation fuzzing in the style of Bin2Wrong. It starts from existing programs (the cases by default, plus `--pool` directories and

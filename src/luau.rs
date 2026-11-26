@@ -154,10 +154,33 @@ pub const STEP_BUDGET: u64 = 2_000_000;
 pub const WALL_LIMIT: Duration = Duration::from_secs(5);
 pub const OUT_OF_MEMORY: &str = "memory limit";
 
+// A library case: the program is an open-source library, and its spec (behind the busted shim)
+// runs after it in the same VM, reaching it through require(name). Only the library is ever
+// decompiled; the spec is the judge
+pub struct Library {
+    pub name: String,
+    pub spec: String,
+    tests: Vec<u8>,
+}
+
+const BUSTED: &str = include_str!("busted.luau");
+
+impl Library {
+    pub fn new(name: &str, spec: &str) -> Result<Library, String> {
+        let source = format!("{BUSTED}\n{spec}\nbusted_run(busted_root, \"\", {{}}, {{}})\n");
+        let tests = compile(&source, Profile::new(1, 1)).map_err(|e| format!("{name}'s spec doesn't compile: {e}"))?;
+        Ok(Library { name: name.to_string(), spec: spec.to_string(), tests })
+    }
+}
+
 // Runs bytecode in a fresh VM. print is captured, and anything that differs between two
 // faithful compilations of the same program (line numbers in error positions, heap
 // addresses) is normalized away.
 pub fn run(bytecode: &[u8]) -> Observation {
+    run_with(bytecode, None)
+}
+
+pub fn run_with(bytecode: &[u8], library: Option<&Library>) -> Observation {
     let lua = Lua::new();
     let _ = lua.set_memory_limit(64 << 20);
 
@@ -203,7 +226,25 @@ pub fn run(bytecode: &[u8]) -> Observation {
     let prelude = PRELUDE.get_or_init(|| compile(crate::generator::PRELUDE, Profile::new(1, 1)).expect("prelude compiles"));
     lua.load(&prelude[..]).set_mode(ChunkMode::Binary).set_name("=prelude").exec().expect("prelude runs");
 
-    let result = lua.load(bytecode).set_mode(ChunkMode::Binary).set_name("=prog").exec();
+    let result = match library {
+        None => lua.load(bytecode).set_mode(ChunkMode::Binary).set_name("=prog").exec(),
+        Some(library) => (|| {
+            // require knows only the library, so a library probing for optional modules
+            // (inspect looks for string.buffer) gets the error a missing module gives
+            let modules = lua.create_table()?;
+            let require = {
+                let modules = modules.clone();
+                lua.create_function(move |_, name: String| match modules.raw_get::<mlua::Value>(name.as_str())? {
+                    mlua::Value::Nil => Err(mlua::Error::runtime(format!("module '{name}' not found"))),
+                    module => Ok(module),
+                })?
+            };
+            lua.globals().set("require", require)?;
+            let module = lua.load(bytecode).set_mode(ChunkMode::Binary).set_name("=prog").call::<mlua::Value>(())?;
+            modules.raw_set(library.name.as_str(), module)?;
+            lua.load(&library.tests[..]).set_mode(ChunkMode::Binary).set_name("=tests").exec()
+        })(),
+    };
     let ending = if steps.get() > STEP_BUDGET {
         Ending::TimedOut
     } else {
