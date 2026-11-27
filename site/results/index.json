@@ -169,6 +169,27 @@
       "levels": null
     },
     {
+      "file": "luarust-full.json",
+      "sha256": "0493039c951667ad83f848d0a7f638f11ec07d1838d48adf9bc146b079cefc6c",
+      "decompiler": "luarust",
+      "version": "2.5",
+      "tier": "full",
+      "hash": "f0eae8ffcedd440e",
+      "score": {
+        "passed": 12276,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 12276,
+        "unusable": 6
+      },
+      "created": "2026-11-27T12:00:52Z",
+      "seconds": 1327.32,
+      "web": true,
+      "archived": false,
+      "levels": null
+    },
+    {
       "file": "luarust-hard-full.json",
       "sha256": "f8c761c62788a3a54de1ff4c6eecfd64416c62d608bfbfd7894a5c48631c86dc",
       "decompiler": "luarust",
@@ -234,28 +255,6 @@
           "passed": 294
         }
       }
-    },
-    {
-      "file": "luarust-full.json",
-      "sha256": "3285779c7708daca779e49464e5b5b575fc9165ae8c6ac75fcc35abf04ab8329",
-      "decompiler": "luarust",
-      "version": "2.5",
-      "tier": "full",
-      "hash": "f0eae8ffcedd440e",
-      "score": {
-        "passed": 12274,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 12274,
-        "unusable": 6,
-        "decompile_failed": 2
-      },
-      "created": "2026-11-26T16:40:31Z",
-      "seconds": 1736.36,
-      "web": true,
-      "archived": false,
-      "levels": null
     },
     {
       "file": "sunberry-full.json",
