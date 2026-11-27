@@ -22,7 +22,7 @@ for f in *.json */*.json; do
 	case $f in */*) archived=true ;; *) archived=false ;; esac
 	sum=$(sha256sum "$f" | cut -d' ' -f1)
 	jq -c --arg file "$f" --arg sum "$sum" --argjson web "$web" --argjson archived "$archived" '{
-		file: $file, sha256: $sum, decompiler: .decompiler.name, version: .decompiler.version,
+		file: $file, sha256: $sum, decompiler: .decompiler.name, version: .decompiler.version, options: .decompiler.options,
 		tier: .suite.tier, hash: .suite.hash, score, totals, same_calls, created, seconds,
 		web: (.decompiler.name as $n | $web | index($n) != null), archived: $archived,
 		levels: ([.profiles[] | (capture("\\+[xo](?<l>[0-9])") // {l: null}) | .l] as $lv

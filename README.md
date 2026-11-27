@@ -67,7 +67,8 @@ cargo build --release
 | hard-quick / hard-full | the same programs with their bytecode rewritten first | 888 / 12,282 |
 | obfuscated | quick's programs, obfuscated as source first | 888 |
 
-`bench` writes `<name>-<tier>.json` with every program's verdict at every profile. `--gallery`
+`bench` writes `<name>-<tier>.json` with every program's verdict at every profile.
+`--options name=...` records the settings a decompiler ran with, which the result page shows. `--gallery`
 also writes `<name>-<tier>.gallery.json`, with the source, output and where they differ for every
 failure, which the website shows in a failed test's "see why" panel.
 

@@ -99,6 +99,11 @@ enum Command {
         /// name=version, shown with that decompiler's result. Repeat for each
         #[arg(long = "version")]
         versions: Vec<String>,
+        /// name=options: the settings that decompiler ran with (a web API's query options, a
+        /// CLI's flags), shown with its result so nobody has to dig through an adapter. Repeat
+        /// for each
+        #[arg(long = "options")]
+        options: Vec<String>,
         /// Directory for the result files
         #[arg(long, default_value = ".")]
         out: PathBuf,
@@ -251,7 +256,9 @@ fn main() -> ExitCode {
     }
 
     match Cli::parse().command {
-        Command::Bench { decompilers, tier, versions, out, upload, sign, gallery, reduce } => bench::run(&decompilers, tier, &versions, &out, upload, sign, gallery, reduce),
+        Command::Bench { decompilers, tier, versions, options, out, upload, sign, gallery, reduce } => {
+            bench::run(&decompilers, tier, &versions, &options, &out, upload, sign, gallery, reduce)
+        }
         Command::Gallery { result, decompiler, reduce } => bench::backfill(&result, &decompiler, reduce),
         Command::Sign { files } => {
             let mut failed = false;

@@ -127,6 +127,9 @@ struct DecompilerInfo {
     name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     version: Option<String>,
+    // the settings it ran with, as whoever ran it described them: not part of the suite
+    #[serde(skip_serializing_if = "Option::is_none")]
+    options: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -561,7 +564,7 @@ fn first_line(detail: &str) -> String {
     if line.len() > 240 { format!("{}...", &line[..line.floor_char_boundary(240)]) } else { line.to_string() }
 }
 
-pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload: bool, sign_results: bool, gallery: bool, reduce: bool) -> ExitCode {
+pub fn run(specs: &[String], tier: Tier, versions: &[String], options: &[String], out: &Path, upload: bool, sign_results: bool, gallery: bool, reduce: bool) -> ExitCode {
     if specs.is_empty() {
         eprintln!("give at least one --decompiler name=command");
         return ExitCode::from(2);
@@ -580,6 +583,14 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
             return ExitCode::from(2);
         };
         version_of.insert(name.to_string(), version.to_string());
+    }
+    let mut options_of = BTreeMap::new();
+    for o in options {
+        let Some((name, text)) = o.split_once('=') else {
+            eprintln!("--options takes name=options");
+            return ExitCode::from(2);
+        };
+        options_of.insert(name.to_string(), text.to_string());
     }
     if let Err(e) = fs::create_dir_all(out) {
         eprintln!("can't create {}: {e}", out.display());
@@ -686,7 +697,7 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
             rosetta: env!("CARGO_PKG_VERSION"),
             luau: LUAU,
             suite: SuiteInfo { name: SUITE, tier: tier.name(), hash: hash.clone() },
-            decompiler: DecompilerInfo { version: version_of.get(&name).cloned(), name: name.clone() },
+            decompiler: DecompilerInfo { version: version_of.get(&name).cloned(), options: options_of.get(&name).cloned(), name: name.clone() },
             created: now_utc(),
             seconds,
             threads: rayon::current_num_threads(),

@@ -273,6 +273,7 @@ function sidePanel(data, check, bytes, source) {
 			${verdictLine}${callsLine}
 			<div class="meta">
 				<div>${icon("chip")}decompiler<span>${esc(data.decompiler.name)}${data.decompiler.version ? ` <span class="keep" style="color:var(--text-muted);font-weight:400">${esc(data.decompiler.version)}</span>` : ""}</span></div>
+				${data.decompiler.options ? `<div>${icon("layers")}options<span class="keep" style="font-weight:400">${esc(data.decompiler.options)}</span></div>` : ""}
 				<div>${icon("clock")}time taken (seconds)<span>${Number(data.seconds).toFixed(2)}</span></div>
 				<div>${icon("layers")}suite<span>${esc(data.suite.name)} ${esc(data.suite.tier)}</span></div>
 				<div>${icon("gear")}rosetta / luau<span>${esc(data.rosetta)} / ${esc(data.luau)}</span></div>

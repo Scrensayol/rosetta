@@ -62,7 +62,7 @@ async function board() {
 				while (rank > 0 && same(rows[rank - 1], r)) rank--;
 				return `<tr class="rise" style="--i:${i}" data-file="${esc(r.file.replace(/\.json$/, ""))}">
 					<td class="rank">${rank + 1}</td>
-					<td class="who">${esc(r.decompiler)}<small class="keep">${esc(r.version || "")}</small></td>
+					<td class="who"${r.options ? ` title="ran with: ${esc(r.options)}"` : ""}>${esc(r.decompiler)}<small class="keep">${esc(r.version || "")}</small></td>
 					<td class="meter"><div class="meter-row"><div class="track2"><i data-w="${pct(r.score)}%"></i></div><b>${fmtPct(pct(r.score))}</b></div></td>
 					<td class="num ${wrong ? "bad" : "dim"}">${wrong.toLocaleString()}</td>
 					<td class="num hide-sm ${refused ? "warn" : "dim"}">${refused.toLocaleString()}</td>
