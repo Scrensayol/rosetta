@@ -31,7 +31,7 @@ let suite = null;
 // ?tier=hard-quick opens the board on that tier
 // (plain "hard" from before the hard tier had two sizes opens hard-quick)
 let tier = ({ hard: "hard-quick" })[new URLSearchParams(location.search).get("tier")] || new URLSearchParams(location.search).get("tier") || "quick";
-const TIER_ORDER = ["quick", "full", "hard-quick", "hard-full"];
+const TIER_ORDER = ["quick", "full", "hard-quick", "hard-full", "obfuscated"];
 async function board() {
 	const index = await officialResults();
 	const suiteOf = r => index.suites[r.hash]?.name || "?";
@@ -53,7 +53,7 @@ async function board() {
 		${tier.startsWith("hard") ? x3(rows) : ""}
 		<table>
 			<thead><tr><th class="rank">#</th><th>decompiler</th><th class="meter">round trips passed</th>
-				<th class="num">wrong</th><th class="num hide-sm">refused</th><th class="num hide-sm">time</th></tr></thead>
+				<th class="num">wrong</th><th class="num hide-sm">refused</th>${rows.some(r => r.same_calls) ? '<th class="num hide-sm" title="of the passes, how many also changed the same things through the same calls (table.insert, setmetatable, coroutines...) in the same order">same calls</th>' : ""}<th class="num hide-sm">time</th></tr></thead>
 			<tbody>${rows.map((r, i) => {
 				const wrong = failures(r.totals), refused = r.totals.refused || 0;
 				// a tie shares its rank
@@ -62,14 +62,15 @@ async function board() {
 				while (rank > 0 && same(rows[rank - 1], r)) rank--;
 				return `<tr class="rise" style="--i:${i}" data-file="${esc(r.file.replace(/\.json$/, ""))}">
 					<td class="rank">${rank + 1}</td>
-					<td class="who">${esc(r.decompiler)}<small class="keep">${esc(r.version || "")}</small></td>
+					<td class="who"${r.options ? ` title="ran with: ${esc(r.options)}"` : ""}>${esc(r.decompiler)}<small class="keep">${esc(r.version || "")}</small></td>
 					<td class="meter"><div class="meter-row"><div class="track2"><i data-w="${pct(r.score)}%"></i></div><b>${fmtPct(pct(r.score))}</b></div></td>
 					<td class="num ${wrong ? "bad" : "dim"}">${wrong.toLocaleString()}</td>
 					<td class="num hide-sm ${refused ? "warn" : "dim"}">${refused.toLocaleString()}</td>
+					${rows.some(r => r.same_calls) ? `<td class="num hide-sm dim">${r.same_calls?.total ? fmtPct(pct(r.same_calls)) : "-"}</td>` : ""}
 					<td class="num hide-sm dim">${r.web ? "web api" : `${Number(r.seconds).toFixed(1)}s`}</td></tr>`;
-			}).join("") || '<tr><td colspan="6" class="dim" style="padding:18px 14px">no official results yet.</td></tr>'}</tbody>
+			}).join("") || '<tr><td colspan="7" class="dim" style="padding:18px 14px">no official results yet.</td></tr>'}</tbody>
 		</table>
-		<div class="board-foot">${info ? `${Object.entries(info.sections).map(([k, v]) => `${v.count} ${k}`).join(" · ")} · each at ${info.profiles} profiles. ` : ""}${old ? "an older suite: its scores don't compare with the current one's. " : ""}${tier.startsWith("hard") ? "the hard tiers rewrite each program's bytecode before the decompiler sees it (same behavior, not the compiler's shapes): robustness, scored apart from quick and full. " : ""}time is the wall clock for the whole run on one machine; web apis are rate-limited, so theirs measures the network.</div>`;
+		<div class="board-foot">${info ? `${Object.entries(info.sections).map(([k, v]) => `${v.count} ${k}`).join(" · ")} · each at ${info.profiles} profiles. ` : ""}${old ? "an older suite: its scores don't compare with the current one's. " : ""}${tier.startsWith("hard") ? "the hard tiers rewrite each program's bytecode before the decompiler sees it (same behavior, not the compiler's shapes): robustness, scored apart from quick and full. " : ""}${tier === "obfuscated" ? "the obfuscated tier runs each program through an open-source obfuscator (prometheus) first: the decompiled vm has to still work, nobody has to deobfuscate it. scored apart. " : ""}time is the wall clock for the whole run on one machine; web apis are rate-limited, so theirs measures the network.</div>`;
 	document.querySelectorAll(".suite-name").forEach(s => (s.textContent = suites[0] || s.textContent));
 	el.querySelectorAll("[data-suite]").forEach(b => b.addEventListener("click", () => { suite = b.dataset.suite; board(); }));
 	el.querySelectorAll("[data-tier]").forEach(b => b.addEventListener("click", () => { tier = b.dataset.tier; board(); }));
