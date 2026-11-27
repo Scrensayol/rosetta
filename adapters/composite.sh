@@ -2,14 +2,16 @@
 # Composite (https://composite.mspaint.cc) as a Rosetta decompiler: POST the bytecode, base64,
 # with telemetry off so the server doesn't keep test programs. Prints the source; an error the
 # server reports is a refusal (exit 3), except a rate limit (429), which is waited out.
+# An optional second argument picks the backend (luau or rust); without it the server picks.
 set -eu
+backend=${2:+&backend=$2}
 req=$(mktemp)
 body=$(mktemp)
 trap 'rm -f "$req" "$body"' EXIT
 base64 -w0 "$1" >"$req"
 for delay in 2 4 8 16 30 0; do
 	code=$(curl -sS -m 25 -o "$body" -w '%{http_code}' -H 'Content-Type: text/plain' \
-		--data-binary @"$req" 'https://composite.mspaint.cc/decompile?encoding=base64&telemetry=false') || {
+		--data-binary @"$req" 'https://composite.mspaint.cc/decompile?encoding=base64&telemetry=false'"$backend") || {
 		echo "unsupported: request failed" >&2
 		exit 3
 	}
