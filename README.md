@@ -234,62 +234,64 @@ prints what it would have sent.
 ## Results
 
 The leaderboard and every official `bench` result are on the website,
-[rosetta.wtf](https://rosetta.wtf/). The `bench` tables come first (suite rosetta-2, 41 cases, run
-2026-11-25 on Luau 0.747, luarust 2026-11-26). The fuzz and check tables after them are older per-command runs
+[rosetta.wtf](https://rosetta.wtf/). The `bench` tables come first (suite rosetta-3, 41 cases and 6
+libraries, run 2026-11-26 on Luau 0.747). rosetta-2's results are archived on the
+site. The fuzz and check tables after them are older per-command runs
 (rosetta-1's 35 cases, sunberry 0.5.4), which also compare readability across
 decompilers on the round trips they all passed.
 
-**The full tier** (`bench --tier full`: the 41 cases, seeds 1000..2000 and 1000 mutants of the
-cases, 12,240 usable round trips each). Every result file is on [the website](https://rosetta.wtf/),
-with each program's verdict at each profile:
+**The full tier** (`bench --tier full`: the 41 cases, the 6 libraries, seeds 1000..2000 and 1000
+mutants of the cases, 12,276 usable round trips each). Every result file is on
+[the website](https://rosetta.wtf/), with each program's verdict at each profile and, for the
+failures, what the decompiler gave back:
 
-| decompiler | pass | wrong | doesn't recompile | refused | cases | generated | mutants |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| sunberry 0.5.6 (new core) | 12,238 (99.98%) | 0 | 0 | 2 | 246/246 | 5,994/5,994 | 5,998/6,000 |
-| luarust 2.5 | 12,236 (99.97%) | 0 | 0 | 4 | 246/246 | 5,994/5,994 | 5,996/6,000 |
-| luacid | 12,201 (99.7%) | 37 | 0 | 2 | 244/246 | 5,990/5,994 | 5,967/6,000 |
-| lua.expert | 12,132 (99.1%) | 4 | 0 | 104 | 246/246 | 5,886/5,994 | 6,000/6,000 |
-| Composite | 11,923 (97.4%) | 76 | 0 | 241 | 246/246 | 5,873/5,994 | 5,804/6,000 |
-| Tovek 2.7 | 11,843 (96.8%) | 4 | 0 | 393 | 244/246 | 5,772/5,994 | 5,827/6,000 |
-| Fission 1.0.5-beta | 10,009 (81.8%) | 1,281 | 950 | 0 | 210/246 | 4,426/5,994 | 5,373/6,000 |
-| sunberry (old core) | 8,991 (73.5%) | 2,932 | 317 | 0 | 200/246 | 3,685/5,994 | 5,106/6,000 |
+| decompiler | pass | wrong | doesn't recompile | refused | failed | cases | libraries | generated | mutants |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| luarust 2.5 | 12,274 (99.98%) | 0 | 0 | 0 | 2 | 246/246 | 36/36 | 5,993/5,994 | 5,999/6,000 |
+| sunberry 0.5.6 (new core) | 12,274 (99.98%) | 0 | 0 | 2 | 0 | 246/246 | 36/36 | 5,994/5,994 | 5,998/6,000 |
+| luacid | 12,237 (99.7%) | 37 | 0 | 2 | 0 | 244/246 | 36/36 | 5,990/5,994 | 5,967/6,000 |
+| lua.expert | 12,167 (99.1%) | 4 | 0 | 105 | 0 | 246/246 | 36/36 | 5,885/5,994 | 6,000/6,000 |
+| Composite | 11,955 (97.4%) | 80 | 0 | 241 | 0 | 246/246 | 32/36 | 5,873/5,994 | 5,804/6,000 |
+| Tovek 2.7 | 11,879 (96.8%) | 4 | 0 | 393 | 0 | 244/246 | 36/36 | 5,772/5,994 | 5,827/6,000 |
+| Fission 1.0.5-beta | 10,031 (81.7%) | 1,295 | 950 | 0 | 0 | 210/246 | 22/36 | 4,426/5,994 | 5,373/6,000 |
+| sunberry (old core) | 9,013 (73.4%) | 2,940 | 323 | 0 | 0 | 200/246 | 22/36 | 3,685/5,994 | 5,106/6,000 |
 
-sunberry's two refusals are mutant mut1-606 at O2g1 and O2g2 (`a condition that isn't an
-expression`); luarust's four are mutant mut1-472 at O1 and O2 (HTTP 422, `This could not be
-decompiled`). The quick tier (846 round trips) has the same order at the top: sunberry, luarust and
-lua.expert pass all 846, luacid 843, Composite 834, Tovek 756, Fission 684 and the old core 584.
+luarust's two failures are seed1591 and mut1-163 at O1g1, where its server ran past the 30
+seconds. Both pass when rerun. sunberry's two refusals are mutant mut1-606 at O2g1 and O2g2. The
+quick tier (882 round trips) has the same order at the top: sunberry, luarust and lua.expert pass
+all 882, luacid 879, Composite 866, Tovek 792, Fission 706 and the old core 606.
 
 **The hard tiers** (the same programs with their bytecode rewritten; see [The hard tiers](#the-hard-tiers)).
-x1, x2 and x3 each cover a third of the round trips. hard-full, 12,240 usable round trips each:
+x1, x2 and x3 each cover a third of the round trips. hard-full, 12,276 usable round trips each:
 
 | decompiler | pass | x1 | x2 | x3 | wrong | doesn't recompile | refused |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| luarust 2.5 | 12,236 (99.97%) | 4,079/4,080 | 4,079/4,080 | 4,078/4,080 | 0 | 0 | 4 |
-| luacid | 5,613 (45.9%) | 3,726/4,080 | 1,391/4,080 | 496/4,080 | 577 | 5 | 6,045 |
-| lua.expert | 3,852 (31.5%) | 3,722/4,080 | 128/4,080 | 2/4,080 | 1 | 0 | 8,387 |
-| Tovek 2.7 | 3,784 (30.9%) | 3,598/4,080 | 179/4,080 | 7/4,080 | 1 | 0 | 8,455 |
-| Fission 1.0.5-beta | 2,995 (24.5%) | 2,954/4,080 | 25/4,080 | 16/4,080 | 8,442 | 803 | 0 |
-| Composite | 2,919 (23.8%) | 2,145/4,080 | 752/4,080 | 22/4,080 | 722 | 0 | 8,599 |
-| sunberry (old core) | 1,317 (10.8%) | 933/4,080 | 372/4,080 | 12/4,080 | 10,887 | 36 | 0 |
-| sunberry 0.5.6 (new core) | 379 (3.1%) | 372/4,080 | 5/4,080 | 2/4,080 | 2 | 0 | 11,859 |
+| luarust 2.5 | 12,276 (100%) | 4,092/4,092 | 4,092/4,092 | 4,092/4,092 | 0 | 0 | 0 |
+| luacid | 5,622 (45.8%) | 3,734/4,092 | 1,392/4,092 | 496/4,092 | 578 | 5 | 6,071 |
+| lua.expert | 3,859 (31.4%) | 3,729/4,092 | 128/4,092 | 2/4,092 | 1 | 0 | 8,416 |
+| Tovek 2.7 | 3,792 (30.9%) | 3,606/4,092 | 179/4,092 | 7/4,092 | 1 | 0 | 8,483 |
+| Fission 1.0.5-beta | 3,001 (24.4%) | 2,960/4,092 | 25/4,092 | 16/4,092 | 8,469 | 806 | 0 |
+| Composite | 2,926 (23.8%) | 2,149/4,092 | 755/4,092 | 22/4,092 | 724 | 0 | 8,626 |
+| sunberry (old core) | 1,317 (10.7%) | 933/4,092 | 372/4,092 | 12/4,092 | 10,923 | 36 | 0 |
+| sunberry 0.5.6 (new core) | 379 (3.1%) | 372/4,092 | 5/4,092 | 2/4,092 | 2 | 0 | 11,895 |
 
-hard-quick, 846 round trips each:
+hard-quick, 882 round trips each:
 
 | decompiler | pass | x1 | x2 | x3 | wrong | doesn't recompile | refused |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| luarust 2.5 | 846 (100%) | 282/282 | 282/282 | 282/282 | 0 | 0 | 0 |
-| luacid | 344 (40.7%) | 239/282 | 77/282 | 28/282 | 30 | 0 | 472 |
-| lua.expert | 256 (30.3%) | 240/282 | 16/282 | 0/282 | 0 | 0 | 590 |
-| Tovek 2.7 | 223 (26.4%) | 207/282 | 16/282 | 0/282 | 0 | 0 | 623 |
-| Fission 1.0.5-beta | 216 (25.5%) | 203/282 | 7/282 | 6/282 | 579 | 51 | 0 |
-| Composite | 213 (25.2%) | 142/282 | 69/282 | 2/282 | 41 | 0 | 592 |
-| sunberry (old core) | 73 (8.6%) | 54/282 | 17/282 | 2/282 | 770 | 3 | 0 |
-| sunberry 0.5.6 (new core) | 35 (4.1%) | 34/282 | 1/282 | 0/282 | 0 | 0 | 811 |
+| luarust 2.5 | 882 (100%) | 294/294 | 294/294 | 294/294 | 0 | 0 | 0 |
+| luacid | 353 (40.0%) | 247/294 | 78/294 | 28/294 | 31 | 0 | 498 |
+| lua.expert | 264 (29.9%) | 248/294 | 16/294 | 0/294 | 0 | 0 | 618 |
+| Tovek 2.7 | 231 (26.2%) | 215/294 | 16/294 | 0/294 | 0 | 0 | 651 |
+| Fission 1.0.5-beta | 222 (25.2%) | 209/294 | 7/294 | 6/294 | 606 | 54 | 0 |
+| Composite | 220 (24.9%) | 146/294 | 72/294 | 2/294 | 43 | 0 | 619 |
+| sunberry (old core) | 73 (8.3%) | 54/294 | 17/294 | 2/294 | 806 | 3 | 0 |
+| sunberry 0.5.6 (new core) | 35 (4.0%) | 34/294 | 1/294 | 0/294 | 0 | 0 | 847 |
 
-luarust is the first to clear the hard tiers: its hard-full score equals its full score, with the
-same four refusals and nothing wrong, and it passes all of hard-quick. Behind it, luacid gets the
-furthest by a long way, but it pays for it in wrong output (577 on hard-full), where lua.expert and
-Tovek mostly refuse what they can't follow.
+luarust clears both hard tiers: every round trip of hard-full and hard-quick passes, libraries
+included. Behind it, luacid gets the furthest by a long way, but it pays for that in wrong output
+(578 on hard-full), where lua.expert and Tovek mostly refuse what they can't follow. Apart from
+luarust, none gets more than 9 of the 36 library round trips through a hard tier.
 sunberry's new core refuses nearly everything past x1: it won't print code it can't prove matches.
 
 The per-command runs were on 2026-11-22 (Luau 0.747), with seven decompilers: sunberry 0.5.4 (its new core with `--strict`, and
