@@ -1,6 +1,26 @@
 {
   "results": [
     {
+      "file": "composite-rust-quick.json",
+      "sha256": "cdc5af839c5292b234f90ca564b80e641d9710c8e3c36f19afe0aee7399d287b",
+      "decompiler": "composite",
+      "version": "rust",
+      "tier": "quick",
+      "hash": "e24826907050bd1d",
+      "score": {
+        "passed": 882,
+        "total": 882
+      },
+      "totals": {
+        "pass": 882
+      },
+      "created": "2026-11-27T15:22:03Z",
+      "seconds": 393.56,
+      "web": true,
+      "archived": false,
+      "levels": null
+    },
+    {
       "file": "lua-expert-quick.json",
       "sha256": "986203adbb2b6720cb04f75ff1f5b4a43fec6fc4d375052ee4acde8e54555640",
       "decompiler": "lua.expert",
@@ -82,23 +102,22 @@
       "levels": null
     },
     {
-      "file": "composite-quick.json",
-      "sha256": "612dcc9f5b5c659f73e54c6750dd320ac3c66f8da13009aca6b994c7c2b86410",
+      "file": "composite-luau-quick.json",
+      "sha256": "aa54e95e0bc0b3591ca1ea69cf23807653e438061f3501905654b86dc3c6afbc",
       "decompiler": "composite",
-      "version": null,
+      "version": "luau",
       "tier": "quick",
       "hash": "e24826907050bd1d",
       "score": {
-        "passed": 866,
+        "passed": 877,
         "total": 882
       },
       "totals": {
-        "pass": 866,
-        "refused": 8,
-        "mismatch": 8
+        "pass": 877,
+        "mismatch": 5
       },
-      "created": "2026-11-26T14:41:31Z",
-      "seconds": 424.16,
+      "created": "2026-11-27T12:15:52Z",
+      "seconds": 369.32,
       "web": true,
       "archived": false,
       "levels": null
@@ -278,6 +297,64 @@
       "levels": null
     },
     {
+      "file": "composite-luau-full.json",
+      "sha256": "e3b931bcee042b1e2d0cc4c104dc7d9cffd3942fba3a31a1eba2fed165ffc62a",
+      "decompiler": "composite",
+      "version": "luau",
+      "tier": "full",
+      "hash": "f0eae8ffcedd440e",
+      "score": {
+        "passed": 12265,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 12265,
+        "unusable": 6,
+        "mismatch": 11
+      },
+      "created": "2026-11-27T13:41:17Z",
+      "seconds": 4709.73,
+      "web": true,
+      "archived": false,
+      "levels": null
+    },
+    {
+      "file": "composite-luau-hard-full.json",
+      "sha256": "12dc65edf90af8613682f7e3e7a66cc6a9ac2b99aa92b7f51eca04d421c8a012",
+      "decompiler": "composite",
+      "version": "luau",
+      "tier": "hard-full",
+      "hash": "9921d3bde4a99bfd",
+      "score": {
+        "passed": 12246,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 12246,
+        "unusable": 6,
+        "refused": 21,
+        "mismatch": 9
+      },
+      "created": "2026-11-27T15:15:21Z",
+      "seconds": 5640.51,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 4092,
+          "passed": 4077
+        },
+        "2": {
+          "total": 4092,
+          "passed": 4087
+        },
+        "3": {
+          "total": 4092,
+          "passed": 4082
+        }
+      }
+    },
+    {
       "file": "luacid-full.json",
       "sha256": "d625ffa9666675ace542f238c92ffdad3fba41d42d24cc69a862e70b80fa4f05",
       "decompiler": "luacid",
@@ -299,6 +376,40 @@
       "web": true,
       "archived": false,
       "levels": null
+    },
+    {
+      "file": "composite-luau-hard-quick.json",
+      "sha256": "c4f0e5ac287605e49442ccc2ceb7cb8f4002c92cbd2ec9f6cd1d48c4f6d81363",
+      "decompiler": "composite",
+      "version": "luau",
+      "tier": "hard-quick",
+      "hash": "9bcb49d29e867a92",
+      "score": {
+        "passed": 879,
+        "total": 882
+      },
+      "totals": {
+        "pass": 879,
+        "mismatch": 3
+      },
+      "created": "2026-11-27T12:22:44Z",
+      "seconds": 407.06,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 294,
+          "passed": 292
+        },
+        "2": {
+          "total": 294,
+          "passed": 294
+        },
+        "3": {
+          "total": 294,
+          "passed": 293
+        }
+      }
     },
     {
       "file": "sunberry-hard-full.json",
@@ -359,6 +470,99 @@
       "levels": null
     },
     {
+      "file": "composite-rust-hard-full.json",
+      "sha256": "f8c578735bcc37f40dbcad8c2cb6b7b82b201bb9b5584e18b09339cc8f166bbe",
+      "decompiler": "composite",
+      "version": "rust",
+      "tier": "hard-full",
+      "hash": "9921d3bde4a99bfd",
+      "score": {
+        "passed": 12102,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 12102,
+        "unusable": 6,
+        "refused": 168,
+        "mismatch": 6
+      },
+      "created": "2026-11-27T18:45:56Z",
+      "seconds": 4723.08,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 4092,
+          "passed": 4036
+        },
+        "2": {
+          "total": 4092,
+          "passed": 4030
+        },
+        "3": {
+          "total": 4092,
+          "passed": 4036
+        }
+      }
+    },
+    {
+      "file": "composite-rust-full.json",
+      "sha256": "3908ab97d5ec7460ae77bc22ece59b91051abbf25fe85019b04d21c76fc9268d",
+      "decompiler": "composite",
+      "version": "rust",
+      "tier": "full",
+      "hash": "f0eae8ffcedd440e",
+      "score": {
+        "passed": 12086,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 12086,
+        "unusable": 6,
+        "refused": 185,
+        "mismatch": 5
+      },
+      "created": "2026-11-27T17:27:03Z",
+      "seconds": 4495.38,
+      "web": true,
+      "archived": false,
+      "levels": null
+    },
+    {
+      "file": "composite-rust-hard-quick.json",
+      "sha256": "7f139f29e2f9115bbcac0d165eab0b6c5b3b95617f7bdcd6073ebe0c478c7efd",
+      "decompiler": "composite",
+      "version": "rust",
+      "tier": "hard-quick",
+      "hash": "9bcb49d29e867a92",
+      "score": {
+        "passed": 868,
+        "total": 882
+      },
+      "totals": {
+        "pass": 868,
+        "refused": 14
+      },
+      "created": "2026-11-27T15:29:06Z",
+      "seconds": 414.49,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 294,
+          "passed": 291
+        },
+        "2": {
+          "total": 294,
+          "passed": 289
+        },
+        "3": {
+          "total": 294,
+          "passed": 288
+        }
+      }
+    },
+    {
       "file": "sunberry-hard-quick.json",
       "sha256": "7f7e4cbf6eb34f43d1acffb17a248d25dfe6b2186d8ad4aec1976fa723fba1ab",
       "decompiler": "sunberry",
@@ -391,29 +595,6 @@
           "passed": 280
         }
       }
-    },
-    {
-      "file": "composite-full.json",
-      "sha256": "f9f8425d8e495d6bb24eea37f7af4c042144685c60c95d566bcbbdd5e56ee99d",
-      "decompiler": "composite",
-      "version": null,
-      "tier": "full",
-      "hash": "f0eae8ffcedd440e",
-      "score": {
-        "passed": 11955,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 11955,
-        "unusable": 6,
-        "refused": 241,
-        "mismatch": 80
-      },
-      "created": "2026-11-26T16:06:59Z",
-      "seconds": 4581.56,
-      "web": true,
-      "archived": false,
-      "levels": null
     },
     {
       "file": "tovek-full.json",
@@ -732,41 +913,6 @@
       }
     },
     {
-      "file": "composite-hard-quick.json",
-      "sha256": "777a5c1b32a989a8ba453187467dcf9d1371f51d8050eef36cb2e21462616621",
-      "decompiler": "composite",
-      "version": null,
-      "tier": "hard-quick",
-      "hash": "9bcb49d29e867a92",
-      "score": {
-        "passed": 220,
-        "total": 882
-      },
-      "totals": {
-        "pass": 220,
-        "refused": 619,
-        "mismatch": 43
-      },
-      "created": "2026-11-26T14:50:33Z",
-      "seconds": 533.62,
-      "web": true,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 294,
-          "passed": 146
-        },
-        "2": {
-          "total": 294,
-          "passed": 72
-        },
-        "3": {
-          "total": 294,
-          "passed": 2
-        }
-      }
-    },
-    {
       "file": "fission-hard-full.json",
       "sha256": "b53c1d936cf48708d865ce9c30b33e05c7df81c2db9670eac17b17694f3a64a4",
       "decompiler": "fission",
@@ -799,42 +945,6 @@
         "3": {
           "total": 4092,
           "passed": 16
-        }
-      }
-    },
-    {
-      "file": "composite-hard-full.json",
-      "sha256": "ca1681e7badd8a4555dfb1601f062ce810bc361ba208ee777f8ae0d57f6f0248",
-      "decompiler": "composite",
-      "version": null,
-      "tier": "hard-full",
-      "hash": "9921d3bde4a99bfd",
-      "score": {
-        "passed": 2926,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 2926,
-        "unusable": 6,
-        "refused": 8626,
-        "mismatch": 724
-      },
-      "created": "2026-11-26T17:38:19Z",
-      "seconds": 5469.16,
-      "web": true,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 4092,
-          "passed": 2149
-        },
-        "2": {
-          "total": 4092,
-          "passed": 755
-        },
-        "3": {
-          "total": 4092,
-          "passed": 22
         }
       }
     },
