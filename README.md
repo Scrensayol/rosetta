@@ -62,10 +62,10 @@ cargo build --release
 
 | tier | programs | round trips |
 | --- | --- | --- |
-| quick | the 41 cases, 6 libraries, and the 100 generated programs and mutants with the most bytecode features | 882 |
-| full | the cases, libraries, 1000 generated programs and 1000 mutants | 12,276 |
-| hard-quick / hard-full | the same programs with their bytecode rewritten first | 882 / 12,276 |
-| obfuscated | quick's programs, obfuscated as source first | 882 |
+| quick | the 42 cases, 6 libraries, and the 100 generated programs and mutants with the most bytecode features | 888 |
+| full | the cases, libraries, 1000 generated programs and 1000 mutants | 12,282 |
+| hard-quick / hard-full | the same programs with their bytecode rewritten first | 888 / 12,282 |
+| obfuscated | quick's programs, obfuscated as source first | 888 |
 
 `bench` writes `<name>-<tier>.json` with every program's verdict at every profile. `--gallery`
 also writes `<name>-<tier>.gallery.json`, with the source, output and where they differ for every
@@ -102,7 +102,8 @@ fixed seed ([src/obfuscate.rs](src/obfuscate.rs)). Both run inside Rosetta, so n
 installed. The decompiler gets the obfuscated program's bytecode and has to give back something
 that still prints what it printed: nobody has to deobfuscate anything, but the obfuscator's VM,
 decoders and flattened control flow all have to survive. A program the obfuscator breaks counts
-as unusable. `rosetta obfuscate-check` shows how many survive at each level, and
+as unusable: in rosetta-4, 140, 135 and 135 of the 148 survive o1, o2 and o3, and o2 and o3 turn
+a program of a few kilobytes into about 780 KB. `rosetta obfuscate-check` shows how many survive at each level, and
 `rosetta obfuscate <file> --level N` prints what a program becomes.
 
 | level | Prometheus preset |
