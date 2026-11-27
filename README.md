@@ -81,12 +81,12 @@ from quick and full.
 
 ## Results
 
-Suite rosetta-3, run 2026-11-26. Round trips passed:
+Suite rosetta-3, run 2026-11-26 and 27. Round trips passed:
 
 | decompiler | quick | full | hard-quick | hard-full | wrong (full / hard-full) |
 | --- | --- | --- | --- | --- | --- |
 | luarust 2.5 | 882 | 12,276 | 882 | 12,276 | 0 / 0 |
-| sunberry 0.5.6 | 882 | 12,274 | 35 | 379 | 0 / 2 |
+| sunberry 0.5.7 | 882 | 12,276 | 865 | 12,207 | 0 / 0 |
 | luacid | 879 | 12,237 | 353 | 5,622 | 37 / 583 |
 | lua.expert | 882 | 12,167 | 264 | 3,859 | 4 / 1 |
 | Composite | 866 | 11,955 | 220 | 2,926 | 80 / 724 |
@@ -95,7 +95,7 @@ Suite rosetta-3, run 2026-11-26. Round trips passed:
 | sunberry (old core) | 606 | 9,013 | 73 | 1,317 | 3,263 / 10,959 |
 
 "wrong" counts wrong output plus output that doesn't recompile. luarust is the only one to clear
-the hard tiers. sunberry refuses almost everything it can't prove, instead of guessing. Per-test
+the hard tiers. sunberry gets 99.4% of hard-full and refuses the rest instead of guessing. Per-test
 verdicts, failures and readability for every run are on [the website](https://rosetta.wtf/).
 
 Rosetta started inside sunberry and shares its author, so be suspicious: everything needed to
