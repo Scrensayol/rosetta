@@ -10,7 +10,7 @@
 set -eu
 cd "$(dirname "$0")/results"
 # decompilers that only run as a web API: their time is the network's, so the board says so
-web='["lua.expert", "composite", "luacid", "luarust"]'
+web='["lua.expert", "composite", "luacid", "luarust", "oracle"]'
 entries=$(mktemp)
 suites=$(mktemp)
 trap 'rm -f "$entries" "$suites"' EXIT
