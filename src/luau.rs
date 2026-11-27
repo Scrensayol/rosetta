@@ -34,6 +34,9 @@ pub struct Extra {
     // not a compiler option: the bytecode is rewritten at this level after compiling (see
     // transform.rs)
     pub transform: u8,
+    // not a compiler option either: the source is obfuscated at this level before compiling (see
+    // obfuscate.rs)
+    pub obfuscate: u8,
 }
 
 pub const MUTABLE_GLOBALS: [&str; 8] = ["math", "string", "table", "bit32", "buffer", "utf8", "os", "coroutine"];
@@ -59,6 +62,7 @@ impl Extra {
                 "m" => extra.mutable = value.parse().ok()?,
                 "d" => extra.disabled = value.parse().ok()?,
                 "x" => extra.transform = value.parse().ok().filter(|v| (1..=crate::transform::LEVELS).contains(v))?,
+                "o" => extra.obfuscate = value.parse().ok().filter(|v| (1..=crate::obfuscate::LEVELS).contains(v))?,
                 _ => return None,
             }
             text = &rest[end..];
@@ -69,7 +73,7 @@ impl Extra {
 
 impl fmt::Display for Extra {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for (flag, value) in [("c", self.coverage as u32), ("t", self.type_info as u32), ("m", self.mutable as u32), ("d", self.disabled as u32), ("x", self.transform as u32)] {
+        for (flag, value) in [("c", self.coverage as u32), ("t", self.type_info as u32), ("m", self.mutable as u32), ("d", self.disabled as u32), ("x", self.transform as u32), ("o", self.obfuscate as u32)] {
             if value != 0 {
                 write!(f, "+{flag}{value}")?;
             }
@@ -80,12 +84,12 @@ impl fmt::Display for Extra {
 
 impl Profile {
     pub const ALL: [Profile; 6] = [
-        Profile { opt: 0, debug: 1, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0 } },
-        Profile { opt: 1, debug: 1, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0 } },
-        Profile { opt: 2, debug: 1, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0 } },
-        Profile { opt: 0, debug: 2, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0 } },
-        Profile { opt: 1, debug: 2, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0 } },
-        Profile { opt: 2, debug: 2, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0 } },
+        Profile { opt: 0, debug: 1, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0, obfuscate: 0 } },
+        Profile { opt: 1, debug: 1, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0, obfuscate: 0 } },
+        Profile { opt: 2, debug: 1, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0, obfuscate: 0 } },
+        Profile { opt: 0, debug: 2, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0, obfuscate: 0 } },
+        Profile { opt: 1, debug: 2, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0, obfuscate: 0 } },
+        Profile { opt: 2, debug: 2, extra: Extra { coverage: 0, type_info: 0, mutable: 0, disabled: 0, transform: 0, obfuscate: 0 } },
     ];
 
     pub fn new(opt: u8, debug: u8) -> Profile {
@@ -133,10 +137,65 @@ pub enum Ending {
     TimedOut,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+// What a run did: what it printed and how it ended, and what it left behind in the global
+// environment and returned. A decompiler's output has to match all of it to pass. The calls it
+// made to standard library functions that change things (see TRACER) are recorded too, and scored
+// on their own: whether a pass also changed the same things in the same order
+#[derive(Clone, Debug, Serialize)]
 pub struct Observation {
     pub log: Vec<String>,
     pub ending: Ending,
+    // "name = value" for every global the run created, changed or removed, and "lib.key = value"
+    // for every field it changed in a table that was already there, sorted; then "return: value"
+    // for what the main chunk returned
+    pub state: Vec<String>,
+    #[serde(skip)]
+    pub calls: Calls,
+}
+
+impl PartialEq for Observation {
+    fn eq(&self, other: &Observation) -> bool {
+        self.log == other.log && self.ending == other.ending && self.state == other.state
+    }
+}
+
+// Every traced call, in order: `table.insert({...}, 3)`. Only the first
+// CALLS_KEPT are kept as text, the rest go into the count and the hash
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct Calls {
+    pub count: u64,
+    pub hash: u64,
+    pub first: Vec<String>,
+}
+
+const CALLS_KEPT: usize = 2000;
+
+impl Calls {
+    fn push(&mut self, call: String) {
+        self.count += 1;
+        if self.hash == 0 {
+            self.hash = 0xcbf2_9ce4_8422_2325;
+        }
+        for b in call.bytes().chain([0]) {
+            self.hash = (self.hash ^ b as u64).wrapping_mul(0x100_0000_01b3);
+        }
+        if self.first.len() < CALLS_KEPT {
+            self.first.push(call);
+        }
+    }
+
+    // where two runs' calls part ways, for a gallery or a log
+    pub fn first_difference(&self, other: &Calls) -> Option<String> {
+        if self == other {
+            return None;
+        }
+        for (i, (a, b)) in self.first.iter().zip(&other.first).enumerate() {
+            if a != b {
+                return Some(format!("call {}: want `{a}` got `{b}`", i + 1));
+            }
+        }
+        Some(format!("made {} calls, want {}", other.count, self.count))
+    }
 }
 
 impl Observation {
@@ -146,6 +205,44 @@ impl Observation {
         text
     }
 }
+
+// Runs once in every VM, before the prelude and the program: the standard library functions that
+// change something (a table, a metatable, a buffer, which coroutine runs) are wrapped so calling
+// one is recorded first. Pure functions are left alone: what they return already shows in what the
+// program does, and the compiler folds some of them away when their arguments are constants, so
+// two faithful programs can call them a different number of times. Calling getfenv turns off the
+// VM's fast paths for builtins (FASTCALL, imports resolved when the chunk loads), so a call
+// reaches its wrapper whatever shape the code making it has. math.random is seeded the same way
+// every time, so a program drawing random numbers does the same thing run after run.
+const TRACER: &str = r#"
+local record = ...
+local env = getfenv(1)
+math.randomseed(1)
+local traced = {
+	table = { "insert", "remove", "sort", "clear", "move", "freeze" },
+	coroutine = { "create", "resume", "yield", "wrap", "close" },
+	buffer = {
+		"writei8", "writeu8", "writei16", "writeu16", "writei32", "writeu32", "writef32", "writef64",
+		"writestring", "writebits", "fill", "copy",
+	},
+	_G = { "setmetatable", "rawset" },
+}
+for lib, names in traced do
+	local t = if lib == "_G" then env else env[lib]
+	if type(t) == "table" then
+		for _, name in names do
+			local f = t[name]
+			if type(f) == "function" then
+				local label = if lib == "_G" then name else lib .. "." .. name
+				t[name] = function(...)
+					record(label, ...)
+					return f(...)
+				end
+			end
+		end
+	end
+end
+"#;
 
 pub const STEP_BUDGET: u64 = 2_000_000;
 // real libraries doing real work (LibDeflate compressing a few kilobytes at every level) need
@@ -226,12 +323,35 @@ pub fn run_with(bytecode: &[u8], library: Option<&Library>) -> Observation {
         });
     }
 
+    let calls = Rc::new(RefCell::new(Calls::default()));
+    {
+        static TRACER_CODE: std::sync::OnceLock<Vec<u8>> = std::sync::OnceLock::new();
+        let tracer = TRACER_CODE.get_or_init(|| compile(TRACER, Profile::new(1, 1)).expect("tracer compiles"));
+        let calls = calls.clone();
+        // its own numbering of addresses, like the log's: an error message passed along carries
+        // a line number, a table's tostring an address
+        let mut addresses = HashMap::new();
+        let record = lua
+            .create_function_mut(move |_, (name, args): (String, MultiValue)| {
+                // line numbers and addresses normalized before anything is cut short
+                let args = args.iter().map(|v| clip(&normalize(&shallow_full(v), &mut addresses))).collect::<Vec<_>>();
+                calls.borrow_mut().push(format!("{name}({})", args.join(", ")));
+                Ok(())
+            })
+            .unwrap();
+        lua.load(&tracer[..]).set_mode(ChunkMode::Binary).set_name("=tracer").call::<()>(record).expect("tracer runs");
+    }
     static PRELUDE: std::sync::OnceLock<Vec<u8>> = std::sync::OnceLock::new();
     let prelude = PRELUDE.get_or_init(|| compile(crate::generator::PRELUDE, Profile::new(1, 1)).expect("prelude compiles"));
     lua.load(&prelude[..]).set_mode(ChunkMode::Binary).set_name("=prelude").exec().expect("prelude runs");
 
+
+    let mut returned = Vec::new();
+    let before = Snapshot::take(&lua);
     let result = match library {
-        None => lua.load(bytecode).set_mode(ChunkMode::Binary).set_name("=prog").exec(),
+        None => lua.load(bytecode).set_mode(ChunkMode::Binary).set_name("=prog").call::<MultiValue>(()).map(|values| {
+            returned = values.into_iter().collect();
+        }),
         Some(library) => (|| {
             // require knows only the library, so a library probing for optional modules
             // (inspect looks for string.buffer) gets the error a missing module gives
@@ -264,7 +384,175 @@ pub fn run_with(bytecode: &[u8], library: Option<&Library>) -> Observation {
         Ending::Errored(text) => Ending::Errored(normalize(&text, &mut addresses)),
         other => other,
     };
-    Observation { log, ending }
+    // a run that hit the budget or ran out of memory is cut off somewhere arbitrary: what it left
+    // behind says nothing
+    let state = match &ending {
+        Ending::TimedOut => Vec::new(),
+        Ending::Errored(e) if e == OUT_OF_MEMORY => Vec::new(),
+        _ => {
+            let mut state = before.changes(&lua);
+            state.extend(returned.iter().map(|v| format!("return: {}", describe(v))));
+            state
+        }
+    };
+    let calls = calls.borrow().clone();
+    Observation { log, ending, state, calls }
+}
+
+// a call argument, uncut
+fn shallow_full(value: &mlua::Value) -> String {
+    match value {
+        mlua::Value::String(s) => format!("{:?}", String::from_utf8_lossy(&s.as_bytes())),
+        other => shallow(other),
+    }
+}
+
+fn clip(text: &str) -> String {
+    if text.len() > 80 { format!("{}...", &text[..text.floor_char_boundary(80)]) } else { text.to_string() }
+}
+
+// a value as one call argument: no deeper than its type for anything that isn't plain data
+fn shallow(value: &mlua::Value) -> String {
+    match value {
+        mlua::Value::String(s) => {
+            let text = String::from_utf8_lossy(&s.as_bytes()).into_owned();
+            if text.len() > 60 { format!("{:?}...", &text[..text.floor_char_boundary(60)]) } else { format!("{text:?}") }
+        }
+        mlua::Value::Nil | mlua::Value::Boolean(_) | mlua::Value::Integer(_) | mlua::Value::Number(_) | mlua::Value::Vector(_) => number_text(value),
+        other => other.type_name().to_string(),
+    }
+}
+
+// numbers the way the prelude's describe writes them: nan and -0 spelled out
+fn number_text(value: &mlua::Value) -> String {
+    match value {
+        mlua::Value::Number(n) if n.is_nan() => "nan".into(),
+        mlua::Value::Number(n) if *n == 0.0 && n.is_sign_negative() => "-0".into(),
+        other => other.to_string().unwrap_or_else(|_| other.type_name().into()),
+    }
+}
+
+// a value all the way down, tables with their keys sorted and their metatables, a table seen
+// before as a back-reference; nothing that depends on where things are in memory
+fn describe(value: &mlua::Value) -> String {
+    let mut seen = HashMap::new();
+    let mut budget = DESCRIBE_BUDGET;
+    let mut out = String::new();
+    describe_into(value, &mut seen, &mut budget, &mut out);
+    out
+}
+
+// tables visited per value: past it, the rest is "..."
+const DESCRIBE_BUDGET: usize = 2000;
+
+fn describe_into(value: &mlua::Value, seen: &mut HashMap<usize, usize>, budget: &mut usize, out: &mut String) {
+    let mlua::Value::Table(table) = value else {
+        out.push_str(&match value {
+            mlua::Value::String(_) | mlua::Value::Nil | mlua::Value::Boolean(_) | mlua::Value::Integer(_) | mlua::Value::Number(_) | mlua::Value::Vector(_) => shallow(value),
+            other => other.type_name().to_string(),
+        });
+        return;
+    };
+    let id = table.to_pointer() as usize;
+    if let Some(n) = seen.get(&id) {
+        out.push_str(&format!("<table {n}>"));
+        return;
+    }
+    if *budget == 0 {
+        out.push_str("...");
+        return;
+    }
+    *budget -= 1;
+    let n = seen.len() + 1;
+    seen.insert(id, n);
+    // keys in a fixed order: a table's own walk order depends on how it was built
+    let mut entries = table.pairs::<mlua::Value, mlua::Value>().flatten().map(|(k, v)| (describe_key(&k), v)).collect::<Vec<_>>();
+    entries.sort_by(|a, b| a.0.cmp(&b.0));
+    out.push('{');
+    for (i, (key, v)) in entries.iter().enumerate() {
+        if i > 0 {
+            out.push_str(", ");
+        }
+        out.push_str(key);
+        out.push('=');
+        describe_into(v, seen, budget, out);
+    }
+    if let Some(meta) = table.metatable() {
+        out.push_str(if entries.is_empty() { "<meta>=" } else { ", <meta>=" });
+        describe_into(&mlua::Value::Table(meta), seen, budget, out);
+    }
+    out.push('}');
+}
+
+// a key goes no deeper than its type: a table used as a key is the same key whatever is in it
+fn describe_key(key: &mlua::Value) -> String {
+    match key {
+        mlua::Value::Table(_) => "<table>".into(),
+        other => shallow(other),
+    }
+}
+
+// a global's name as the program wrote it
+fn global_name(key: &mlua::Value) -> String {
+    match key {
+        mlua::Value::String(s) => String::from_utf8_lossy(&s.as_bytes()).into_owned(),
+        other => format!("[{}]", describe_key(other)),
+    }
+}
+
+// The globals and the fields of the tables among them, by identity, before the program runs
+struct Snapshot {
+    globals: HashMap<String, (mlua::Value, Option<HashMap<String, mlua::Value>>)>,
+}
+
+impl Snapshot {
+    fn take(lua: &Lua) -> Snapshot {
+        let mut globals = HashMap::new();
+        let env = lua.globals();
+        for (key, value) in env.pairs::<mlua::Value, mlua::Value>().flatten() {
+            let fields = match &value {
+                // _G is the globals themselves, already gone through one by one
+                mlua::Value::Table(t) if t.to_pointer() == env.to_pointer() => None,
+                mlua::Value::Table(t) => Some(t.pairs::<mlua::Value, mlua::Value>().flatten().map(|(k, v)| (describe_key(&k), v)).collect()),
+                _ => None,
+            };
+            globals.insert(global_name(&key), (value, fields));
+        }
+        Snapshot { globals }
+    }
+
+    // what changed since: a new or replaced global in full, a field changed in a table that was
+    // already a global, and a global that's gone
+    fn changes(&self, lua: &Lua) -> Vec<String> {
+        let same = |a: &mlua::Value, b: &mlua::Value| match (a, b) {
+            (mlua::Value::Number(x), mlua::Value::Number(y)) => x.to_bits() == y.to_bits() || (x.is_nan() && y.is_nan()),
+            _ => a == b,
+        };
+        let mut lines = Vec::new();
+        let mut present = std::collections::HashSet::new();
+        for (key, value) in lua.globals().pairs::<mlua::Value, mlua::Value>().flatten() {
+            let name = global_name(&key);
+            present.insert(name.clone());
+            match self.globals.get(&name) {
+                Some((old, fields)) if same(old, &value) => {
+                    let (Some(fields), mlua::Value::Table(t)) = (fields, &value) else { continue };
+                    let mut now = std::collections::HashSet::new();
+                    for (k, v) in t.pairs::<mlua::Value, mlua::Value>().flatten() {
+                        let field = describe_key(&k);
+                        if !fields.get(&field).is_some_and(|old| same(old, &v)) {
+                            lines.push(format!("{name}[{field}] = {}", describe(&v)));
+                        }
+                        now.insert(field);
+                    }
+                    lines.extend(fields.keys().filter(|f| !now.contains(*f)).map(|f| format!("{name}[{f}] = nil")));
+                }
+                _ => lines.push(format!("{name} = {}", describe(&value))),
+            }
+        }
+        lines.extend(self.globals.keys().filter(|k| !present.contains(*k)).map(|k| format!("{k} = nil")));
+        lines.sort();
+        lines
+    }
 }
 
 fn error_text(error: &mlua::Error) -> String {

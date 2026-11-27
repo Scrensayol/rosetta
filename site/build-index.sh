@@ -2,7 +2,7 @@
 # Rebuilds results/index.json from the official result files next to it: each file's SHA-256 (what
 # the site checks a dropped file against) and a summary for the leaderboard, plus, for every suite
 # they ran, a hash of each section's program names, so a file that claims the suite but ran other
-# programs shows up as spoofed. Hard-tier results also get their score at each transform level.
+# programs shows up as spoofed. Hard-tier and obfuscated-tier results also get their score at each level.
 # Run it after adding or replacing a result. Needs jq and sha256sum. Failure galleries
 # (<result>.gallery.json, see `rosetta gallery`) sit beside their results and aren't indexed.
 # Results of an older suite live in a directory named after it (results/rosetta-1/): they stay
@@ -23,9 +23,9 @@ for f in *.json */*.json; do
 	sum=$(sha256sum "$f" | cut -d' ' -f1)
 	jq -c --arg file "$f" --arg sum "$sum" --argjson web "$web" --argjson archived "$archived" '{
 		file: $file, sha256: $sum, decompiler: .decompiler.name, version: .decompiler.version,
-		tier: .suite.tier, hash: .suite.hash, score, totals, created, seconds,
+		tier: .suite.tier, hash: .suite.hash, score, totals, same_calls, created, seconds,
 		web: (.decompiler.name as $n | $web | index($n) != null), archived: $archived,
-		levels: ([.profiles[] | (capture("\\+x(?<l>[0-9])") // {l: null}) | .l] as $lv
+		levels: ([.profiles[] | (capture("\\+[xo](?<l>[0-9])") // {l: null}) | .l] as $lv
 			| if ($lv | map(select(. != null)) | length) == 0 then null else
 				reduce (.sections[].tests[].results | split("") | to_entries[]) as $e ({};
 					$lv[$e.key] as $l

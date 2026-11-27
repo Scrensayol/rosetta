@@ -7,6 +7,7 @@ mod generator;
 mod lex;
 mod luau;
 mod mutate;
+mod obfuscate;
 mod quality;
 mod reduce;
 mod rng;
@@ -153,9 +154,28 @@ enum Command {
         #[arg(long)]
         only: Option<String>,
     },
+    /// Check the obfuscated tier without a decompiler: how many programs survive obfuscation at
+    /// each level still doing what they did
+    ObfuscateCheck {
+        /// Programs left out to print
+        #[arg(long, default_value = "20")]
+        show: usize,
+        /// Only programs with this name
+        #[arg(long)]
+        only: Option<String>,
+    },
     /// Run a bytecode file with Rosetta's Luau and print what it prints
     #[command(hide = true)]
     Run { bytecode: PathBuf },
+    /// Print a .luau file (or a seed's program) the way the obfuscated tier gives it to the
+    /// compiler: lowered to Lua 5.1, then obfuscated at --level (0 only lowers it)
+    Obfuscate {
+        input: String,
+        #[arg(long, default_value_t = 1)]
+        level: u8,
+        #[arg(long, value_enum, default_value = "full")]
+        grammar: Grammar,
+    },
     /// Print the program a seed generates
     Gen {
         seed: u64,
@@ -256,6 +276,10 @@ fn main() -> ExitCode {
                 println!("{line}");
             }
             println!("-- {:?}", observed.ending);
+            for line in &observed.state {
+                println!("-- {line}");
+            }
+            println!("-- {} traced calls", observed.calls.count);
             ExitCode::SUCCESS
         }
         Command::LibraryCheck { dirs, verbose } => {
@@ -320,6 +344,23 @@ fn main() -> ExitCode {
             if ok { ExitCode::SUCCESS } else { ExitCode::FAILURE }
         }
         Command::TransformCheck { tier, show, only } => bench::transform_check(tier, show, only.as_deref()),
+        Command::ObfuscateCheck { show, only } => bench::obfuscate_check(show, only.as_deref()),
+        Command::Obfuscate { input, level, grammar } => {
+            let source = match input.strip_prefix("seed").and_then(|n| n.parse().ok()) {
+                Some(seed) => generator::generate(seed, grammar).render(),
+                None => fs::read_to_string(&input).expect("read input"),
+            };
+            match if level == 0 { obfuscate::lower(&source) } else { obfuscate::apply(&source, level) } {
+                Ok(text) => {
+                    print!("{text}");
+                    ExitCode::SUCCESS
+                }
+                Err(e) => {
+                    eprintln!("{e}");
+                    ExitCode::FAILURE
+                }
+            }
+        }
         Command::Compile { input, profile, grammar, output } => {
             let Some(profile) = Profile::parse(&profile) else {
                 eprintln!("profiles look like O1g1");
@@ -618,7 +659,7 @@ fn run(common: &Common, cases: Vec<Case>, reduce: bool, generator_version: &str)
     let decompiler_count = decompilers.len();
     let jobs = cases
         .iter()
-        .flat_map(|case| profiles.iter().flat_map(move |p| (0..decompiler_count).map(move |d| (case, Profile { extra: Extra { transform: p.extra.transform, ..case.extra }, ..*p }, d))))
+        .flat_map(|case| profiles.iter().flat_map(move |p| (0..decompiler_count).map(move |d| (case, Profile { extra: Extra { transform: p.extra.transform, obfuscate: p.extra.obfuscate, ..case.extra }, ..*p }, d))))
         .collect::<Vec<_>>();
     let started = std::time::Instant::now();
     let results = jobs

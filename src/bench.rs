@@ -26,7 +26,7 @@ use crate::{
 };
 
 // Bump when anything below changes which programs run or how they're graded
-pub const SUITE: &str = "rosetta-3";
+pub const SUITE: &str = "rosetta-4";
 pub const LUAU: &str = "0.747";
 const MUTATION_SEED: u64 = 1;
 const FUZZ_START: u64 = 1000;
@@ -45,11 +45,14 @@ pub enum Tier {
     HardQuick,
     /// Full's programs, rewritten the same way: about 12,000 round trips
     HardFull,
+    /// Quick's programs obfuscated as source first (see obfuscate.rs), each profile at one of
+    /// three levels: scored on its own
+    Obfuscated,
 }
 
 impl Tier {
     fn from_name(name: &str) -> Option<Tier> {
-        [Tier::Quick, Tier::Full, Tier::HardQuick, Tier::HardFull].into_iter().find(|t| t.name() == name)
+        [Tier::Quick, Tier::Full, Tier::HardQuick, Tier::HardFull, Tier::Obfuscated].into_iter().find(|t| t.name() == name)
     }
 
     fn name(self) -> &'static str {
@@ -58,13 +61,14 @@ impl Tier {
             Tier::Full => "full",
             Tier::HardQuick => "hard-quick",
             Tier::HardFull => "hard-full",
+            Tier::Obfuscated => "obfuscated",
         }
     }
 
     // how many generated programs and mutants the tier keeps
     fn size(self) -> usize {
         match self {
-            Tier::Quick | Tier::HardQuick => 50,
+            Tier::Quick | Tier::HardQuick | Tier::Obfuscated => 50,
             Tier::Full | Tier::HardFull => 1000,
         }
     }
@@ -79,6 +83,12 @@ pub fn profiles(tier: Tier) -> Vec<Profile> {
             .iter()
             .zip([1, 2, 3, 2, 3, 1])
             .map(|(p, x)| Profile { extra: Extra { transform: x, ..p.extra }, ..*p })
+            .collect(),
+        // the same pairing, with the obfuscator's levels
+        Tier::Obfuscated => Profile::ALL
+            .iter()
+            .zip([1, 2, 3, 2, 3, 1])
+            .map(|(p, o)| Profile { extra: Extra { obfuscate: o, ..p.extra }, ..*p })
             .collect(),
     }
 }
@@ -129,6 +139,14 @@ struct TestOut {
     // profile -> the first line of why it didn't pass
     #[serde(skip_serializing_if = "BTreeMap::is_empty")]
     details: BTreeMap<String, String>,
+    // one letter per profile beside results: for a pass, whether the output made the same calls
+    // that change things (table.insert, setmetatable, coroutine.resume...: see luau.rs's TRACER) as
+    // the original, in the same order ('s'), or other ones ('d'); '-' for anything else, and for
+    // a program whose own calls differ from run to run
+    calls: String,
+    // profile -> where a pass's calls part ways with the original's
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    call_details: BTreeMap<String, String>,
 }
 
 #[derive(Serialize)]
@@ -156,6 +174,8 @@ struct BenchResult {
     letters: BTreeMap<char, Kind>,
     score: Score,
     totals: BTreeMap<Kind, usize>,
+    // of the passes, how many also made the same calls that change things, in the same order
+    same_calls: Score,
     sections: Vec<SectionOut>,
     // readability over this decompiler's own passes (a run with several decompilers in the README
     // measures it over the passes they share instead)
@@ -361,6 +381,9 @@ fn fingerprint(tier: Tier, sections: &[Section]) -> String {
     if matches!(tier, Tier::HardQuick | Tier::HardFull) {
         feed(crate::transform::VERSION);
     }
+    if tier == Tier::Obfuscated {
+        feed(crate::obfuscate::VERSION);
+    }
     for p in profiles(tier) {
         feed(&p.to_string());
     }
@@ -473,6 +496,49 @@ pub fn transform_check(tier: Tier, show: usize, only: Option<&str>) -> ExitCode 
     if tallies.identity.is_empty() && tallies.unreadable.is_empty() && tallies.changed.is_empty() { ExitCode::SUCCESS } else { ExitCode::FAILURE }
 }
 
+// Checks the obfuscated tier without any decompiler: at every level, how many programs the
+// obfuscator takes and how many of those still print exactly what they printed. The ones that
+// don't are unusable in the tier, so this is what decides its size, not a pass/fail
+pub fn obfuscate_check(show: usize, only: Option<&str>) -> ExitCode {
+    let started = Instant::now();
+    let sections = sections(Tier::Obfuscated);
+    let programs = sections.iter().flat_map(|s| &s.programs).filter(|p| only.is_none_or(|o| p.name == o)).collect::<Vec<_>>();
+    let jobs = programs.iter().flat_map(|p| (1..=crate::obfuscate::LEVELS).map(move |level| (*p, level))).collect::<Vec<_>>();
+    let results = jobs
+        .par_iter()
+        .map(|&(program, level)| {
+            let profile = Profile { extra: Extra { obfuscate: level, ..program.extra }, ..Profile::new(1, 1) };
+            let problem = (|| {
+                let original = crate::luau::compile(&program.source, profile).map_err(|e| format!("doesn't compile: {e}"))?;
+                let want = crate::luau::run_with(&original, program.library.as_ref());
+                let text = crate::obfuscate::apply(&program.source, level).map_err(|e| format!("the obfuscator can't take it: {e}"))?;
+                let bytecode = crate::luau::compile(&text, profile).map_err(|e| format!("obfuscated, it doesn't compile: {e}"))?;
+                let seen = crate::luau::run_with(&bytecode, program.library.as_ref());
+                if seen != want {
+                    return Err(format!("changed what it does: {} lines, {:?} vs {} lines, {:?}", seen.log.len(), seen.ending, want.log.len(), want.ending));
+                }
+                Ok(text.len())
+            })();
+            (program.name.as_str(), level, problem)
+        })
+        .collect::<Vec<_>>();
+    for level in 1..=crate::obfuscate::LEVELS {
+        let at = results.iter().filter(|r| r.1 == level).collect::<Vec<_>>();
+        let kept = at.iter().filter_map(|r| r.2.as_ref().ok()).collect::<Vec<_>>();
+        println!(
+            "level {level}: {} of {} programs kept, {:.0} KB of source on average",
+            kept.len(),
+            at.len(),
+            kept.iter().map(|&&n| n as f64).sum::<f64>() / kept.len().max(1) as f64 / 1024.0
+        );
+    }
+    for (name, level, problem) in results.iter().filter(|r| r.2.is_err()).take(show) {
+        println!("  {name} o{level}: {}", problem.as_ref().unwrap_err());
+    }
+    println!("{} programs at {} levels in {:.1}s", programs.len(), crate::obfuscate::LEVELS, started.elapsed().as_secs_f64());
+    ExitCode::SUCCESS
+}
+
 // UTC, to the second, without pulling in a date crate
 fn now_utc() -> String {
     let secs = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0) as i64;
@@ -546,9 +612,9 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
                 let program = &sections[s].programs[p];
                 // (a program's own compiler options, and the tier's transform level)
                 let base = tier_profiles[q];
-                let profile = Profile { extra: Extra { transform: base.extra.transform, ..program.extra }, ..base };
+                let profile = Profile { extra: Extra { transform: base.extra.transform, obfuscate: base.extra.obfuscate, ..program.extra }, ..base };
                 let mut verdict = roundtrip::check(&program.source, program.library.as_ref(), profile, decompiler);
-                let (kind, detail, quality) = (verdict.kind, std::mem::take(&mut verdict.detail), verdict.quality.take());
+                let (kind, detail, quality, calls) = (verdict.kind, std::mem::take(&mut verdict.detail), verdict.quality.take(), verdict.calls.take());
                 // without --reduce the verdict in hand is the entry; with it, only the failures that
                 // make the gallery are reduced, after the run
                 let entry = (gallery && kind.is_failure()).then(|| {
@@ -557,7 +623,7 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
                     let e = (!reduce).then(|| gallery::entry(section.id, &program.name, &program.source, program.library.as_ref(), profile, decompiler, verdict, false));
                     (section.id, (s, p, q, e))
                 });
-                (kind, detail, quality, entry)
+                (kind, detail, quality, entry, calls)
             })
             .collect::<Vec<_>>();
         let seconds = (started.elapsed().as_secs_f64() * 100.0).round() / 100.0;
@@ -565,6 +631,7 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
         let mut next = outcomes.iter();
         let mut totals = BTreeMap::<Kind, usize>::new();
         let mut overall = Score::default();
+        let mut same_calls = Score::default();
         let mut passes = Vec::new();
         let mut out_sections = Vec::new();
         for section in &sections {
@@ -575,8 +642,23 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
                 .map(|program| {
                     let mut results = String::new();
                     let mut details = BTreeMap::new();
+                    let mut calls = String::new();
+                    let mut call_details = BTreeMap::new();
                     for base in &tier_profiles {
-                        let (kind, detail, quality, _) = next.next().unwrap();
+                        let (kind, detail, quality, _, same) = next.next().unwrap();
+                        match same {
+                            Some(Ok(())) => {
+                                calls.push('s');
+                                same_calls.passed += 1;
+                                same_calls.total += 1;
+                            }
+                            Some(Err(why)) => {
+                                calls.push('d');
+                                same_calls.total += 1;
+                                call_details.insert(base.to_string(), first_line(why));
+                            }
+                            None => calls.push('-'),
+                        }
                         results.push(letter(*kind));
                         *totals.entry(*kind).or_default() += 1;
                         if *kind != Kind::Unusable {
@@ -589,7 +671,7 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
                         }
                         passes.extend(quality.as_ref());
                     }
-                    TestOut { name: program.name.clone(), about: program.about.clone(), results, details }
+                    TestOut { name: program.name.clone(), about: program.about.clone(), results, details, calls, call_details }
                 })
                 .collect();
             overall.passed += score.passed;
@@ -612,6 +694,7 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
             letters: LETTERS.into_iter().collect(),
             score: overall,
             totals,
+            same_calls,
             sections: out_sections,
             quality: (!passes.is_empty()).then(|| Summary::of(&passes)),
         };
@@ -626,7 +709,7 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
                     e.unwrap_or_else(|| {
                         let program = &sections[s].programs[p];
                         let base = tier_profiles[q];
-                        let profile = Profile { extra: Extra { transform: base.extra.transform, ..program.extra }, ..base };
+                        let profile = Profile { extra: Extra { transform: base.extra.transform, obfuscate: base.extra.obfuscate, ..program.extra }, ..base };
                         let verdict = roundtrip::check(&program.source, program.library.as_ref(), profile, decompiler);
                         let shrink = verdict.kind.is_failure();
                         gallery::entry(sections[s].id, &program.name, &program.source, program.library.as_ref(), profile, decompiler, verdict, shrink)
@@ -638,11 +721,13 @@ pub fn run(specs: &[String], tier: Tier, versions: &[String], out: &Path, upload
         }
         let parts = result.sections.iter().map(|s| format!("{} {}/{}", s.id, s.score.passed, s.score.total)).collect::<Vec<_>>();
         println!(
-            "{name}: {}/{} ({:.1}%) | {} | {seconds:.1}s -> {}",
+            "{name}: {}/{} ({:.1}%) | {} | same calls on {}/{} passes | {seconds:.1}s -> {}",
             overall.passed,
             overall.total,
             overall.passed as f64 * 100.0 / overall.total.max(1) as f64,
             parts.join(", "),
+            same_calls.passed,
+            same_calls.total,
             path.display()
         );
         if sign_results && let Err(e) = sign(&path) {
@@ -807,7 +892,7 @@ pub fn backfill(result: &Path, spec: &str, reduce: bool) -> ExitCode {
         .map(|&(s, p, q, recorded)| {
             let program = &sections[s].programs[p];
             let base = tier_profiles[q];
-            let profile = Profile { extra: Extra { transform: base.extra.transform, ..program.extra }, ..base };
+            let profile = Profile { extra: Extra { transform: base.extra.transform, obfuscate: base.extra.obfuscate, ..program.extra }, ..base };
             let verdict = roundtrip::check(&program.source, program.library.as_ref(), profile, &decompiler);
             let differs = verdict.kind != recorded;
             let shrink = reduce && verdict.kind.is_failure();

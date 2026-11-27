@@ -223,6 +223,9 @@ function sidePanel(data, check, bytes, source) {
 		: refused
 			? `<div class="verdict-line" style="color:var(--state-warn)">nothing wrong · ${refused} refused</div>`
 			: `<div class="verdict-line">no round trips failed!</div>`;
+	// from rosetta-4 on: of the passes, how many also made the same calls that change things
+	const sc = data.same_calls;
+	const callsLine = sc && sc.total ? `<div class="verdict-line" style="color:var(--text-dim)">same calls on ${sc.passed.toLocaleString()} of ${sc.total.toLocaleString()} passes</div>` : "";
 	const created = data.created ? new Date(data.created).toLocaleString() : "unknown";
 	const q = data.quality;
 	const quality = q ? `
@@ -243,8 +246,9 @@ function sidePanel(data, check, bytes, source) {
 		<div><div class="bar-label"><span>${esc(s.title)}</span><span>${s.score.passed} / ${s.score.total}</span></div>
 		<div class="track2"><i data-w="${pct(s.score)}%"></i></div></div>`).join("");
 	// the hard tier: how the rewritten bytecode went at each transform level
-	const LEVEL = { 1: "registers, no-ops, junk", 2: "+ blocks, swaps", 3: "+ fake branches" };
-	const levelOf = data.profiles.map(p => Number(/\+x(\d)/.exec(p)?.[1] || 0));
+	const obfuscated = data.profiles.some(p => /\+o\d/.test(p));
+	const LEVEL = obfuscated ? { 1: "weak: flattened, constant array", 2: "medium: vm, encrypted strings", 3: "strong: all of it" } : { 1: "registers, no-ops, junk", 2: "+ blocks, swaps", 3: "+ fake branches" };
+	const levelOf = data.profiles.map(p => Number(/\+[xo](\d)/.exec(p)?.[1] || 0));
 	let levelCard = "";
 	if (levelOf.some(l => l)) {
 		const by = {};
@@ -255,10 +259,10 @@ function sidePanel(data, check, bytes, source) {
 			by[l].total++;
 			if (v === "p") by[l].passed++;
 		});
-		levelCard = `<div class="card"><h4>by transform level</h4><div class="bars">${Object.keys(by).sort().map(l => `
+		levelCard = `<div class="card"><h4>by ${obfuscated ? "obfuscation" : "transform"} level</h4><div class="bars">${Object.keys(by).sort().map(l => `
 			<div><div class="bar-label"><span>x${l} · ${esc(LEVEL[l] || "")}</span><span>${by[l].passed} / ${by[l].total}</span></div>
 			<div class="track2"><i data-w="${pct(by[l])}%"></i></div></div>`).join("")}</div>
-			<p class="note">the bytecode each decompiler got was rewritten to do exactly the same thing at these levels: see the readme's hard tier.</p></div>`;
+			<p class="note">${obfuscated ? "each program was obfuscated as source at these levels before compiling: see the readme's obfuscated tier." : "the bytecode each decompiler got was rewritten to do exactly the same thing at these levels: see the readme's hard tier."}</p></div>`;
 	}
 	const shareable = check.state !== "verified" && !params.get("rubis");
 	return `
@@ -266,7 +270,7 @@ function sidePanel(data, check, bytes, source) {
 			<div class="verify ${check.state}">${glyph}<div><h3>${title}</h3><p>${text}</p>${problems}${unknown}</div></div>
 			${ring(p / 100, fmtPct(p))}
 			<div class="score"><b>${data.score.passed.toLocaleString()}</b> / ${data.score.total.toLocaleString()}</div>
-			${verdictLine}
+			${verdictLine}${callsLine}
 			<div class="meta">
 				<div>${icon("chip")}decompiler<span>${esc(data.decompiler.name)}${data.decompiler.version ? ` <span class="keep" style="color:var(--text-muted);font-weight:400">${esc(data.decompiler.version)}</span>` : ""}</span></div>
 				<div>${icon("clock")}time taken (seconds)<span>${Number(data.seconds).toFixed(2)}</span></div>

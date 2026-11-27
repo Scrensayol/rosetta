@@ -3,7 +3,7 @@
 A standardized, open-source benchmark for Luau decompilers.
 
 Rosetta compiles a program, runs it, hands the bytecode to a decompiler, recompiles what comes
-back and runs that. If the two runs print the same thing, it passes. Leaderboard and every
+back and runs that. If the two runs do the same thing, it passes. Leaderboard and every
 official result: [rosetta.wtf](https://rosetta.wtf/). News: [Discord](https://discord.gg/7qE27wRwnd).
 
 ## Grading
@@ -13,12 +13,24 @@ and every decompiler gets the same bytes.
 
 | verdict | meaning |
 | --- | --- |
-| pass | recompiles and prints exactly what the original printed |
+| pass | recompiles and does exactly what the original did: see below |
 | wrong | recompiles but behaves differently: the worst outcome |
 | doesn't recompile | the output isn't valid Luau |
 | refused | a clean non-zero exit: no output, but no wrong output either |
 | failed | crashed, or ran past 30 seconds |
 | unusable | the input itself doesn't finish; it counts for nobody |
+
+"Does the same thing" means four things match: everything it prints, in order; how it ends
+(returns, or errors with which message, or runs out of time); every global it creates, changes
+or removes, and every field it changes in a table that was already there (the standard library
+included), compared all the way down; and what the main chunk returns. Line numbers in error
+messages and heap addresses are normalized away, since a faithful decompile can't keep them.
+
+Passes also get a stricter, separate check: whether the output made the same calls that change
+things (`table.insert`, `table.remove`, `table.sort`, `setmetatable`, `rawset`, coroutine
+switches, buffer writes) with the same arguments, in the same order. A program can get the same
+result through different calls, so this is reported beside the score as "same calls" and doesn't
+change it. Pure functions aren't tracked, since the compiler folds some of them away.
 
 The score is passes out of usable round trips. Wrong output is reported on its own, because
 refusing 1% is far better than being quietly wrong 1% of the time. Passes are also measured
@@ -53,6 +65,7 @@ cargo build --release
 | quick | the 41 cases, 6 libraries, and the 100 generated programs and mutants with the most bytecode features | 882 |
 | full | the cases, libraries, 1000 generated programs and 1000 mutants | 12,276 |
 | hard-quick / hard-full | the same programs with their bytecode rewritten first | 882 / 12,276 |
+| obfuscated | quick's programs, obfuscated as source first | 882 |
 
 `bench` writes `<name>-<tier>.json` with every program's verdict at every profile. `--gallery`
 also writes `<name>-<tier>.gallery.json`, with the source, output and where they differ for every
@@ -62,7 +75,7 @@ Other commands: `check` (cases only), `fuzz`, `mutate`, `gen`, `compile`, `trans
 `library-check`, `gallery`, plus `--reduce` to shrink a failing program and
 `--baseline` for CI. `rosetta help` lists them all.
 
-The suite is pinned as `rosetta-3` (Luau 0.747): which programs run and how is hashed, so two
+The suite is pinned as `rosetta-4` (Luau 0.747): which programs run and how is hashed, so two
 results with the same hash ran the same programs.
 
 ### The hard tiers
@@ -78,6 +91,30 @@ from quick and full.
 | x1 | shifted registers, no-ops, jumps to the next instruction, unreachable junk |
 | x2 | + shuffled registers, equivalent instruction swaps, shuffled basic blocks, no local debug info |
 | x3 | + opaque always-taken branches guarding junk, shuffled functions, no upvalue names |
+
+### The obfuscated tier
+
+Scripts in the wild are often obfuscated as source before they're ever compiled. The obfuscated
+tier does the same to quick's programs: each is lowered to Lua 5.1 with
+[darklua](https://github.com/seaofvoices/darklua), then obfuscated by
+[Prometheus](https://github.com/prometheus-lua/Prometheus), an open-source obfuscator, from a
+fixed seed ([src/obfuscate.rs](src/obfuscate.rs)). Both run inside Rosetta, so nothing has to be
+installed. The decompiler gets the obfuscated program's bytecode and has to give back something
+that still prints what it printed: nobody has to deobfuscate anything, but the obfuscator's VM,
+decoders and flattened control flow all have to survive. A program the obfuscator breaks counts
+as unusable. `rosetta obfuscate-check` shows how many survive at each level, and
+`rosetta obfuscate <file> --level N` prints what a program becomes.
+
+| level | Prometheus preset |
+| --- | --- |
+| o1 | Weak: flattened control flow, a constant array |
+| o2 | Medium: a VM, encrypted strings, flattening outside the VM, numbers as expressions |
+| o3 | Strong: all of the above, flattening inside the VM too |
+
+Prometheus's anti-tamper step is left out, since it trips on any change to the program's line
+layout, which every decompiler makes. So is Strong's number representation mutation, which breaks
+nearly every program under Luau. Based on Prometheus by Elias Oelschner,
+https://github.com/prometheus-lua/Prometheus (vendored in [vendor/prometheus](vendor/prometheus)).
 
 ## Results
 

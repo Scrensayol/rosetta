@@ -3,6 +3,7 @@ use serde::Serialize;
 use crate::{
     decompiler::Decompiler,
     luau::{self, Ending, Library, Observation, Profile},
+    obfuscate,
     quality::{self, Quality},
     transform,
 };
@@ -34,11 +35,14 @@ pub struct Verdict {
     pub got: Option<Observation>,
     // only on a pass
     pub quality: Option<Quality>,
+    // only on a pass: whether the output also made the same calls that change things, in the same
+    // order with the same arguments, and if not, where they part ways
+    pub calls: Option<Result<(), String>>,
 }
 
 impl Verdict {
     fn new(kind: Kind, detail: impl Into<String>) -> Verdict {
-        Verdict { kind, detail: detail.into(), output: None, want: None, got: None, quality: None }
+        Verdict { kind, detail: detail.into(), output: None, want: None, got: None, quality: None, calls: None }
     }
 }
 
@@ -46,6 +50,20 @@ impl Verdict {
 // has to recompile, at the same profile, into something that prints the same thing. A library
 // case's spec runs after the program both times
 pub fn check(source: &str, library: Option<&Library>, profile: Profile, decompiler: &dyn Decompiler) -> Verdict {
+    // the obfuscated tier: the original program sets what has to be printed, and the obfuscated
+    // one, which is what gets compiled and decompiled, has to print exactly that. If it doesn't,
+    // the obfuscator broke it, and it counts for nobody
+    let obfuscated;
+    let (source, original) = match profile.extra.obfuscate {
+        0 => (source, None),
+        level => match obfuscate::apply(source, level) {
+            Ok(text) => {
+                obfuscated = text;
+                (obfuscated.as_str(), Some(source))
+            }
+            Err(e) => return Verdict::new(Kind::Unusable, format!("the obfuscator can't take it: {e}")),
+        },
+    };
     let bytecode = match luau::compile(source, profile) {
         Ok(b) => b,
         Err(e) => return Verdict::new(Kind::Unusable, format!("input doesn't compile: {e}")),
@@ -53,6 +71,15 @@ pub fn check(source: &str, library: Option<&Library>, profile: Profile, decompil
     let want = luau::run_with(&bytecode, library);
     if want.ending == Ending::TimedOut {
         return Verdict::new(Kind::Unusable, "input exhausts the step budget");
+    }
+    if let Some(original) = original {
+        let reference = match luau::compile(original, profile) {
+            Ok(b) => luau::run_with(&b, library),
+            Err(e) => return Verdict::new(Kind::Unusable, format!("input doesn't compile: {e}")),
+        };
+        if reference != want {
+            return Verdict::new(Kind::Unusable, format!("obfuscating changed what the program does: {}", first_difference(&reference, &want)));
+        }
     }
     // where an allocation finally fails depends on temporaries no decompiler has to preserve
     if want.ending == Ending::Errored(luau::OUT_OF_MEMORY.into()) {
@@ -91,7 +118,15 @@ pub fn check(source: &str, library: Option<&Library>, profile: Profile, decompil
     let got = luau::run_with(&recompiled, library);
     let (kind, detail) = if got == want { (Kind::Pass, String::new()) } else { (Kind::Mismatch, first_difference(&want, &got)) };
     let quality = (kind == Kind::Pass).then(|| quality::measure(source, &output, profile.debug >= 2, cpu));
-    Verdict { kind, detail, output: Some(output), want: Some(want), got: Some(got), quality }
+    // calls that differ from run to run of the original itself (an order that comes from where
+    // tables sit in memory) say nothing about the decompiler: those passes are left out of it
+    let calls = (kind == Kind::Pass)
+        .then(|| match want.calls.first_difference(&got.calls) {
+            None => Some(Ok(())),
+            Some(why) => (luau::run_with(&bytecode, library).calls == want.calls).then_some(Err(why)),
+        })
+        .flatten();
+    Verdict { kind, detail, output: Some(output), want: Some(want), got: Some(got), quality, calls }
 }
 
 fn first_difference(want: &Observation, got: &Observation) -> String {
@@ -103,5 +138,14 @@ fn first_difference(want: &Observation, got: &Observation) -> String {
     if want.log.len() != got.log.len() {
         return format!("printed {} lines, want {}", got.log.len(), want.log.len());
     }
-    format!("ended {:?}, want {:?}", got.ending, want.ending)
+    if want.ending != got.ending {
+        return format!("ended {:?}, want {:?}", got.ending, want.ending);
+    }
+    // printed the same and ended the same, but left something else behind
+    let clip = |s: &str| if s.len() > 160 { format!("{}...", &s[..s.floor_char_boundary(160)]) } else { s.to_string() };
+    match want.state.iter().zip(&got.state).find(|(w, g)| w != g) {
+        Some((w, g)) => format!("left behind `{}`, want `{}`", clip(g), clip(w)),
+        None if want.state.len() > got.state.len() => format!("didn't leave behind `{}`", clip(&want.state[got.state.len()])),
+        None => format!("also left behind `{}`", clip(got.state.get(want.state.len()).map_or("", |s| s))),
+    }
 }
