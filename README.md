@@ -120,25 +120,31 @@ https://github.com/prometheus-lua/Prometheus (vendored in [vendor/prometheus](ve
 
 ## Results
 
-Suite rosetta-3, run 2026-11-26 and 27. Round trips passed:
+Suite rosetta-4, run 2026-11-27 and 28. Round trips passed (obfuscated is out of about 818
+usable, the others out of 888 and 12,282):
 
-| decompiler | quick | full | hard-quick | hard-full | wrong (full / hard-full) |
-| --- | --- | --- | --- | --- | --- |
-| luarust 2.5 | 882 | 12,276 | 882 | 12,276 | 0 / 0 |
-| sunberry 0.5.7 | 882 | 12,276 | 865 | 12,207 | 0 / 0 |
-| Composite luau | 877 | 12,265 | 879 | 12,246 | 11 / 9 |
-| luacid | 879 | 12,237 | 353 | 5,622 | 37 / 583 |
-| lua.expert | 882 | 12,167 | 264 | 3,859 | 4 / 1 |
-| Composite rust | 882 | 12,086 | 868 | 12,102 | 5 / 6 |
-| Tovek 2.7 | 792 | 11,879 | 231 | 3,792 | 4 / 1 |
-| Fission 1.0.5-beta | 706 | 10,031 | 222 | 3,001 | 2,245 / 9,275 |
-| sunberry (old core) | 606 | 9,013 | 73 | 1,317 | 3,263 / 10,959 |
+| decompiler | quick | full | hard-quick | hard-full | obfuscated | wrong (full / hard-full / obfuscated) |
+| --- | --- | --- | --- | --- | --- | --- |
+| luarust 2.5 | 888 | 12,281 | 888 | 12,281 | 603 | 0 / 1 / 211 |
+| sunberry 0.5.7 | 888 | 12,273 | 876 | 12,182 | 47 | 9 / 17 / 0 |
+| Composite rust | 887 | 12,262 | 887 | 12,259 | 324 | 6 / 6 / 2 |
+| luacid | 886 | 12,244 | 628 | 8,868 | 361 | 38 / 1,081 / 20 |
+| Composite luau | 841 | 12,239 | 864 | 12,234 | 609 | 25 / 29 / 0 |
+| lua.expert | 888 | 12,081 | 288 | 3,953 | 665 | 8 / 2 / 0 |
+| Tovek 2.7 | 868 | 12,046 | 277 | 3,987 | 761 | 4 / 1 / 0 |
+| Oracle v2 | 864 | 11,945 | 549 | 7,955 | 796 | 337 / 1,167 / 0 |
+| sunberry (old core) | 652 | 9,177 | 120 | 1,579 | 0 | 3,105 / 10,703 / 817 |
+| Fission 1.0.5-beta | 597 | 8,565 | 172 | 2,497 | 444 | 3,717 / 9,785 / 362 |
 
-"wrong" counts wrong output plus output that doesn't recompile. luarust is the only one to clear
-the hard tiers. Composite's luau backend gets 99.8% of hard-full; sunberry gets 99.4% and refuses
-the rest instead of guessing. Composite runs as two rows, one per backend (`?backend=luau` or
-`rust`). Per-test
-verdicts, failures and readability for every run are on [the website](https://rosetta.wtf/).
+"wrong" counts wrong output plus output that doesn't recompile: luarust's 211 on the obfuscated
+tier don't recompile, Fission's and the old core's are mostly wrong. rosetta-4 grades what a
+program leaves behind as well as what it prints, which is most of why Fission and the old core
+fell from rosetta-3. Oracle gets the most of the obfuscated tier and nothing wrong there; sunberry
+fails nearly all of it (crashes and timeouts on the obfuscators' VMs) but isn't wrong either.
+Composite runs as two rows, one per backend (`?backend=luau` or `rust`), each result naming the
+Composite build it ran on (Composite redeployed during the luau runs, so luau's hard-full ran on
+a newer build than its other three tiers). Per-test verdicts, failures, readability and "same calls" for every run
+are on [the website](https://rosetta.wtf/), and rosetta-3's results are archived there.
 
 Rosetta started inside sunberry and shares its author, so be suspicious: everything needed to
 rerun these numbers is here, and cases that break sunberry are as welcome as any other.

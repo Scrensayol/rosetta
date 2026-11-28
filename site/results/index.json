@@ -1,254 +1,1771 @@
 {
   "results": [
     {
-      "file": "composite-rust-quick.json",
-      "sha256": "cdc5af839c5292b234f90ca564b80e641d9710c8e3c36f19afe0aee7399d287b",
-      "decompiler": "composite",
-      "version": "rust",
-      "tier": "quick",
-      "hash": "e24826907050bd1d",
-      "score": {
-        "passed": 882,
-        "total": 882
-      },
-      "totals": {
-        "pass": 882
-      },
-      "created": "2026-11-27T15:22:03Z",
-      "seconds": 393.56,
-      "web": true,
-      "archived": false,
-      "levels": null
-    },
-    {
       "file": "lua-expert-quick.json",
-      "sha256": "986203adbb2b6720cb04f75ff1f5b4a43fec6fc4d375052ee4acde8e54555640",
+      "sha256": "945e67074709c514279b0a0df4b5eeab54a04914af28054ba79a54dfc0b30d64",
       "decompiler": "lua.expert",
       "version": null,
+      "options": "API defaults",
       "tier": "quick",
-      "hash": "e24826907050bd1d",
+      "hash": "f99045656e5f7f14",
       "score": {
-        "passed": 882,
-        "total": 882
+        "passed": 888,
+        "total": 888
       },
       "totals": {
-        "pass": 882
+        "pass": 888
       },
-      "created": "2026-11-26T14:41:27Z",
-      "seconds": 423.38,
+      "same_calls": {
+        "passed": 888,
+        "total": 888
+      },
+      "created": "2026-11-27T18:24:01Z",
+      "seconds": 281.95,
       "web": true,
       "archived": false,
       "levels": null
     },
     {
       "file": "luarust-quick.json",
-      "sha256": "6e3c6c31690c6941aa7cc50bbdb2eb47d8867022e821d3e0a74193ab4ad00593",
+      "sha256": "ec2ffb1dd043168a1f033f7bec49e8dcce17a7b6cf7951dd78fe2796badaf47c",
       "decompiler": "luarust",
       "version": "2.5",
+      "options": "the account's saved options, AI variable names off",
       "tier": "quick",
-      "hash": "e24826907050bd1d",
+      "hash": "f99045656e5f7f14",
       "score": {
-        "passed": 882,
-        "total": 882
+        "passed": 888,
+        "total": 888
       },
       "totals": {
-        "pass": 882
+        "pass": 888
       },
-      "created": "2026-11-26T14:36:55Z",
-      "seconds": 153.41,
+      "same_calls": {
+        "passed": 888,
+        "total": 888
+      },
+      "created": "2026-11-27T18:09:23Z",
+      "seconds": 236.51,
       "web": true,
       "archived": false,
       "levels": null
     },
     {
       "file": "sunberry-quick.json",
-      "sha256": "bdad229867b1a30b5486ccc5c33f18273dfe60da6ad7f4f854c35ee50cc6e4fb",
+      "sha256": "31c0422ea9f516207020cbe50357a1a0fca9b15c6265b2a19054dd649c5dbd3f",
       "decompiler": "sunberry",
       "version": "0.5.7",
+      "options": "decompile --strict -e 1 -n script",
       "tier": "quick",
-      "hash": "e24826907050bd1d",
+      "hash": "f99045656e5f7f14",
       "score": {
-        "passed": 882,
-        "total": 882
+        "passed": 888,
+        "total": 888
       },
       "totals": {
-        "pass": 882
+        "pass": 888
       },
-      "created": "2026-11-27T12:41:03Z",
-      "seconds": 9.16,
+      "same_calls": {
+        "passed": 888,
+        "total": 888
+      },
+      "created": "2026-11-27T18:05:26Z",
+      "seconds": 8.63,
       "web": false,
       "archived": false,
       "levels": null
     },
     {
-      "file": "luacid-quick.json",
-      "sha256": "f6643dcc0ff0e0e2fedf153027baee6cde024e01dfe38698d41ff03d18b04662",
-      "decompiler": "luacid",
-      "version": null,
+      "file": "composite-rust-quick.json",
+      "sha256": "e004c4b0c6acfdba1b893d5628c11e7a2f92ff040b33ef6b716eab4458c5814c",
+      "decompiler": "composite",
+      "version": "rust",
+      "options": "encoding=base64&telemetry=false&backend=rust; Composite build rust 926161d7c01a",
       "tier": "quick",
-      "hash": "e24826907050bd1d",
+      "hash": "f99045656e5f7f14",
       "score": {
-        "passed": 879,
-        "total": 882
+        "passed": 887,
+        "total": 888
       },
       "totals": {
-        "pass": 879,
-        "mismatch": 3
+        "pass": 887,
+        "refused": 1
       },
-      "created": "2026-11-26T14:50:42Z",
-      "seconds": 971.9,
+      "same_calls": {
+        "passed": 887,
+        "total": 887
+      },
+      "created": "2026-11-28T00:27:17Z",
+      "seconds": 358.64,
       "web": true,
       "archived": false,
       "levels": null
     },
     {
-      "file": "composite-luau-quick.json",
-      "sha256": "aa54e95e0bc0b3591ca1ea69cf23807653e438061f3501905654b86dc3c6afbc",
-      "decompiler": "composite",
-      "version": "luau",
+      "file": "luacid-quick.json",
+      "sha256": "2cb2e7a57f6885d3033b2ca08af4716152a1deb6ba75ba529446e6e06d7713dd",
+      "decompiler": "luacid",
+      "version": null,
+      "options": "API defaults",
       "tier": "quick",
-      "hash": "e24826907050bd1d",
+      "hash": "f99045656e5f7f14",
       "score": {
-        "passed": 877,
-        "total": 882
+        "passed": 886,
+        "total": 888
       },
       "totals": {
-        "pass": 877,
-        "mismatch": 5
+        "pass": 886,
+        "mismatch": 2
       },
-      "created": "2026-11-27T12:15:52Z",
-      "seconds": 369.32,
+      "same_calls": {
+        "passed": 860,
+        "total": 886
+      },
+      "created": "2026-11-27T18:35:09Z",
+      "seconds": 945.67,
       "web": true,
       "archived": false,
       "levels": null
     },
     {
       "file": "tovek-quick.json",
-      "sha256": "3796e16c38305ec6b1c9d3852b99c0011a3ac1fc1535aebeee2f0e970ba48e0e",
+      "sha256": "2c01de56cc7405e3ee85a737c595f4216cec0224e6619d668721e6c91b9465d3",
       "decompiler": "tovek",
       "version": "2.7",
+      "options": "luau-lifter defaults",
       "tier": "quick",
-      "hash": "e24826907050bd1d",
+      "hash": "f99045656e5f7f14",
       "score": {
-        "passed": 792,
-        "total": 882
+        "passed": 868,
+        "total": 888
       },
       "totals": {
-        "pass": 792,
-        "refused": 90
+        "pass": 868,
+        "refused": 20
       },
-      "created": "2026-11-26T14:38:17Z",
-      "seconds": 11.05,
+      "same_calls": {
+        "passed": 868,
+        "total": 868
+      },
+      "created": "2026-11-27T20:14:34Z",
+      "seconds": 15.35,
+      "web": false,
+      "archived": false,
+      "levels": null
+    },
+    {
+      "file": "oracle-quick.json",
+      "sha256": "f1e6b1484c70e861cc96d25c4715ad2dba12b3fe8de29dc5e3f1247eefd1478d",
+      "decompiler": "oracle",
+      "version": "v2",
+      "options": "version=2, default options",
+      "tier": "quick",
+      "hash": "f99045656e5f7f14",
+      "score": {
+        "passed": 864,
+        "total": 888
+      },
+      "totals": {
+        "pass": 864,
+        "recompile_failed": 1,
+        "mismatch": 23
+      },
+      "same_calls": {
+        "passed": 864,
+        "total": 864
+      },
+      "created": "2026-11-27T19:18:54Z",
+      "seconds": 452.05,
+      "web": true,
+      "archived": false,
+      "levels": null
+    },
+    {
+      "file": "composite-luau-quick.json",
+      "sha256": "eb9a53b361e22f40e6496f2ab01eb3bca8af2ad0697b933c41bbb9bf8fce031d",
+      "decompiler": "composite",
+      "version": "luau",
+      "options": "encoding=base64&telemetry=false&backend=luau; Composite build luau 92d6cb450fe0",
+      "tier": "quick",
+      "hash": "f99045656e5f7f14",
+      "score": {
+        "passed": 841,
+        "total": 888
+      },
+      "totals": {
+        "pass": 841,
+        "refused": 42,
+        "mismatch": 5
+      },
+      "same_calls": {
+        "passed": 841,
+        "total": 841
+      },
+      "created": "2026-11-27T18:55:04Z",
+      "seconds": 505.42,
+      "web": true,
+      "archived": false,
+      "levels": null
+    },
+    {
+      "file": "sunberry-old-core-quick.json",
+      "sha256": "8b0daf88d599cb5da50732c3bc2c98e7e8c73434c0002a13018668ce6d95cb49",
+      "decompiler": "sunberry-old-core",
+      "version": "0.5.7",
+      "options": "decompile --core old -e 1 -n script",
+      "tier": "quick",
+      "hash": "f99045656e5f7f14",
+      "score": {
+        "passed": 652,
+        "total": 888
+      },
+      "totals": {
+        "pass": 652,
+        "recompile_failed": 44,
+        "mismatch": 192
+      },
+      "same_calls": {
+        "passed": 652,
+        "total": 652
+      },
+      "created": "2026-11-27T19:42:26Z",
+      "seconds": 9.38,
       "web": false,
       "archived": false,
       "levels": null
     },
     {
       "file": "fission-quick.json",
-      "sha256": "9847672b2606231cc6f9ec8d709cb5bab562de847433d57ef73636c2c23090d4",
+      "sha256": "65aadb4f227a671ed66a0e113c2d995e9ffdb7e4c949f34270ad2fe679d81a14",
       "decompiler": "fission",
       "version": "1.0.5-beta",
+      "options": "vanilla mode, default flags",
       "tier": "quick",
-      "hash": "e24826907050bd1d",
+      "hash": "f99045656e5f7f14",
       "score": {
-        "passed": 706,
-        "total": 882
+        "passed": 597,
+        "total": 888
       },
       "totals": {
-        "pass": 706,
+        "pass": 597,
         "recompile_failed": 62,
-        "mismatch": 114
+        "mismatch": 229
       },
-      "created": "2026-11-26T14:41:00Z",
-      "seconds": 19.35,
+      "same_calls": {
+        "passed": 594,
+        "total": 597
+      },
+      "created": "2026-11-27T20:58:08Z",
+      "seconds": 21.65,
       "web": false,
       "archived": false,
       "levels": null
     },
     {
-      "file": "sunberry-old-core-quick.json",
-      "sha256": "8063711f874d5c30b0d73743944c6777a9dde27b39cdc9c48b9127f0da33b87f",
-      "decompiler": "sunberry-old-core",
-      "version": "0.5.6",
-      "tier": "quick",
-      "hash": "e24826907050bd1d",
+      "file": "luarust-hard-quick.json",
+      "sha256": "4031472f50f9782e7641e186ee5ed1be08062a1c44841e25c1771075aacf1b7c",
+      "decompiler": "luarust",
+      "version": "2.5",
+      "options": "the account's saved options, AI variable names off",
+      "tier": "hard-quick",
+      "hash": "820f50496ba24191",
       "score": {
-        "passed": 606,
-        "total": 882
+        "passed": 888,
+        "total": 888
       },
       "totals": {
-        "pass": 606,
-        "recompile_failed": 44,
-        "mismatch": 232
+        "pass": 888
       },
-      "created": "2026-11-26T14:36:13Z",
-      "seconds": 6.64,
-      "web": false,
+      "same_calls": {
+        "passed": 888,
+        "total": 888
+      },
+      "created": "2026-11-27T18:13:30Z",
+      "seconds": 236.61,
+      "web": true,
       "archived": false,
-      "levels": null
+      "levels": {
+        "1": {
+          "total": 296,
+          "passed": 296
+        },
+        "2": {
+          "total": 296,
+          "passed": 296
+        },
+        "3": {
+          "total": 296,
+          "passed": 296
+        }
+      }
     },
     {
       "file": "luarust-full.json",
-      "sha256": "0493039c951667ad83f848d0a7f638f11ec07d1838d48adf9bc146b079cefc6c",
+      "sha256": "b38d61782b86b78dd4bef00ac0ed1611be71460968e0c3838782fea2fe0af410",
       "decompiler": "luarust",
       "version": "2.5",
+      "options": "the account's saved options, AI variable names off",
       "tier": "full",
-      "hash": "f0eae8ffcedd440e",
+      "hash": "6a95f18434373f4a",
       "score": {
-        "passed": 12276,
-        "total": 12276
+        "passed": 12281,
+        "total": 12282
       },
       "totals": {
-        "pass": 12276,
-        "unusable": 6
+        "pass": 12281,
+        "unusable": 6,
+        "decompile_failed": 1
       },
-      "created": "2026-11-27T12:00:52Z",
-      "seconds": 1327.32,
+      "same_calls": {
+        "passed": 12195,
+        "total": 12281
+      },
+      "created": "2026-11-27T20:07:08Z",
+      "seconds": 2672.72,
       "web": true,
       "archived": false,
       "levels": null
     },
     {
       "file": "luarust-hard-full.json",
-      "sha256": "f8c761c62788a3a54de1ff4c6eecfd64416c62d608bfbfd7894a5c48631c86dc",
+      "sha256": "67e4f6c74feb2faa51ad6fbee790a0df0bda3765f7875389c42d0e032af0467d",
       "decompiler": "luarust",
       "version": "2.5",
+      "options": "the account's saved options, AI variable names off",
       "tier": "hard-full",
-      "hash": "9921d3bde4a99bfd",
+      "hash": "724fd4dd8498513d",
       "score": {
-        "passed": 12276,
-        "total": 12276
+        "passed": 12281,
+        "total": 12282
       },
       "totals": {
-        "pass": 12276,
-        "unusable": 6
+        "pass": 12281,
+        "unusable": 6,
+        "mismatch": 1
       },
-      "created": "2026-11-26T17:11:15Z",
-      "seconds": 1834.73,
+      "same_calls": {
+        "passed": 12194,
+        "total": 12281
+      },
+      "created": "2026-11-27T20:54:15Z",
+      "seconds": 2813.01,
       "web": true,
       "archived": false,
       "levels": {
         "1": {
-          "total": 4092,
-          "passed": 4092
+          "total": 4094,
+          "passed": 4094
         },
         "2": {
-          "total": 4092,
-          "passed": 4092
+          "total": 4094,
+          "passed": 4093
         },
         "3": {
-          "total": 4092,
-          "passed": 4092
+          "total": 4094,
+          "passed": 4094
         }
       }
     },
     {
-      "file": "luarust-hard-quick.json",
-      "sha256": "ba837e81be27f8f71660639c7c0e19adfebb5880b36da7ba63b50c65f2514960",
+      "file": "sunberry-full.json",
+      "sha256": "974986b68d76a7bf319afe7d39946340d99aea34fab78b490501c4528a965369",
+      "decompiler": "sunberry",
+      "version": "0.5.7",
+      "options": "decompile --strict -e 1 -n script",
+      "tier": "full",
+      "hash": "6a95f18434373f4a",
+      "score": {
+        "passed": 12273,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 12273,
+        "unusable": 6,
+        "mismatch": 9
+      },
+      "same_calls": {
+        "passed": 12261,
+        "total": 12273
+      },
+      "created": "2026-11-27T19:39:05Z",
+      "seconds": 92.04,
+      "web": false,
+      "archived": false,
+      "levels": null
+    },
+    {
+      "file": "composite-rust-hard-quick.json",
+      "sha256": "f98464f8e4f3eaa9f5d849c338f4b2f9cb199c736cf9e5d8e198bd64d234d0d3",
+      "decompiler": "composite",
+      "version": "rust",
+      "options": "encoding=base64&telemetry=false&backend=rust; Composite build rust 926161d7c01a",
+      "tier": "hard-quick",
+      "hash": "820f50496ba24191",
+      "score": {
+        "passed": 887,
+        "total": 888
+      },
+      "totals": {
+        "pass": 887,
+        "refused": 1
+      },
+      "same_calls": {
+        "passed": 887,
+        "total": 887
+      },
+      "created": "2026-11-28T00:33:28Z",
+      "seconds": 365.57,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 296,
+          "passed": 296
+        },
+        "2": {
+          "total": 296,
+          "passed": 296
+        },
+        "3": {
+          "total": 296,
+          "passed": 295
+        }
+      }
+    },
+    {
+      "file": "composite-rust-full.json",
+      "sha256": "67b8bdf6c54592ffc7b05d74b6edc501c974d73ffae765d10435a2285f4dcc40",
+      "decompiler": "composite",
+      "version": "rust",
+      "options": "encoding=base64&telemetry=false&backend=rust; Composite build rust 926161d7c01a",
+      "tier": "full",
+      "hash": "6a95f18434373f4a",
+      "score": {
+        "passed": 12262,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 12262,
+        "unusable": 6,
+        "refused": 14,
+        "mismatch": 6
+      },
+      "same_calls": {
+        "passed": 12252,
+        "total": 12262
+      },
+      "created": "2026-11-28T04:14:33Z",
+      "seconds": 4242.5,
+      "web": true,
+      "archived": false,
+      "levels": null
+    },
+    {
+      "file": "composite-rust-hard-full.json",
+      "sha256": "689357b5cdbe5d551593143fb9eb19f2f74bb25d4ebedad4d485a26e9497eb69",
+      "decompiler": "composite",
+      "version": "rust",
+      "options": "encoding=base64&telemetry=false&backend=rust; Composite build rust 926161d7c01a",
+      "tier": "hard-full",
+      "hash": "724fd4dd8498513d",
+      "score": {
+        "passed": 12259,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 12259,
+        "unusable": 6,
+        "refused": 17,
+        "mismatch": 6
+      },
+      "same_calls": {
+        "passed": 12250,
+        "total": 12259
+      },
+      "created": "2026-11-28T05:27:08Z",
+      "seconds": 4351.44,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 4094,
+          "passed": 4087
+        },
+        "2": {
+          "total": 4094,
+          "passed": 4089
+        },
+        "3": {
+          "total": 4094,
+          "passed": 4083
+        }
+      }
+    },
+    {
+      "file": "luacid-full.json",
+      "sha256": "29c97e66e1874c7526554270a10eadd31d1f73fe6ef6029e46636a70f900fc4d",
+      "decompiler": "luacid",
+      "version": null,
+      "options": "API defaults",
+      "tier": "full",
+      "hash": "6a95f18434373f4a",
+      "score": {
+        "passed": 12244,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 12244,
+        "unusable": 6,
+        "mismatch": 38
+      },
+      "same_calls": {
+        "passed": 11788,
+        "total": 12244
+      },
+      "created": "2026-11-28T00:32:09Z",
+      "seconds": 12947.02,
+      "web": true,
+      "archived": false,
+      "levels": null
+    },
+    {
+      "file": "composite-luau-full.json",
+      "sha256": "70669c06a9785bca17823564b04dc714a519c5e0119ecd8899f659cd645ed6cc",
+      "decompiler": "composite",
+      "version": "luau",
+      "options": "encoding=base64&telemetry=false&backend=luau; Composite build luau 92d6cb450fe0",
+      "tier": "full",
+      "hash": "6a95f18434373f4a",
+      "score": {
+        "passed": 12239,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 12239,
+        "unusable": 6,
+        "refused": 18,
+        "mismatch": 25
+      },
+      "same_calls": {
+        "passed": 12189,
+        "total": 12239
+      },
+      "created": "2026-11-27T23:03:21Z",
+      "seconds": 4502.71,
+      "web": true,
+      "archived": false,
+      "levels": null
+    },
+    {
+      "file": "composite-luau-hard-full.json",
+      "sha256": "5bdc8a3a907e86bc50fe9a742b07610f1d618c9803e327202d7c5aaab42dc533",
+      "decompiler": "composite",
+      "version": "luau",
+      "options": "encoding=base64&telemetry=false&backend=luau; Composite build luau 16076b1a2f02",
+      "tier": "hard-full",
+      "hash": "724fd4dd8498513d",
+      "score": {
+        "passed": 12234,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 12234,
+        "unusable": 6,
+        "refused": 19,
+        "mismatch": 29
+      },
+      "same_calls": {
+        "passed": 12184,
+        "total": 12234
+      },
+      "created": "2026-11-28T06:48:58Z",
+      "seconds": 4888.12,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 4094,
+          "passed": 4079
+        },
+        "2": {
+          "total": 4094,
+          "passed": 4086
+        },
+        "3": {
+          "total": 4094,
+          "passed": 4069
+        }
+      }
+    },
+    {
+      "file": "sunberry-hard-full.json",
+      "sha256": "ac942860e862c4ad86ea1ee73562f2fae8e0e6b300bcb966505ef8f8cb360a96",
+      "decompiler": "sunberry",
+      "version": "0.5.7",
+      "options": "decompile --strict -e 1 -n script",
+      "tier": "hard-full",
+      "hash": "724fd4dd8498513d",
+      "score": {
+        "passed": 12182,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 12182,
+        "unusable": 6,
+        "refused": 83,
+        "recompile_failed": 2,
+        "mismatch": 15
+      },
+      "same_calls": {
+        "passed": 12162,
+        "total": 12182
+      },
+      "created": "2026-11-27T19:42:08Z",
+      "seconds": 177.27,
+      "web": false,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 4094,
+          "passed": 4082
+        },
+        "2": {
+          "total": 4094,
+          "passed": 4054
+        },
+        "3": {
+          "total": 4094,
+          "passed": 4046
+        }
+      }
+    },
+    {
+      "file": "sunberry-hard-quick.json",
+      "sha256": "00b84e915640218ef440997b565cf89295ee639863ed41e769b8d0fe3d2c27a8",
+      "decompiler": "sunberry",
+      "version": "0.5.7",
+      "options": "decompile --strict -e 1 -n script",
+      "tier": "hard-quick",
+      "hash": "820f50496ba24191",
+      "score": {
+        "passed": 876,
+        "total": 888
+      },
+      "totals": {
+        "pass": 876,
+        "refused": 12
+      },
+      "same_calls": {
+        "passed": 876,
+        "total": 876
+      },
+      "created": "2026-11-27T18:05:47Z",
+      "seconds": 17.05,
+      "web": false,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 296,
+          "passed": 296
+        },
+        "2": {
+          "total": 296,
+          "passed": 293
+        },
+        "3": {
+          "total": 296,
+          "passed": 287
+        }
+      }
+    },
+    {
+      "file": "lua-expert-full.json",
+      "sha256": "ad7529ade74b3553543eace5e4e12433ef8bef21534aee810297fd974f3bd202",
+      "decompiler": "lua.expert",
+      "version": null,
+      "options": "API defaults",
+      "tier": "full",
+      "hash": "6a95f18434373f4a",
+      "score": {
+        "passed": 12081,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 12081,
+        "unusable": 6,
+        "refused": 193,
+        "mismatch": 8
+      },
+      "same_calls": {
+        "passed": 12015,
+        "total": 12081
+      },
+      "created": "2026-11-27T21:16:18Z",
+      "seconds": 3745.08,
+      "web": true,
+      "archived": false,
+      "levels": null
+    },
+    {
+      "file": "tovek-full.json",
+      "sha256": "db600819d213a97738259eb3869b4c7f7ad6f7a7fd92c441144b1a5a096732b6",
+      "decompiler": "tovek",
+      "version": "2.7",
+      "options": "luau-lifter defaults",
+      "tier": "full",
+      "hash": "6a95f18434373f4a",
+      "score": {
+        "passed": 12046,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 12046,
+        "unusable": 6,
+        "refused": 232,
+        "mismatch": 4
+      },
+      "same_calls": {
+        "passed": 12045,
+        "total": 12046
+      },
+      "created": "2026-11-27T20:56:37Z",
+      "seconds": 70.29,
+      "web": false,
+      "archived": false,
+      "levels": null
+    },
+    {
+      "file": "oracle-obfuscated.json",
+      "sha256": "798f3f06900fee11333344c42d6bd9b5feb7621688be279b7e6716e3d880ed64",
+      "decompiler": "oracle",
+      "version": "v2",
+      "options": "version=2, default options",
+      "tier": "obfuscated",
+      "hash": "75a22ac96a3ad36c",
+      "score": {
+        "passed": 796,
+        "total": 818
+      },
+      "totals": {
+        "pass": 796,
+        "unusable": 70,
+        "refused": 21,
+        "decompile_failed": 1
+      },
+      "same_calls": {
+        "passed": 796,
+        "total": 796
+      },
+      "created": "2026-11-27T21:45:14Z",
+      "seconds": 8020.24,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 278,
+          "passed": 276
+        },
+        "2": {
+          "total": 270,
+          "passed": 258
+        },
+        "3": {
+          "total": 270,
+          "passed": 262
+        }
+      }
+    },
+    {
+      "file": "composite-luau-hard-quick.json",
+      "sha256": "0388e34de2b675a310d7a16381dae4eaf152e07b8dfce5540feebc9acfa633cd",
+      "decompiler": "composite",
+      "version": "luau",
+      "options": "encoding=base64&telemetry=false&backend=luau; Composite build luau 92d6cb450fe0",
+      "tier": "hard-quick",
+      "hash": "820f50496ba24191",
+      "score": {
+        "passed": 864,
+        "total": 888
+      },
+      "totals": {
+        "pass": 864,
+        "refused": 21,
+        "mismatch": 3
+      },
+      "same_calls": {
+        "passed": 864,
+        "total": 864
+      },
+      "created": "2026-11-27T19:03:44Z",
+      "seconds": 488.53,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 296,
+          "passed": 284
+        },
+        "2": {
+          "total": 296,
+          "passed": 294
+        },
+        "3": {
+          "total": 296,
+          "passed": 286
+        }
+      }
+    },
+    {
+      "file": "oracle-full.json",
+      "sha256": "55342b7b74dd66368bc28190640babb51cb4081696668686586d03dde28c6eb0",
+      "decompiler": "oracle",
+      "version": "v2",
+      "options": "version=2, default options",
+      "tier": "full",
+      "hash": "6a95f18434373f4a",
+      "score": {
+        "passed": 11945,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 11945,
+        "unusable": 6,
+        "recompile_failed": 11,
+        "mismatch": 326
+      },
+      "same_calls": {
+        "passed": 11910,
+        "total": 11945
+      },
+      "created": "2026-11-27T22:59:06Z",
+      "seconds": 4428.77,
+      "web": true,
+      "archived": false,
+      "levels": null
+    },
+    {
+      "file": "tovek-obfuscated.json",
+      "sha256": "77f7f6fc1f17733269c8324314026e35a6560fb731b7adeee3304f394c435f9f",
+      "decompiler": "tovek",
+      "version": "2.7",
+      "options": "luau-lifter defaults",
+      "tier": "obfuscated",
+      "hash": "75a22ac96a3ad36c",
+      "score": {
+        "passed": 761,
+        "total": 818
+      },
+      "totals": {
+        "pass": 761,
+        "unusable": 70,
+        "refused": 2,
+        "decompile_failed": 55
+      },
+      "same_calls": {
+        "passed": 761,
+        "total": 761
+      },
+      "created": "2026-11-27T20:55:24Z",
+      "seconds": 2428.8,
+      "web": false,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 278,
+          "passed": 276
+        },
+        "2": {
+          "total": 270,
+          "passed": 219
+        },
+        "3": {
+          "total": 270,
+          "passed": 266
+        }
+      }
+    },
+    {
+      "file": "lua-expert-obfuscated.json",
+      "sha256": "ea6489945d06f193c9ea7f3fc447ba2335497ad29b8d26da345188b2601bc9ef",
+      "decompiler": "lua.expert",
+      "version": null,
+      "options": "API defaults",
+      "tier": "obfuscated",
+      "hash": "75a22ac96a3ad36c",
+      "score": {
+        "passed": 665,
+        "total": 818
+      },
+      "totals": {
+        "pass": 665,
+        "unusable": 70,
+        "refused": 153
+      },
+      "same_calls": {
+        "passed": 665,
+        "total": 665
+      },
+      "created": "2026-11-27T20:13:42Z",
+      "seconds": 6275.4,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 278,
+          "passed": 271
+        },
+        "2": {
+          "total": 270,
+          "passed": 222
+        },
+        "3": {
+          "total": 270,
+          "passed": 172
+        }
+      }
+    },
+    {
+      "file": "sunberry-old-core-full.json",
+      "sha256": "12910d53364773329e61cc8ba30f7f2e8239789f89b00eb43e7d79e0ba214165",
+      "decompiler": "sunberry-old-core",
+      "version": "0.5.7",
+      "options": "decompile --core old -e 1 -n script",
+      "tier": "full",
+      "hash": "6a95f18434373f4a",
+      "score": {
+        "passed": 9177,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 9177,
+        "unusable": 6,
+        "recompile_failed": 316,
+        "mismatch": 2789
+      },
+      "same_calls": {
+        "passed": 9151,
+        "total": 9177
+      },
+      "created": "2026-11-27T20:13:08Z",
+      "seconds": 75.58,
+      "web": false,
+      "archived": false,
+      "levels": null
+    },
+    {
+      "file": "composite-luau-obfuscated.json",
+      "sha256": "ed011d62d4c6599f7f5ee3f47c087e9de4738e83443c4eee71f8ac1c999bf356",
+      "decompiler": "composite",
+      "version": "luau",
+      "options": "encoding=base64&telemetry=false&backend=luau; Composite build luau 92d6cb450fe0",
+      "tier": "obfuscated",
+      "hash": "75a22ac96a3ad36c",
+      "score": {
+        "passed": 609,
+        "total": 818
+      },
+      "totals": {
+        "pass": 609,
+        "unusable": 70,
+        "refused": 209
+      },
+      "same_calls": {
+        "passed": 609,
+        "total": 609
+      },
+      "created": "2026-11-27T21:48:15Z",
+      "seconds": 9841.6,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 278,
+          "passed": 276
+        },
+        "2": {
+          "total": 270,
+          "passed": 155
+        },
+        "3": {
+          "total": 270,
+          "passed": 178
+        }
+      }
+    },
+    {
+      "file": "luarust-obfuscated.json",
+      "sha256": "69a0af60efe9b2635a03edb81850564d55b76c4a8eacfe583e84f9bc2572100b",
       "decompiler": "luarust",
       "version": "2.5",
+      "options": "the account's saved options, AI variable names off",
+      "tier": "obfuscated",
+      "hash": "75a22ac96a3ad36c",
+      "score": {
+        "passed": 603,
+        "total": 818
+      },
+      "totals": {
+        "pass": 603,
+        "unusable": 70,
+        "refused": 1,
+        "decompile_failed": 3,
+        "recompile_failed": 211
+      },
+      "same_calls": {
+        "passed": 0,
+        "total": 603
+      },
+      "created": "2026-11-27T19:22:21Z",
+      "seconds": 4120.16,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 278,
+          "passed": 276
+        },
+        "2": {
+          "total": 270,
+          "passed": 135
+        },
+        "3": {
+          "total": 270,
+          "passed": 192
+        }
+      }
+    },
+    {
+      "file": "luacid-hard-full.json",
+      "sha256": "c38e39d0d9964ba3590696cd82e948909aa9767e3eecb574746bee3af9caff4e",
+      "decompiler": "luacid",
+      "version": null,
+      "options": "API defaults",
+      "tier": "hard-full",
+      "hash": "724fd4dd8498513d",
+      "score": {
+        "passed": 8868,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 8868,
+        "unusable": 6,
+        "refused": 2333,
+        "recompile_failed": 37,
+        "mismatch": 1044
+      },
+      "same_calls": {
+        "passed": 8497,
+        "total": 8868
+      },
+      "created": "2026-11-28T04:09:16Z",
+      "seconds": 13024.53,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 4094,
+          "passed": 4074
+        },
+        "2": {
+          "total": 4094,
+          "passed": 4001
+        },
+        "3": {
+          "total": 4094,
+          "passed": 793
+        }
+      }
+    },
+    {
+      "file": "luacid-hard-quick.json",
+      "sha256": "18f829eb41210ce1aa5db4cb5964de6570a1c00325fc1e1b762658fb427d60e8",
+      "decompiler": "luacid",
+      "version": null,
+      "options": "API defaults",
       "tier": "hard-quick",
-      "hash": "9bcb49d29e867a92",
+      "hash": "820f50496ba24191",
+      "score": {
+        "passed": 628,
+        "total": 888
+      },
+      "totals": {
+        "pass": 628,
+        "refused": 152,
+        "recompile_failed": 1,
+        "mismatch": 107
+      },
+      "same_calls": {
+        "passed": 603,
+        "total": 628
+      },
+      "created": "2026-11-27T18:52:23Z",
+      "seconds": 1009.37,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 296,
+          "passed": 295
+        },
+        "2": {
+          "total": 296,
+          "passed": 289
+        },
+        "3": {
+          "total": 296,
+          "passed": 44
+        }
+      }
+    },
+    {
+      "file": "fission-full.json",
+      "sha256": "e7322be4ea05ca03100d3ddf1c03d47970787d4b646d4308630232a6e5a78861",
+      "decompiler": "fission",
+      "version": "1.0.5-beta",
+      "options": "vanilla mode, default flags",
+      "tier": "full",
+      "hash": "6a95f18434373f4a",
+      "score": {
+        "passed": 8565,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 8565,
+        "unusable": 6,
+        "recompile_failed": 1033,
+        "mismatch": 2684
+      },
+      "same_calls": {
+        "passed": 8528,
+        "total": 8565
+      },
+      "created": "2026-11-27T21:27:57Z",
+      "seconds": 150.62,
+      "web": false,
+      "archived": false,
+      "levels": null
+    },
+    {
+      "file": "oracle-hard-full.json",
+      "sha256": "0c57d422d8cc583f535bd01b74f3c5b7fff7cc39fcf60f4d604f6e62fa64d54d",
+      "decompiler": "oracle",
+      "version": "v2",
+      "options": "version=2, default options",
+      "tier": "hard-full",
+      "hash": "724fd4dd8498513d",
+      "score": {
+        "passed": 7955,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 7955,
+        "unusable": 6,
+        "refused": 3,
+        "decompile_failed": 3157,
+        "recompile_failed": 445,
+        "mismatch": 722
+      },
+      "same_calls": {
+        "passed": 7933,
+        "total": 7955
+      },
+      "created": "2026-11-28T00:44:45Z",
+      "seconds": 6336.52,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 4094,
+          "passed": 3486
+        },
+        "2": {
+          "total": 4094,
+          "passed": 4080
+        },
+        "3": {
+          "total": 4094,
+          "passed": 389
+        }
+      }
+    },
+    {
+      "file": "oracle-hard-quick.json",
+      "sha256": "d7cdef1497efdff33b1c6c58a5e9662c34d59a987ee46e180b983fb94cd36576",
+      "decompiler": "oracle",
+      "version": "v2",
+      "options": "version=2, default options",
+      "tier": "hard-quick",
+      "hash": "820f50496ba24191",
+      "score": {
+        "passed": 549,
+        "total": 888
+      },
+      "totals": {
+        "pass": 549,
+        "refused": 5,
+        "decompile_failed": 244,
+        "recompile_failed": 19,
+        "mismatch": 71
+      },
+      "same_calls": {
+        "passed": 549,
+        "total": 549
+      },
+      "created": "2026-11-27T19:31:12Z",
+      "seconds": 711.39,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 296,
+          "passed": 231
+        },
+        "2": {
+          "total": 296,
+          "passed": 293
+        },
+        "3": {
+          "total": 296,
+          "passed": 25
+        }
+      }
+    },
+    {
+      "file": "fission-obfuscated.json",
+      "sha256": "48edeee1bec4b731794ae03966880d9743b21b0253dbcf5886366faa31e5e06a",
+      "decompiler": "fission",
+      "version": "1.0.5-beta",
+      "options": "vanilla mode, default flags",
+      "tier": "obfuscated",
+      "hash": "75a22ac96a3ad36c",
+      "score": {
+        "passed": 444,
+        "total": 819
+      },
+      "totals": {
+        "pass": 444,
+        "unusable": 69,
+        "refused": 3,
+        "decompile_failed": 10,
+        "mismatch": 362
+      },
+      "same_calls": {
+        "passed": 444,
+        "total": 444
+      },
+      "created": "2026-11-27T21:25:23Z",
+      "seconds": 1596.26,
+      "web": false,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 279,
+          "passed": 139
+        },
+        "2": {
+          "total": 270,
+          "passed": 257
+        },
+        "3": {
+          "total": 270,
+          "passed": 48
+        }
+      }
+    },
+    {
+      "file": "luacid-obfuscated.json",
+      "sha256": "2811d690abc97b105a548527fca60212b4d2c8fc393b2edc298dbbc05f187bda",
+      "decompiler": "luacid",
+      "version": null,
+      "options": "API defaults",
+      "tier": "obfuscated",
+      "hash": "75a22ac96a3ad36c",
+      "score": {
+        "passed": 361,
+        "total": 818
+      },
+      "totals": {
+        "pass": 361,
+        "unusable": 70,
+        "refused": 437,
+        "recompile_failed": 2,
+        "mismatch": 18
+      },
+      "same_calls": {
+        "passed": 143,
+        "total": 361
+      },
+      "created": "2026-11-27T20:56:12Z",
+      "seconds": 7401.79,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 278,
+          "passed": 259
+        },
+        "2": {
+          "total": 270,
+          "passed": 102
+        },
+        "3": {
+          "total": 270,
+          "passed": 0
+        }
+      }
+    },
+    {
+      "file": "composite-rust-obfuscated.json",
+      "sha256": "524259052ec7e4cfd4fcdab44c2de28e5a50da6caef257f8737585f7e015c7eb",
+      "decompiler": "composite",
+      "version": "rust",
+      "options": "encoding=base64&telemetry=false&backend=rust; Composite build rust 926161d7c01a",
+      "tier": "obfuscated",
+      "hash": "75a22ac96a3ad36c",
+      "score": {
+        "passed": 324,
+        "total": 819
+      },
+      "totals": {
+        "pass": 324,
+        "unusable": 69,
+        "refused": 493,
+        "mismatch": 2
+      },
+      "same_calls": {
+        "passed": 324,
+        "total": 324
+      },
+      "created": "2026-11-28T03:03:48Z",
+      "seconds": 9016.03,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 279,
+          "passed": 246
+        },
+        "2": {
+          "total": 270,
+          "passed": 35
+        },
+        "3": {
+          "total": 270,
+          "passed": 43
+        }
+      }
+    },
+    {
+      "file": "tovek-hard-full.json",
+      "sha256": "e1b86a49706e878f201cd718da3296ac7b287fe8c44565b6fc9cc5b429993b7a",
+      "decompiler": "tovek",
+      "version": "2.7",
+      "options": "luau-lifter defaults",
+      "tier": "hard-full",
+      "hash": "724fd4dd8498513d",
+      "score": {
+        "passed": 3987,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 3987,
+        "unusable": 6,
+        "refused": 8294,
+        "mismatch": 1
+      },
+      "same_calls": {
+        "passed": 3987,
+        "total": 3987
+      },
+      "created": "2026-11-27T20:57:23Z",
+      "seconds": 42.31,
+      "web": false,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 4094,
+          "passed": 3730
+        },
+        "2": {
+          "total": 4094,
+          "passed": 244
+        },
+        "3": {
+          "total": 4094,
+          "passed": 13
+        }
+      }
+    },
+    {
+      "file": "lua-expert-hard-quick.json",
+      "sha256": "6d1602435baad62c25cdfc33f758021cf86d28470deebbf1a2c497882467e569",
+      "decompiler": "lua.expert",
+      "version": null,
+      "options": "API defaults",
+      "tier": "hard-quick",
+      "hash": "820f50496ba24191",
+      "score": {
+        "passed": 288,
+        "total": 888
+      },
+      "totals": {
+        "pass": 288,
+        "refused": 600
+      },
+      "same_calls": {
+        "passed": 288,
+        "total": 288
+      },
+      "created": "2026-11-27T18:28:52Z",
+      "seconds": 274.23,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 296,
+          "passed": 269
+        },
+        "2": {
+          "total": 296,
+          "passed": 19
+        },
+        "3": {
+          "total": 296,
+          "passed": 0
+        }
+      }
+    },
+    {
+      "file": "lua-expert-hard-full.json",
+      "sha256": "46e81e9cd5a758afb163983bc0a36d5ab80ef4c89f79265cfd4107dccb69bcb4",
+      "decompiler": "lua.expert",
+      "version": null,
+      "options": "API defaults",
+      "tier": "hard-full",
+      "hash": "724fd4dd8498513d",
+      "score": {
+        "passed": 3953,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 3953,
+        "unusable": 6,
+        "refused": 8327,
+        "mismatch": 2
+      },
+      "same_calls": {
+        "passed": 3927,
+        "total": 3953
+      },
+      "created": "2026-11-27T22:15:05Z",
+      "seconds": 3516.46,
+      "web": true,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 4094,
+          "passed": 3751
+        },
+        "2": {
+          "total": 4094,
+          "passed": 197
+        },
+        "3": {
+          "total": 4094,
+          "passed": 5
+        }
+      }
+    },
+    {
+      "file": "tovek-hard-quick.json",
+      "sha256": "3d54e8a7094326efa3b45d1994d08bd4330ca61b6b0848355b3228e920220eb6",
+      "decompiler": "tovek",
+      "version": "2.7",
+      "options": "luau-lifter defaults",
+      "tier": "hard-quick",
+      "hash": "820f50496ba24191",
+      "score": {
+        "passed": 277,
+        "total": 888
+      },
+      "totals": {
+        "pass": 277,
+        "refused": 611
+      },
+      "same_calls": {
+        "passed": 277,
+        "total": 277
+      },
+      "created": "2026-11-27T20:14:48Z",
+      "seconds": 8.01,
+      "web": false,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 296,
+          "passed": 261
+        },
+        "2": {
+          "total": 296,
+          "passed": 16
+        },
+        "3": {
+          "total": 296,
+          "passed": 0
+        }
+      }
+    },
+    {
+      "file": "fission-hard-full.json",
+      "sha256": "d006bf1be23c66e8d392624c8830b82b0da839f357e1fde6762cbdeb53c3890d",
+      "decompiler": "fission",
+      "version": "1.0.5-beta",
+      "options": "vanilla mode, default flags",
+      "tier": "hard-full",
+      "hash": "724fd4dd8498513d",
+      "score": {
+        "passed": 2497,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 2497,
+        "unusable": 6,
+        "recompile_failed": 800,
+        "mismatch": 8985
+      },
+      "same_calls": {
+        "passed": 2484,
+        "total": 2497
+      },
+      "created": "2026-11-27T21:31:44Z",
+      "seconds": 224.04,
+      "web": false,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 4094,
+          "passed": 2392
+        },
+        "2": {
+          "total": 4094,
+          "passed": 67
+        },
+        "3": {
+          "total": 4094,
+          "passed": 38
+        }
+      }
+    },
+    {
+      "file": "fission-hard-quick.json",
+      "sha256": "695103487784b806717df381d42e04e027e9e1adc4c59e8013766d2801bc4ed5",
+      "decompiler": "fission",
+      "version": "1.0.5-beta",
+      "options": "vanilla mode, default flags",
+      "tier": "hard-quick",
+      "hash": "820f50496ba24191",
+      "score": {
+        "passed": 172,
+        "total": 888
+      },
+      "totals": {
+        "pass": 172,
+        "recompile_failed": 72,
+        "mismatch": 644
+      },
+      "same_calls": {
+        "passed": 171,
+        "total": 172
+      },
+      "created": "2026-11-27T20:58:42Z",
+      "seconds": 28.77,
+      "web": false,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 296,
+          "passed": 159
+        },
+        "2": {
+          "total": 296,
+          "passed": 7
+        },
+        "3": {
+          "total": 296,
+          "passed": 6
+        }
+      }
+    },
+    {
+      "file": "sunberry-old-core-hard-quick.json",
+      "sha256": "bdd39919c086de9221d00a72f8b709e93fb7e05497e90f24c0f9a1530d404a28",
+      "decompiler": "sunberry-old-core",
+      "version": "0.5.7",
+      "options": "decompile --core old -e 1 -n script",
+      "tier": "hard-quick",
+      "hash": "820f50496ba24191",
+      "score": {
+        "passed": 120,
+        "total": 888
+      },
+      "totals": {
+        "pass": 120,
+        "recompile_failed": 3,
+        "mismatch": 765
+      },
+      "same_calls": {
+        "passed": 112,
+        "total": 120
+      },
+      "created": "2026-11-27T19:42:38Z",
+      "seconds": 6.71,
+      "web": false,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 296,
+          "passed": 83
+        },
+        "2": {
+          "total": 296,
+          "passed": 35
+        },
+        "3": {
+          "total": 296,
+          "passed": 2
+        }
+      }
+    },
+    {
+      "file": "sunberry-old-core-hard-full.json",
+      "sha256": "5a4ef7ab607bf689dbf8b9719ebc5ae9984ff39a2e47450921eda4dbba68f51d",
+      "decompiler": "sunberry-old-core",
+      "version": "0.5.7",
+      "options": "decompile --core old -e 1 -n script",
+      "tier": "hard-full",
+      "hash": "724fd4dd8498513d",
+      "score": {
+        "passed": 1579,
+        "total": 12282
+      },
+      "totals": {
+        "pass": 1579,
+        "unusable": 6,
+        "recompile_failed": 41,
+        "mismatch": 10662
+      },
+      "same_calls": {
+        "passed": 1564,
+        "total": 1579
+      },
+      "created": "2026-11-27T20:14:10Z",
+      "seconds": 55.71,
+      "web": false,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 4094,
+          "passed": 1106
+        },
+        "2": {
+          "total": 4094,
+          "passed": 436
+        },
+        "3": {
+          "total": 4094,
+          "passed": 37
+        }
+      }
+    },
+    {
+      "file": "sunberry-obfuscated.json",
+      "sha256": "1197d1558076e0d8099afa9f5c5ac756b4d1aae67b6dd946d0e1e52e34cc4b1c",
+      "decompiler": "sunberry",
+      "version": "0.5.7",
+      "options": "decompile --strict -e 1 -n script",
+      "tier": "obfuscated",
+      "hash": "75a22ac96a3ad36c",
+      "score": {
+        "passed": 47,
+        "total": 818
+      },
+      "totals": {
+        "pass": 47,
+        "unusable": 70,
+        "decompile_failed": 771
+      },
+      "same_calls": {
+        "passed": 47,
+        "total": 47
+      },
+      "created": "2026-11-27T19:37:29Z",
+      "seconds": 5497.61,
+      "web": false,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 278,
+          "passed": 47
+        },
+        "2": {
+          "total": 270,
+          "passed": 0
+        },
+        "3": {
+          "total": 270,
+          "passed": 0
+        }
+      }
+    },
+    {
+      "file": "sunberry-old-core-obfuscated.json",
+      "sha256": "7150187fd3eace0aa5d89f9449b6f4616b67f913c5c8787c86e98924f12f446a",
+      "decompiler": "sunberry-old-core",
+      "version": "0.5.7",
+      "options": "decompile --core old -e 1 -n script",
+      "tier": "obfuscated",
+      "hash": "75a22ac96a3ad36c",
+      "score": {
+        "passed": 0,
+        "total": 818
+      },
+      "totals": {
+        "unusable": 70,
+        "decompile_failed": 1,
+        "recompile_failed": 136,
+        "mismatch": 681
+      },
+      "same_calls": {
+        "passed": 0,
+        "total": 0
+      },
+      "created": "2026-11-27T20:11:46Z",
+      "seconds": 1742.63,
+      "web": false,
+      "archived": false,
+      "levels": {
+        "1": {
+          "total": 278,
+          "passed": 0
+        },
+        "2": {
+          "total": 270,
+          "passed": 0
+        },
+        "3": {
+          "total": 270,
+          "passed": 0
+        }
+      }
+    },
+    {
+      "file": "rosetta-3/composite-rust-quick.json",
+      "sha256": "cdc5af839c5292b234f90ca564b80e641d9710c8e3c36f19afe0aee7399d287b",
+      "decompiler": "composite",
+      "version": "rust",
+      "options": null,
+      "tier": "quick",
+      "hash": "e24826907050bd1d",
       "score": {
         "passed": 882,
         "total": 882
@@ -256,774 +1773,19 @@
       "totals": {
         "pass": 882
       },
-      "created": "2026-11-26T14:39:49Z",
-      "seconds": 160.54,
+      "same_calls": null,
+      "created": "2026-11-27T15:22:03Z",
+      "seconds": 393.56,
       "web": true,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 294,
-          "passed": 294
-        },
-        "2": {
-          "total": 294,
-          "passed": 294
-        },
-        "3": {
-          "total": 294,
-          "passed": 294
-        }
-      }
-    },
-    {
-      "file": "sunberry-full.json",
-      "sha256": "60b4750afb79f1777880b9a55c0cf1f07d5c4e4d5f9099f5351df5cb94570550",
-      "decompiler": "sunberry",
-      "version": "0.5.7",
-      "tier": "full",
-      "hash": "f0eae8ffcedd440e",
-      "score": {
-        "passed": 12276,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 12276,
-        "unusable": 6
-      },
-      "created": "2026-11-27T12:42:24Z",
-      "seconds": 52.94,
-      "web": false,
-      "archived": false,
+      "archived": true,
       "levels": null
-    },
-    {
-      "file": "composite-luau-full.json",
-      "sha256": "e3b931bcee042b1e2d0cc4c104dc7d9cffd3942fba3a31a1eba2fed165ffc62a",
-      "decompiler": "composite",
-      "version": "luau",
-      "tier": "full",
-      "hash": "f0eae8ffcedd440e",
-      "score": {
-        "passed": 12265,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 12265,
-        "unusable": 6,
-        "mismatch": 11
-      },
-      "created": "2026-11-27T13:41:17Z",
-      "seconds": 4709.73,
-      "web": true,
-      "archived": false,
-      "levels": null
-    },
-    {
-      "file": "composite-luau-hard-full.json",
-      "sha256": "12dc65edf90af8613682f7e3e7a66cc6a9ac2b99aa92b7f51eca04d421c8a012",
-      "decompiler": "composite",
-      "version": "luau",
-      "tier": "hard-full",
-      "hash": "9921d3bde4a99bfd",
-      "score": {
-        "passed": 12246,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 12246,
-        "unusable": 6,
-        "refused": 21,
-        "mismatch": 9
-      },
-      "created": "2026-11-27T15:15:21Z",
-      "seconds": 5640.51,
-      "web": true,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 4092,
-          "passed": 4077
-        },
-        "2": {
-          "total": 4092,
-          "passed": 4087
-        },
-        "3": {
-          "total": 4092,
-          "passed": 4082
-        }
-      }
-    },
-    {
-      "file": "luacid-full.json",
-      "sha256": "d625ffa9666675ace542f238c92ffdad3fba41d42d24cc69a862e70b80fa4f05",
-      "decompiler": "luacid",
-      "version": null,
-      "tier": "full",
-      "hash": "f0eae8ffcedd440e",
-      "score": {
-        "passed": 12237,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 12237,
-        "unusable": 6,
-        "refused": 2,
-        "mismatch": 37
-      },
-      "created": "2026-11-26T18:45:15Z",
-      "seconds": 13027.31,
-      "web": true,
-      "archived": false,
-      "levels": null
-    },
-    {
-      "file": "composite-luau-hard-quick.json",
-      "sha256": "c4f0e5ac287605e49442ccc2ceb7cb8f4002c92cbd2ec9f6cd1d48c4f6d81363",
-      "decompiler": "composite",
-      "version": "luau",
-      "tier": "hard-quick",
-      "hash": "9bcb49d29e867a92",
-      "score": {
-        "passed": 879,
-        "total": 882
-      },
-      "totals": {
-        "pass": 879,
-        "mismatch": 3
-      },
-      "created": "2026-11-27T12:22:44Z",
-      "seconds": 407.06,
-      "web": true,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 294,
-          "passed": 292
-        },
-        "2": {
-          "total": 294,
-          "passed": 294
-        },
-        "3": {
-          "total": 294,
-          "passed": 293
-        }
-      }
-    },
-    {
-      "file": "sunberry-hard-full.json",
-      "sha256": "c11f4e400c2aee14adda8808f9b1572a8de489423c51ae0fe118cd1f541d6732",
-      "decompiler": "sunberry",
-      "version": "0.5.7",
-      "tier": "hard-full",
-      "hash": "9921d3bde4a99bfd",
-      "score": {
-        "passed": 12207,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 12207,
-        "unusable": 6,
-        "refused": 69
-      },
-      "created": "2026-11-27T12:44:08Z",
-      "seconds": 100.14,
-      "web": false,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 4092,
-          "passed": 4088
-        },
-        "2": {
-          "total": 4092,
-          "passed": 4071
-        },
-        "3": {
-          "total": 4092,
-          "passed": 4048
-        }
-      }
-    },
-    {
-      "file": "lua-expert-full.json",
-      "sha256": "66242dfd1b1b48b225672a77b21d11389a98c17338b783915d2690549d8b84d7",
-      "decompiler": "lua.expert",
-      "version": null,
-      "tier": "full",
-      "hash": "f0eae8ffcedd440e",
-      "score": {
-        "passed": 12167,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 12167,
-        "unusable": 6,
-        "refused": 105,
-        "mismatch": 4
-      },
-      "created": "2026-11-26T16:06:58Z",
-      "seconds": 4677.19,
-      "web": true,
-      "archived": false,
-      "levels": null
-    },
-    {
-      "file": "composite-rust-hard-full.json",
-      "sha256": "f8c578735bcc37f40dbcad8c2cb6b7b82b201bb9b5584e18b09339cc8f166bbe",
-      "decompiler": "composite",
-      "version": "rust",
-      "tier": "hard-full",
-      "hash": "9921d3bde4a99bfd",
-      "score": {
-        "passed": 12102,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 12102,
-        "unusable": 6,
-        "refused": 168,
-        "mismatch": 6
-      },
-      "created": "2026-11-27T18:45:56Z",
-      "seconds": 4723.08,
-      "web": true,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 4092,
-          "passed": 4036
-        },
-        "2": {
-          "total": 4092,
-          "passed": 4030
-        },
-        "3": {
-          "total": 4092,
-          "passed": 4036
-        }
-      }
-    },
-    {
-      "file": "composite-rust-full.json",
-      "sha256": "3908ab97d5ec7460ae77bc22ece59b91051abbf25fe85019b04d21c76fc9268d",
-      "decompiler": "composite",
-      "version": "rust",
-      "tier": "full",
-      "hash": "f0eae8ffcedd440e",
-      "score": {
-        "passed": 12086,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 12086,
-        "unusable": 6,
-        "refused": 185,
-        "mismatch": 5
-      },
-      "created": "2026-11-27T17:27:03Z",
-      "seconds": 4495.38,
-      "web": true,
-      "archived": false,
-      "levels": null
-    },
-    {
-      "file": "composite-rust-hard-quick.json",
-      "sha256": "7f139f29e2f9115bbcac0d165eab0b6c5b3b95617f7bdcd6073ebe0c478c7efd",
-      "decompiler": "composite",
-      "version": "rust",
-      "tier": "hard-quick",
-      "hash": "9bcb49d29e867a92",
-      "score": {
-        "passed": 868,
-        "total": 882
-      },
-      "totals": {
-        "pass": 868,
-        "refused": 14
-      },
-      "created": "2026-11-27T15:29:06Z",
-      "seconds": 414.49,
-      "web": true,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 294,
-          "passed": 291
-        },
-        "2": {
-          "total": 294,
-          "passed": 289
-        },
-        "3": {
-          "total": 294,
-          "passed": 288
-        }
-      }
-    },
-    {
-      "file": "sunberry-hard-quick.json",
-      "sha256": "7f7e4cbf6eb34f43d1acffb17a248d25dfe6b2186d8ad4aec1976fa723fba1ab",
-      "decompiler": "sunberry",
-      "version": "0.5.7",
-      "tier": "hard-quick",
-      "hash": "9bcb49d29e867a92",
-      "score": {
-        "passed": 865,
-        "total": 882
-      },
-      "totals": {
-        "pass": 865,
-        "refused": 17
-      },
-      "created": "2026-11-27T12:41:27Z",
-      "seconds": 18.66,
-      "web": false,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 294,
-          "passed": 294
-        },
-        "2": {
-          "total": 294,
-          "passed": 291
-        },
-        "3": {
-          "total": 294,
-          "passed": 280
-        }
-      }
-    },
-    {
-      "file": "tovek-full.json",
-      "sha256": "95412bbc7b3ac465d6d1a88eef96b877cb395af5661304ff99423fb5729cfd6d",
-      "decompiler": "tovek",
-      "version": "2.7",
-      "tier": "full",
-      "hash": "f0eae8ffcedd440e",
-      "score": {
-        "passed": 11879,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 11879,
-        "unusable": 6,
-        "refused": 393,
-        "mismatch": 4
-      },
-      "created": "2026-11-26T14:39:46Z",
-      "seconds": 72.54,
-      "web": false,
-      "archived": false,
-      "levels": null
-    },
-    {
-      "file": "fission-full.json",
-      "sha256": "4563d67aa4ebff346b85d60bea205ee41a8afdca71dc26b92b656894e7da8683",
-      "decompiler": "fission",
-      "version": "1.0.5-beta",
-      "tier": "full",
-      "hash": "f0eae8ffcedd440e",
-      "score": {
-        "passed": 10031,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 10031,
-        "unusable": 6,
-        "recompile_failed": 950,
-        "mismatch": 1295
-      },
-      "created": "2026-11-26T14:44:18Z",
-      "seconds": 149.53,
-      "web": false,
-      "archived": false,
-      "levels": null
-    },
-    {
-      "file": "sunberry-old-core-full.json",
-      "sha256": "31021371dfb71c48ab74bd556a4af6f0a8cd6592e56f0a8c442cfdbf2299da81",
-      "decompiler": "sunberry-old-core",
-      "version": "0.5.6",
-      "tier": "full",
-      "hash": "f0eae8ffcedd440e",
-      "score": {
-        "passed": 9013,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 9013,
-        "unusable": 6,
-        "recompile_failed": 323,
-        "mismatch": 2940
-      },
-      "created": "2026-11-26T14:37:24Z",
-      "seconds": 57.98,
-      "web": false,
-      "archived": false,
-      "levels": null
-    },
-    {
-      "file": "luacid-hard-full.json",
-      "sha256": "2493c9d24ccd1b77c8e428de858e8fb56f560da96979b25053bfe80d9e6943b6",
-      "decompiler": "luacid",
-      "version": null,
-      "tier": "hard-full",
-      "hash": "9921d3bde4a99bfd",
-      "score": {
-        "passed": 5622,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 5622,
-        "unusable": 6,
-        "refused": 6071,
-        "recompile_failed": 5,
-        "mismatch": 578
-      },
-      "created": "2026-11-26T22:32:51Z",
-      "seconds": 13651.89,
-      "web": true,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 4092,
-          "passed": 3734
-        },
-        "2": {
-          "total": 4092,
-          "passed": 1392
-        },
-        "3": {
-          "total": 4092,
-          "passed": 496
-        }
-      }
-    },
-    {
-      "file": "luacid-hard-quick.json",
-      "sha256": "d419982abdff9bbe1d3adfd9378bef0754a81c0f840ace6d3971988c159d8521",
-      "decompiler": "luacid",
-      "version": null,
-      "tier": "hard-quick",
-      "hash": "9bcb49d29e867a92",
-      "score": {
-        "passed": 353,
-        "total": 882
-      },
-      "totals": {
-        "pass": 353,
-        "refused": 498,
-        "mismatch": 31
-      },
-      "created": "2026-11-26T15:08:03Z",
-      "seconds": 1031.88,
-      "web": true,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 294,
-          "passed": 247
-        },
-        "2": {
-          "total": 294,
-          "passed": 78
-        },
-        "3": {
-          "total": 294,
-          "passed": 28
-        }
-      }
-    },
-    {
-      "file": "lua-expert-hard-full.json",
-      "sha256": "7d3f5893dac81679a71f68406431aa27675cfdc21d8bbef1dd94c533777cb9fe",
-      "decompiler": "lua.expert",
-      "version": null,
-      "tier": "hard-full",
-      "hash": "9921d3bde4a99bfd",
-      "score": {
-        "passed": 3859,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 3859,
-        "unusable": 6,
-        "refused": 8416,
-        "mismatch": 1
-      },
-      "created": "2026-11-26T17:22:33Z",
-      "seconds": 4523.67,
-      "web": true,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 4092,
-          "passed": 3729
-        },
-        "2": {
-          "total": 4092,
-          "passed": 128
-        },
-        "3": {
-          "total": 4092,
-          "passed": 2
-        }
-      }
-    },
-    {
-      "file": "tovek-hard-full.json",
-      "sha256": "6ef9925207ec73e8f925950e9fb795ab2be483afdb23b83f8b1e46a0fc343f12",
-      "decompiler": "tovek",
-      "version": "2.7",
-      "tier": "hard-full",
-      "hash": "9921d3bde4a99bfd",
-      "score": {
-        "passed": 3792,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 3792,
-        "unusable": 6,
-        "refused": 8483,
-        "mismatch": 1
-      },
-      "created": "2026-11-26T14:40:36Z",
-      "seconds": 44.25,
-      "web": false,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 4092,
-          "passed": 3606
-        },
-        "2": {
-          "total": 4092,
-          "passed": 179
-        },
-        "3": {
-          "total": 4092,
-          "passed": 7
-        }
-      }
-    },
-    {
-      "file": "lua-expert-hard-quick.json",
-      "sha256": "c4c3d231673c6ee88c359f0103b541227fab2df76d06048e0ddb8660bee7d2ac",
-      "decompiler": "lua.expert",
-      "version": null,
-      "tier": "hard-quick",
-      "hash": "9bcb49d29e867a92",
-      "score": {
-        "passed": 264,
-        "total": 882
-      },
-      "totals": {
-        "pass": 264,
-        "refused": 618
-      },
-      "created": "2026-11-26T14:48:57Z",
-      "seconds": 440.69,
-      "web": true,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 294,
-          "passed": 248
-        },
-        "2": {
-          "total": 294,
-          "passed": 16
-        },
-        "3": {
-          "total": 294,
-          "passed": 0
-        }
-      }
-    },
-    {
-      "file": "tovek-hard-quick.json",
-      "sha256": "3c7114bcceaece1816a7395450211a1e331cc6af456a26a36d1f423dfa773c0b",
-      "decompiler": "tovek",
-      "version": "2.7",
-      "tier": "hard-quick",
-      "hash": "9bcb49d29e867a92",
-      "score": {
-        "passed": 231,
-        "total": 882
-      },
-      "totals": {
-        "pass": 231,
-        "refused": 651
-      },
-      "created": "2026-11-26T14:38:30Z",
-      "seconds": 6.35,
-      "web": false,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 294,
-          "passed": 215
-        },
-        "2": {
-          "total": 294,
-          "passed": 16
-        },
-        "3": {
-          "total": 294,
-          "passed": 0
-        }
-      }
-    },
-    {
-      "file": "fission-hard-quick.json",
-      "sha256": "78798399a77db881e0e7bfb18db6c99aae7f1ffef82c375fda28434f29e88e08",
-      "decompiler": "fission",
-      "version": "1.0.5-beta",
-      "tier": "hard-quick",
-      "hash": "9bcb49d29e867a92",
-      "score": {
-        "passed": 222,
-        "total": 882
-      },
-      "totals": {
-        "pass": 222,
-        "recompile_failed": 54,
-        "mismatch": 606
-      },
-      "created": "2026-11-26T14:41:44Z",
-      "seconds": 38.29,
-      "web": false,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 294,
-          "passed": 209
-        },
-        "2": {
-          "total": 294,
-          "passed": 7
-        },
-        "3": {
-          "total": 294,
-          "passed": 6
-        }
-      }
-    },
-    {
-      "file": "fission-hard-full.json",
-      "sha256": "b53c1d936cf48708d865ce9c30b33e05c7df81c2db9670eac17b17694f3a64a4",
-      "decompiler": "fission",
-      "version": "1.0.5-beta",
-      "tier": "hard-full",
-      "hash": "9921d3bde4a99bfd",
-      "score": {
-        "passed": 3001,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 3001,
-        "unusable": 6,
-        "recompile_failed": 806,
-        "mismatch": 8469
-      },
-      "created": "2026-11-26T14:48:07Z",
-      "seconds": 225.03,
-      "web": false,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 4092,
-          "passed": 2960
-        },
-        "2": {
-          "total": 4092,
-          "passed": 25
-        },
-        "3": {
-          "total": 4092,
-          "passed": 16
-        }
-      }
-    },
-    {
-      "file": "sunberry-old-core-hard-full.json",
-      "sha256": "92dfa3f96cb3a313d1596d90ebbe0c480b311f7379f6a178654b41527d5ba4ac",
-      "decompiler": "sunberry-old-core",
-      "version": "0.5.6",
-      "tier": "hard-full",
-      "hash": "9921d3bde4a99bfd",
-      "score": {
-        "passed": 1317,
-        "total": 12276
-      },
-      "totals": {
-        "pass": 1317,
-        "unusable": 6,
-        "recompile_failed": 36,
-        "mismatch": 10923
-      },
-      "created": "2026-11-26T14:38:00Z",
-      "seconds": 31.8,
-      "web": false,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 4092,
-          "passed": 933
-        },
-        "2": {
-          "total": 4092,
-          "passed": 372
-        },
-        "3": {
-          "total": 4092,
-          "passed": 12
-        }
-      }
-    },
-    {
-      "file": "sunberry-old-core-hard-quick.json",
-      "sha256": "c5e9475052cf39dbf82110b7b995c9760040d3a8c439d57bb55b2155344c469c",
-      "decompiler": "sunberry-old-core",
-      "version": "0.5.6",
-      "tier": "hard-quick",
-      "hash": "9bcb49d29e867a92",
-      "score": {
-        "passed": 73,
-        "total": 882
-      },
-      "totals": {
-        "pass": 73,
-        "recompile_failed": 3,
-        "mismatch": 806
-      },
-      "created": "2026-11-26T14:36:22Z",
-      "seconds": 4.71,
-      "web": false,
-      "archived": false,
-      "levels": {
-        "1": {
-          "total": 294,
-          "passed": 54
-        },
-        "2": {
-          "total": 294,
-          "passed": 17
-        },
-        "3": {
-          "total": 294,
-          "passed": 2
-        }
-      }
     },
     {
       "file": "rosetta-1/lua-expert-quick.json",
       "sha256": "5125a08c07a09f80ef8b4981d1574f2eb1305f710d79e32b33ef59fc5aae16fb",
       "decompiler": "lua.expert",
       "version": null,
+      "options": null,
       "tier": "quick",
       "hash": "b90ea066cf5e767e",
       "score": {
@@ -1033,6 +1795,7 @@
       "totals": {
         "pass": 810
       },
+      "same_calls": null,
       "created": "2026-11-22T13:14:37Z",
       "seconds": 382.18,
       "web": true,
@@ -1044,6 +1807,7 @@
       "sha256": "cf04db3a27ccf4877e868706475e51c3ec197c9b274ed2c0bd2567b20b2b0f3e",
       "decompiler": "lua.expert",
       "version": null,
+      "options": null,
       "tier": "quick",
       "hash": "eb2e66b08f531f01",
       "score": {
@@ -1053,8 +1817,31 @@
       "totals": {
         "pass": 846
       },
+      "same_calls": null,
       "created": "2026-11-25T14:30:29Z",
       "seconds": 350.88,
+      "web": true,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/lua-expert-quick.json",
+      "sha256": "986203adbb2b6720cb04f75ff1f5b4a43fec6fc4d375052ee4acde8e54555640",
+      "decompiler": "lua.expert",
+      "version": null,
+      "options": null,
+      "tier": "quick",
+      "hash": "e24826907050bd1d",
+      "score": {
+        "passed": 882,
+        "total": 882
+      },
+      "totals": {
+        "pass": 882
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:41:27Z",
+      "seconds": 423.38,
       "web": true,
       "archived": true,
       "levels": null
@@ -1064,6 +1851,7 @@
       "sha256": "cfeec5c2e74be91f963083a67a864a2942d94a1ea7d28179f96fdfeaac84a8bf",
       "decompiler": "luacid",
       "version": null,
+      "options": null,
       "tier": "quick",
       "hash": "b90ea066cf5e767e",
       "score": {
@@ -1073,6 +1861,7 @@
       "totals": {
         "pass": 810
       },
+      "same_calls": null,
       "created": "2026-11-22T13:26:04Z",
       "seconds": 1063.26,
       "web": true,
@@ -1084,6 +1873,7 @@
       "sha256": "7269ba18505c6e0f9910da405faae873f2c4f1172674580b3af2f1d332641c73",
       "decompiler": "luarust",
       "version": "2.5",
+      "options": null,
       "tier": "quick",
       "hash": "eb2e66b08f531f01",
       "score": {
@@ -1093,8 +1883,31 @@
       "totals": {
         "pass": 846
       },
+      "same_calls": null,
       "created": "2026-11-26T10:00:18Z",
       "seconds": 82.12,
+      "web": true,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/luarust-quick.json",
+      "sha256": "6e3c6c31690c6941aa7cc50bbdb2eb47d8867022e821d3e0a74193ab4ad00593",
+      "decompiler": "luarust",
+      "version": "2.5",
+      "options": null,
+      "tier": "quick",
+      "hash": "e24826907050bd1d",
+      "score": {
+        "passed": 882,
+        "total": 882
+      },
+      "totals": {
+        "pass": 882
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:36:55Z",
+      "seconds": 153.41,
       "web": true,
       "archived": true,
       "levels": null
@@ -1104,6 +1917,7 @@
       "sha256": "a8d97c78266cfa8772059082f2ef324bcd1d349cea139667c008e2a6b9e18c11",
       "decompiler": "sunberry",
       "version": "0.5.6",
+      "options": null,
       "tier": "quick",
       "hash": "b90ea066cf5e767e",
       "score": {
@@ -1113,6 +1927,7 @@
       "totals": {
         "pass": 810
       },
+      "same_calls": null,
       "created": "2026-11-24T16:03:00Z",
       "seconds": 4.6,
       "web": false,
@@ -1124,6 +1939,7 @@
       "sha256": "5a19221be2ac44f058d95669de9e593c38fe9b73f2532efa9051bb793f076d24",
       "decompiler": "sunberry",
       "version": "0.5.6-e6e8581",
+      "options": null,
       "tier": "quick",
       "hash": "eb2e66b08f531f01",
       "score": {
@@ -1133,9 +1949,55 @@
       "totals": {
         "pass": 846
       },
+      "same_calls": null,
       "created": "2026-11-25T14:41:28Z",
       "seconds": 4.46,
       "web": false,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/sunberry-quick.json",
+      "sha256": "bdad229867b1a30b5486ccc5c33f18273dfe60da6ad7f4f854c35ee50cc6e4fb",
+      "decompiler": "sunberry",
+      "version": "0.5.7",
+      "options": null,
+      "tier": "quick",
+      "hash": "e24826907050bd1d",
+      "score": {
+        "passed": 882,
+        "total": 882
+      },
+      "totals": {
+        "pass": 882
+      },
+      "same_calls": null,
+      "created": "2026-11-27T12:41:03Z",
+      "seconds": 9.16,
+      "web": false,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/luacid-quick.json",
+      "sha256": "f6643dcc0ff0e0e2fedf153027baee6cde024e01dfe38698d41ff03d18b04662",
+      "decompiler": "luacid",
+      "version": null,
+      "options": null,
+      "tier": "quick",
+      "hash": "e24826907050bd1d",
+      "score": {
+        "passed": 879,
+        "total": 882
+      },
+      "totals": {
+        "pass": 879,
+        "mismatch": 3
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:50:42Z",
+      "seconds": 971.9,
+      "web": true,
       "archived": true,
       "levels": null
     },
@@ -1144,6 +2006,7 @@
       "sha256": "a457cd1d79a9be4415ec338c04ca648aa75fdf4afbe7d6d066e6a43c12e4fbdd",
       "decompiler": "luacid",
       "version": null,
+      "options": null,
       "tier": "quick",
       "hash": "eb2e66b08f531f01",
       "score": {
@@ -1154,8 +2017,32 @@
         "pass": 843,
         "mismatch": 3
       },
+      "same_calls": null,
       "created": "2026-11-25T14:40:26Z",
       "seconds": 940.74,
+      "web": true,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/composite-luau-quick.json",
+      "sha256": "aa54e95e0bc0b3591ca1ea69cf23807653e438061f3501905654b86dc3c6afbc",
+      "decompiler": "composite",
+      "version": "luau",
+      "options": null,
+      "tier": "quick",
+      "hash": "e24826907050bd1d",
+      "score": {
+        "passed": 877,
+        "total": 882
+      },
+      "totals": {
+        "pass": 877,
+        "mismatch": 5
+      },
+      "same_calls": null,
+      "created": "2026-11-27T12:15:52Z",
+      "seconds": 369.32,
       "web": true,
       "archived": true,
       "levels": null
@@ -1165,6 +2052,7 @@
       "sha256": "35fa2c8983bb8e81ff26fa75fa064457bbe1bcd2f058f3fbe55b63e382611259",
       "decompiler": "composite",
       "version": null,
+      "options": null,
       "tier": "quick",
       "hash": "eb2e66b08f531f01",
       "score": {
@@ -1176,6 +2064,7 @@
         "refused": 8,
         "mismatch": 4
       },
+      "same_calls": null,
       "created": "2026-11-25T14:30:58Z",
       "seconds": 377.53,
       "web": true,
@@ -1187,6 +2076,7 @@
       "sha256": "8543a961a71c99db05dca917286aed8618eebe73f76a82fa67f85311d6845759",
       "decompiler": "composite",
       "version": null,
+      "options": null,
       "tier": "quick",
       "hash": "b90ea066cf5e767e",
       "score": {
@@ -1198,6 +2088,7 @@
         "refused": 7,
         "mismatch": 6
       },
+      "same_calls": null,
       "created": "2026-11-22T13:15:11Z",
       "seconds": 417.16,
       "web": true,
@@ -1209,6 +2100,7 @@
       "sha256": "2b5cf8f370144eabdbf728980832d4db1a4fa165adff9fb67cd2096ecf7b9587",
       "decompiler": "tovek",
       "version": "2.7",
+      "options": null,
       "tier": "quick",
       "hash": "b90ea066cf5e767e",
       "score": {
@@ -1219,8 +2111,32 @@
         "pass": 732,
         "refused": 78
       },
+      "same_calls": null,
       "created": "2026-11-22T13:08:27Z",
       "seconds": 4.83,
+      "web": false,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/tovek-quick.json",
+      "sha256": "3796e16c38305ec6b1c9d3852b99c0011a3ac1fc1535aebeee2f0e970ba48e0e",
+      "decompiler": "tovek",
+      "version": "2.7",
+      "options": null,
+      "tier": "quick",
+      "hash": "e24826907050bd1d",
+      "score": {
+        "passed": 792,
+        "total": 882
+      },
+      "totals": {
+        "pass": 792,
+        "refused": 90
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:38:17Z",
+      "seconds": 11.05,
       "web": false,
       "archived": true,
       "levels": null
@@ -1230,6 +2146,7 @@
       "sha256": "cec5177fae9df9cd28ca5a7ff57788bc4b5c690caa3fd67f78d80cfe2d90cd1a",
       "decompiler": "tovek",
       "version": "2.7",
+      "options": null,
       "tier": "quick",
       "hash": "eb2e66b08f531f01",
       "score": {
@@ -1240,6 +2157,7 @@
         "pass": 756,
         "refused": 90
       },
+      "same_calls": null,
       "created": "2026-11-25T14:20:14Z",
       "seconds": 4.51,
       "web": false,
@@ -1251,6 +2169,7 @@
       "sha256": "1fd041d691e13d0b08728b7f33e97a02e2dd08fdc1c25ed98c44cf6217c49403",
       "decompiler": "fission",
       "version": "1.0.5-beta",
+      "options": null,
       "tier": "quick",
       "hash": "eb2e66b08f531f01",
       "score": {
@@ -1262,6 +2181,7 @@
         "recompile_failed": 62,
         "mismatch": 100
       },
+      "same_calls": null,
       "created": "2026-11-25T14:20:21Z",
       "seconds": 7.65,
       "web": false,
@@ -1273,6 +2193,7 @@
       "sha256": "a1369f8382a71d87f60b5ae2e3d7da94170da9976dff968f420216dd0f15d9be",
       "decompiler": "fission",
       "version": "1.0.5-beta",
+      "options": null,
       "tier": "quick",
       "hash": "b90ea066cf5e767e",
       "score": {
@@ -1284,8 +2205,33 @@
         "recompile_failed": 56,
         "mismatch": 102
       },
+      "same_calls": null,
       "created": "2026-11-22T13:08:35Z",
       "seconds": 7.75,
+      "web": false,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/fission-quick.json",
+      "sha256": "9847672b2606231cc6f9ec8d709cb5bab562de847433d57ef73636c2c23090d4",
+      "decompiler": "fission",
+      "version": "1.0.5-beta",
+      "options": null,
+      "tier": "quick",
+      "hash": "e24826907050bd1d",
+      "score": {
+        "passed": 706,
+        "total": 882
+      },
+      "totals": {
+        "pass": 706,
+        "recompile_failed": 62,
+        "mismatch": 114
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:41:00Z",
+      "seconds": 19.35,
       "web": false,
       "archived": true,
       "levels": null
@@ -1295,6 +2241,7 @@
       "sha256": "e66e48cd66739bedcc07225fb2a2a0ed37ba50868909a422947374e5e082abd4",
       "decompiler": "sunberry-old-core",
       "version": "0.5.4",
+      "options": null,
       "tier": "quick",
       "hash": "b90ea066cf5e767e",
       "score": {
@@ -1306,6 +2253,7 @@
         "recompile_failed": 36,
         "mismatch": 212
       },
+      "same_calls": null,
       "created": "2026-11-22T13:08:22Z",
       "seconds": 4.62,
       "web": false,
@@ -1317,6 +2265,7 @@
       "sha256": "1c51aec0e8ed6ad74e46f9ff16526fdc3ffd58c7162138b868975ac35bee741e",
       "decompiler": "sunberry-old-core",
       "version": "0.5.6",
+      "options": null,
       "tier": "quick",
       "hash": "eb2e66b08f531f01",
       "score": {
@@ -1328,8 +2277,33 @@
         "recompile_failed": 38,
         "mismatch": 224
       },
+      "same_calls": null,
       "created": "2026-11-25T14:20:09Z",
       "seconds": 3.93,
+      "web": false,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/sunberry-old-core-quick.json",
+      "sha256": "8063711f874d5c30b0d73743944c6777a9dde27b39cdc9c48b9127f0da33b87f",
+      "decompiler": "sunberry-old-core",
+      "version": "0.5.6",
+      "options": null,
+      "tier": "quick",
+      "hash": "e24826907050bd1d",
+      "score": {
+        "passed": 606,
+        "total": 882
+      },
+      "totals": {
+        "pass": 606,
+        "recompile_failed": 44,
+        "mismatch": 232
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:36:13Z",
+      "seconds": 6.64,
       "web": false,
       "archived": true,
       "levels": null
@@ -1339,6 +2313,7 @@
       "sha256": "6a2335d81f5c83737686ac263888897f4ba9d44b315f6435be069aaefc4f6f84",
       "decompiler": "luarust",
       "version": "2.5",
+      "options": null,
       "tier": "hard-quick",
       "hash": "f6bbc849d6126c23",
       "score": {
@@ -1348,6 +2323,7 @@
       "totals": {
         "pass": 846
       },
+      "same_calls": null,
       "created": "2026-11-26T10:02:05Z",
       "seconds": 94.49,
       "web": true,
@@ -1368,10 +2344,105 @@
       }
     },
     {
+      "file": "rosetta-3/luarust-full.json",
+      "sha256": "0493039c951667ad83f848d0a7f638f11ec07d1838d48adf9bc146b079cefc6c",
+      "decompiler": "luarust",
+      "version": "2.5",
+      "options": null,
+      "tier": "full",
+      "hash": "f0eae8ffcedd440e",
+      "score": {
+        "passed": 12276,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 12276,
+        "unusable": 6
+      },
+      "same_calls": null,
+      "created": "2026-11-27T12:00:52Z",
+      "seconds": 1327.32,
+      "web": true,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/luarust-hard-full.json",
+      "sha256": "f8c761c62788a3a54de1ff4c6eecfd64416c62d608bfbfd7894a5c48631c86dc",
+      "decompiler": "luarust",
+      "version": "2.5",
+      "options": null,
+      "tier": "hard-full",
+      "hash": "9921d3bde4a99bfd",
+      "score": {
+        "passed": 12276,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 12276,
+        "unusable": 6
+      },
+      "same_calls": null,
+      "created": "2026-11-26T17:11:15Z",
+      "seconds": 1834.73,
+      "web": true,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 4092,
+          "passed": 4092
+        },
+        "2": {
+          "total": 4092,
+          "passed": 4092
+        },
+        "3": {
+          "total": 4092,
+          "passed": 4092
+        }
+      }
+    },
+    {
+      "file": "rosetta-3/luarust-hard-quick.json",
+      "sha256": "ba837e81be27f8f71660639c7c0e19adfebb5880b36da7ba63b50c65f2514960",
+      "decompiler": "luarust",
+      "version": "2.5",
+      "options": null,
+      "tier": "hard-quick",
+      "hash": "9bcb49d29e867a92",
+      "score": {
+        "passed": 882,
+        "total": 882
+      },
+      "totals": {
+        "pass": 882
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:39:49Z",
+      "seconds": 160.54,
+      "web": true,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 294,
+          "passed": 294
+        },
+        "2": {
+          "total": 294,
+          "passed": 294
+        },
+        "3": {
+          "total": 294,
+          "passed": 294
+        }
+      }
+    },
+    {
       "file": "rosetta-1/sunberry-full.json",
       "sha256": "b103b998a185923a572e33bb01403f749337c802ef057837c0be0cb2a2ff18f7",
       "decompiler": "sunberry",
       "version": "0.5.6",
+      "options": null,
       "tier": "full",
       "hash": "99c2122fc5494b3c",
       "score": {
@@ -1382,8 +2453,32 @@
         "pass": 12204,
         "unusable": 6
       },
+      "same_calls": null,
       "created": "2026-11-24T16:03:41Z",
       "seconds": 38.62,
+      "web": false,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/sunberry-full.json",
+      "sha256": "60b4750afb79f1777880b9a55c0cf1f07d5c4e4d5f9099f5351df5cb94570550",
+      "decompiler": "sunberry",
+      "version": "0.5.7",
+      "options": null,
+      "tier": "full",
+      "hash": "f0eae8ffcedd440e",
+      "score": {
+        "passed": 12276,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 12276,
+        "unusable": 6
+      },
+      "same_calls": null,
+      "created": "2026-11-27T12:42:24Z",
+      "seconds": 52.94,
       "web": false,
       "archived": true,
       "levels": null
@@ -1393,6 +2488,7 @@
       "sha256": "d1fe61cd5d9170eb88d5d392f082f91e25e9ff9e2fed204aaed5c5d053bc73ca",
       "decompiler": "sunberry",
       "version": "0.5.6-e6e8581",
+      "options": null,
       "tier": "full",
       "hash": "7193a5a671859c20",
       "score": {
@@ -1404,6 +2500,7 @@
         "unusable": 6,
         "refused": 2
       },
+      "same_calls": null,
       "created": "2026-11-25T14:42:12Z",
       "seconds": 40.27,
       "web": false,
@@ -1415,6 +2512,7 @@
       "sha256": "b7b888fc6e914649043eade8d25d7a1a39d7525b6f1a67f12e295382f4fe99cc",
       "decompiler": "luarust",
       "version": "2.5",
+      "options": null,
       "tier": "full",
       "hash": "7193a5a671859c20",
       "score": {
@@ -1426,6 +2524,7 @@
         "unusable": 6,
         "refused": 4
       },
+      "same_calls": null,
       "created": "2026-11-26T10:20:26Z",
       "seconds": 1196.49,
       "web": true,
@@ -1437,6 +2536,7 @@
       "sha256": "f38a46b72c911fd85430d87dd66259967bb3d8661ebaad9746952e891db6484d",
       "decompiler": "luarust",
       "version": "2.5",
+      "options": null,
       "tier": "hard-full",
       "hash": "4280f326d51a106a",
       "score": {
@@ -1448,6 +2548,7 @@
         "unusable": 6,
         "refused": 4
       },
+      "same_calls": null,
       "created": "2026-11-26T10:21:58Z",
       "seconds": 1289.43,
       "web": true,
@@ -1472,6 +2573,7 @@
       "sha256": "e04bc0106e26be5c4501616ae900a102fcddd7b305cd4adaacb16f07cc98f825",
       "decompiler": "luacid",
       "version": null,
+      "options": null,
       "tier": "full",
       "hash": "99c2122fc5494b3c",
       "score": {
@@ -1483,8 +2585,96 @@
         "unusable": 6,
         "mismatch": 6
       },
+      "same_calls": null,
       "created": "2026-11-22T17:03:03Z",
       "seconds": 13014.49,
+      "web": true,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/composite-luau-full.json",
+      "sha256": "e3b931bcee042b1e2d0cc4c104dc7d9cffd3942fba3a31a1eba2fed165ffc62a",
+      "decompiler": "composite",
+      "version": "luau",
+      "options": null,
+      "tier": "full",
+      "hash": "f0eae8ffcedd440e",
+      "score": {
+        "passed": 12265,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 12265,
+        "unusable": 6,
+        "mismatch": 11
+      },
+      "same_calls": null,
+      "created": "2026-11-27T13:41:17Z",
+      "seconds": 4709.73,
+      "web": true,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/composite-luau-hard-full.json",
+      "sha256": "12dc65edf90af8613682f7e3e7a66cc6a9ac2b99aa92b7f51eca04d421c8a012",
+      "decompiler": "composite",
+      "version": "luau",
+      "options": null,
+      "tier": "hard-full",
+      "hash": "9921d3bde4a99bfd",
+      "score": {
+        "passed": 12246,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 12246,
+        "unusable": 6,
+        "refused": 21,
+        "mismatch": 9
+      },
+      "same_calls": null,
+      "created": "2026-11-27T15:15:21Z",
+      "seconds": 5640.51,
+      "web": true,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 4092,
+          "passed": 4077
+        },
+        "2": {
+          "total": 4092,
+          "passed": 4087
+        },
+        "3": {
+          "total": 4092,
+          "passed": 4082
+        }
+      }
+    },
+    {
+      "file": "rosetta-3/luacid-full.json",
+      "sha256": "d625ffa9666675ace542f238c92ffdad3fba41d42d24cc69a862e70b80fa4f05",
+      "decompiler": "luacid",
+      "version": null,
+      "options": null,
+      "tier": "full",
+      "hash": "f0eae8ffcedd440e",
+      "score": {
+        "passed": 12237,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 12237,
+        "unusable": 6,
+        "refused": 2,
+        "mismatch": 37
+      },
+      "same_calls": null,
+      "created": "2026-11-26T18:45:15Z",
+      "seconds": 13027.31,
       "web": true,
       "archived": true,
       "levels": null
@@ -1494,6 +2684,7 @@
       "sha256": "fa694eba0a379390c0eedbc29f721cd1be2d953883042dae7756e65927ac1771",
       "decompiler": "luacid",
       "version": null,
+      "options": null,
       "tier": "full",
       "hash": "7193a5a671859c20",
       "score": {
@@ -1506,6 +2697,7 @@
         "refused": 2,
         "mismatch": 37
       },
+      "same_calls": null,
       "created": "2026-11-25T18:18:29Z",
       "seconds": 13078.78,
       "web": true,
@@ -1513,10 +2705,84 @@
       "levels": null
     },
     {
+      "file": "rosetta-3/composite-luau-hard-quick.json",
+      "sha256": "c4f0e5ac287605e49442ccc2ceb7cb8f4002c92cbd2ec9f6cd1d48c4f6d81363",
+      "decompiler": "composite",
+      "version": "luau",
+      "options": null,
+      "tier": "hard-quick",
+      "hash": "9bcb49d29e867a92",
+      "score": {
+        "passed": 879,
+        "total": 882
+      },
+      "totals": {
+        "pass": 879,
+        "mismatch": 3
+      },
+      "same_calls": null,
+      "created": "2026-11-27T12:22:44Z",
+      "seconds": 407.06,
+      "web": true,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 294,
+          "passed": 292
+        },
+        "2": {
+          "total": 294,
+          "passed": 294
+        },
+        "3": {
+          "total": 294,
+          "passed": 293
+        }
+      }
+    },
+    {
+      "file": "rosetta-3/sunberry-hard-full.json",
+      "sha256": "c11f4e400c2aee14adda8808f9b1572a8de489423c51ae0fe118cd1f541d6732",
+      "decompiler": "sunberry",
+      "version": "0.5.7",
+      "options": null,
+      "tier": "hard-full",
+      "hash": "9921d3bde4a99bfd",
+      "score": {
+        "passed": 12207,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 12207,
+        "unusable": 6,
+        "refused": 69
+      },
+      "same_calls": null,
+      "created": "2026-11-27T12:44:08Z",
+      "seconds": 100.14,
+      "web": false,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 4092,
+          "passed": 4088
+        },
+        "2": {
+          "total": 4092,
+          "passed": 4071
+        },
+        "3": {
+          "total": 4092,
+          "passed": 4048
+        }
+      }
+    },
+    {
       "file": "rosetta-2/lua-expert-full.json",
       "sha256": "b14ee35530f1ed0a51529365b909c9138af8deebf4f4639b7a00877338784cfb",
       "decompiler": "lua.expert",
       "version": null,
+      "options": null,
       "tier": "full",
       "hash": "7193a5a671859c20",
       "score": {
@@ -1529,8 +2795,34 @@
         "refused": 104,
         "mismatch": 4
       },
+      "same_calls": null,
       "created": "2026-11-25T15:58:00Z",
       "seconds": 5247.47,
+      "web": true,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/lua-expert-full.json",
+      "sha256": "66242dfd1b1b48b225672a77b21d11389a98c17338b783915d2690549d8b84d7",
+      "decompiler": "lua.expert",
+      "version": null,
+      "options": null,
+      "tier": "full",
+      "hash": "f0eae8ffcedd440e",
+      "score": {
+        "passed": 12167,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 12167,
+        "unusable": 6,
+        "refused": 105,
+        "mismatch": 4
+      },
+      "same_calls": null,
+      "created": "2026-11-26T16:06:58Z",
+      "seconds": 4677.19,
       "web": true,
       "archived": true,
       "levels": null
@@ -1540,6 +2832,7 @@
       "sha256": "b714134b453ef898527810c37d3cb4c70615e8da3f881a2bf540238406e5b1ec",
       "decompiler": "lua.expert",
       "version": null,
+      "options": null,
       "tier": "full",
       "hash": "99c2122fc5494b3c",
       "score": {
@@ -1552,6 +2845,7 @@
         "refused": 110,
         "mismatch": 4
       },
+      "same_calls": null,
       "created": "2026-11-22T14:43:30Z",
       "seconds": 5329.97,
       "web": true,
@@ -1559,10 +2853,110 @@
       "levels": null
     },
     {
+      "file": "rosetta-3/composite-rust-hard-full.json",
+      "sha256": "f8c578735bcc37f40dbcad8c2cb6b7b82b201bb9b5584e18b09339cc8f166bbe",
+      "decompiler": "composite",
+      "version": "rust",
+      "options": null,
+      "tier": "hard-full",
+      "hash": "9921d3bde4a99bfd",
+      "score": {
+        "passed": 12102,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 12102,
+        "unusable": 6,
+        "refused": 168,
+        "mismatch": 6
+      },
+      "same_calls": null,
+      "created": "2026-11-27T18:45:56Z",
+      "seconds": 4723.08,
+      "web": true,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 4092,
+          "passed": 4036
+        },
+        "2": {
+          "total": 4092,
+          "passed": 4030
+        },
+        "3": {
+          "total": 4092,
+          "passed": 4036
+        }
+      }
+    },
+    {
+      "file": "rosetta-3/composite-rust-full.json",
+      "sha256": "3908ab97d5ec7460ae77bc22ece59b91051abbf25fe85019b04d21c76fc9268d",
+      "decompiler": "composite",
+      "version": "rust",
+      "options": null,
+      "tier": "full",
+      "hash": "f0eae8ffcedd440e",
+      "score": {
+        "passed": 12086,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 12086,
+        "unusable": 6,
+        "refused": 185,
+        "mismatch": 5
+      },
+      "same_calls": null,
+      "created": "2026-11-27T17:27:03Z",
+      "seconds": 4495.38,
+      "web": true,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/composite-rust-hard-quick.json",
+      "sha256": "7f139f29e2f9115bbcac0d165eab0b6c5b3b95617f7bdcd6073ebe0c478c7efd",
+      "decompiler": "composite",
+      "version": "rust",
+      "options": null,
+      "tier": "hard-quick",
+      "hash": "9bcb49d29e867a92",
+      "score": {
+        "passed": 868,
+        "total": 882
+      },
+      "totals": {
+        "pass": 868,
+        "refused": 14
+      },
+      "same_calls": null,
+      "created": "2026-11-27T15:29:06Z",
+      "seconds": 414.49,
+      "web": true,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 294,
+          "passed": 291
+        },
+        "2": {
+          "total": 294,
+          "passed": 289
+        },
+        "3": {
+          "total": 294,
+          "passed": 288
+        }
+      }
+    },
+    {
       "file": "rosetta-1/composite-full.json",
       "sha256": "ffed014e848d096d2abfcbcc5fd45f904f43d16d40fa0f68a3997e5c9c21d46c",
       "decompiler": "composite",
       "version": null,
+      "options": null,
       "tier": "full",
       "hash": "99c2122fc5494b3c",
       "score": {
@@ -1575,6 +2969,7 @@
         "refused": 133,
         "mismatch": 82
       },
+      "same_calls": null,
       "created": "2026-11-22T14:42:54Z",
       "seconds": 5260.17,
       "web": true,
@@ -1582,10 +2977,47 @@
       "levels": null
     },
     {
+      "file": "rosetta-3/sunberry-hard-quick.json",
+      "sha256": "7f7e4cbf6eb34f43d1acffb17a248d25dfe6b2186d8ad4aec1976fa723fba1ab",
+      "decompiler": "sunberry",
+      "version": "0.5.7",
+      "options": null,
+      "tier": "hard-quick",
+      "hash": "9bcb49d29e867a92",
+      "score": {
+        "passed": 865,
+        "total": 882
+      },
+      "totals": {
+        "pass": 865,
+        "refused": 17
+      },
+      "same_calls": null,
+      "created": "2026-11-27T12:41:27Z",
+      "seconds": 18.66,
+      "web": false,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 294,
+          "passed": 294
+        },
+        "2": {
+          "total": 294,
+          "passed": 291
+        },
+        "3": {
+          "total": 294,
+          "passed": 280
+        }
+      }
+    },
+    {
       "file": "rosetta-2/composite-full.json",
       "sha256": "0e9f204495645e0e309d1cc3bd9725276e7fb8ab41a1e71cb3e7ab99639531cf",
       "decompiler": "composite",
       "version": null,
+      "options": null,
       "tier": "full",
       "hash": "7193a5a671859c20",
       "score": {
@@ -1598,6 +3030,7 @@
         "refused": 241,
         "mismatch": 76
       },
+      "same_calls": null,
       "created": "2026-11-25T15:56:19Z",
       "seconds": 5117.65,
       "web": true,
@@ -1609,6 +3042,7 @@
       "sha256": "6ba0741e087b4cbdad4f0a3f93d9c70c1c4c5a276be10ef30e5222d7683242cd",
       "decompiler": "tovek",
       "version": "2.7",
+      "options": null,
       "tier": "full",
       "hash": "99c2122fc5494b3c",
       "score": {
@@ -1621,8 +3055,34 @@
         "refused": 359,
         "mismatch": 4
       },
+      "same_calls": null,
       "created": "2026-11-22T13:11:00Z",
       "seconds": 53.02,
+      "web": false,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/tovek-full.json",
+      "sha256": "95412bbc7b3ac465d6d1a88eef96b877cb395af5661304ff99423fb5729cfd6d",
+      "decompiler": "tovek",
+      "version": "2.7",
+      "options": null,
+      "tier": "full",
+      "hash": "f0eae8ffcedd440e",
+      "score": {
+        "passed": 11879,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 11879,
+        "unusable": 6,
+        "refused": 393,
+        "mismatch": 4
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:39:46Z",
+      "seconds": 72.54,
       "web": false,
       "archived": true,
       "levels": null
@@ -1632,6 +3092,7 @@
       "sha256": "1fe532b85949ffe8b2ac49b8b148e6d9ef3a8b89e8e74c0e30447bc61a6c4ab2",
       "decompiler": "tovek",
       "version": "2.7",
+      "options": null,
       "tier": "full",
       "hash": "7193a5a671859c20",
       "score": {
@@ -1644,6 +3105,7 @@
         "refused": 393,
         "mismatch": 4
       },
+      "same_calls": null,
       "created": "2026-11-25T14:22:13Z",
       "seconds": 65.35,
       "web": false,
@@ -1655,6 +3117,7 @@
       "sha256": "276b3fae68eea14dbf5bf09f869beebf45baf21acf1af23b19e51ae9b471e5a6",
       "decompiler": "fission",
       "version": "1.0.5-beta",
+      "options": null,
       "tier": "full",
       "hash": "7193a5a671859c20",
       "score": {
@@ -1667,8 +3130,34 @@
         "recompile_failed": 950,
         "mismatch": 1281
       },
+      "same_calls": null,
       "created": "2026-11-25T14:24:29Z",
       "seconds": 135.79,
+      "web": false,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/fission-full.json",
+      "sha256": "4563d67aa4ebff346b85d60bea205ee41a8afdca71dc26b92b656894e7da8683",
+      "decompiler": "fission",
+      "version": "1.0.5-beta",
+      "options": null,
+      "tier": "full",
+      "hash": "f0eae8ffcedd440e",
+      "score": {
+        "passed": 10031,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 10031,
+        "unusable": 6,
+        "recompile_failed": 950,
+        "mismatch": 1295
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:44:18Z",
+      "seconds": 149.53,
       "web": false,
       "archived": true,
       "levels": null
@@ -1678,6 +3167,7 @@
       "sha256": "3212b5ed420051ae0b4525ce89d75d720d6105ae84bee22af9b716f6a03d601a",
       "decompiler": "fission",
       "version": "1.0.5-beta",
+      "options": null,
       "tier": "full",
       "hash": "99c2122fc5494b3c",
       "score": {
@@ -1690,6 +3180,7 @@
         "recompile_failed": 1238,
         "mismatch": 1409
       },
+      "same_calls": null,
       "created": "2026-11-22T13:12:58Z",
       "seconds": 118.84,
       "web": false,
@@ -1701,6 +3192,7 @@
       "sha256": "6ddb8c6e4a6196f2df9ecb1da4f60ae63511c63e54c4909c3505b003cb62ede5",
       "decompiler": "sunberry-old-core",
       "version": "0.5.4",
+      "options": null,
       "tier": "full",
       "hash": "99c2122fc5494b3c",
       "score": {
@@ -1713,6 +3205,7 @@
         "recompile_failed": 280,
         "mismatch": 2735
       },
+      "same_calls": null,
       "created": "2026-11-22T13:10:07Z",
       "seconds": 46.7,
       "web": false,
@@ -1724,6 +3217,7 @@
       "sha256": "bc3ea4adf8032342afe2d592fbb0bb174a45bbaaa5449bd4be3cee6af094eb0d",
       "decompiler": "sunberry-old-core",
       "version": "0.5.6",
+      "options": null,
       "tier": "full",
       "hash": "7193a5a671859c20",
       "score": {
@@ -1736,8 +3230,34 @@
         "recompile_failed": 317,
         "mismatch": 2932
       },
+      "same_calls": null,
       "created": "2026-11-25T14:21:08Z",
       "seconds": 43.58,
+      "web": false,
+      "archived": true,
+      "levels": null
+    },
+    {
+      "file": "rosetta-3/sunberry-old-core-full.json",
+      "sha256": "31021371dfb71c48ab74bd556a4af6f0a8cd6592e56f0a8c442cfdbf2299da81",
+      "decompiler": "sunberry-old-core",
+      "version": "0.5.6",
+      "options": null,
+      "tier": "full",
+      "hash": "f0eae8ffcedd440e",
+      "score": {
+        "passed": 9013,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 9013,
+        "unusable": 6,
+        "recompile_failed": 323,
+        "mismatch": 2940
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:37:24Z",
+      "seconds": 57.98,
       "web": false,
       "archived": true,
       "levels": null
@@ -1747,6 +3267,7 @@
       "sha256": "0d5e03368da4425d3136e44e545b4e8da8ee411fbddd0019bed3741c2f972acb",
       "decompiler": "luacid",
       "version": null,
+      "options": null,
       "tier": "hard-full",
       "hash": "4280f326d51a106a",
       "score": {
@@ -1760,6 +3281,7 @@
         "recompile_failed": 5,
         "mismatch": 577
       },
+      "same_calls": null,
       "created": "2026-11-25T22:21:58Z",
       "seconds": 13619.25,
       "web": true,
@@ -1780,10 +3302,50 @@
       }
     },
     {
+      "file": "rosetta-3/luacid-hard-full.json",
+      "sha256": "2493c9d24ccd1b77c8e428de858e8fb56f560da96979b25053bfe80d9e6943b6",
+      "decompiler": "luacid",
+      "version": null,
+      "options": null,
+      "tier": "hard-full",
+      "hash": "9921d3bde4a99bfd",
+      "score": {
+        "passed": 5622,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 5622,
+        "unusable": 6,
+        "refused": 6071,
+        "recompile_failed": 5,
+        "mismatch": 578
+      },
+      "same_calls": null,
+      "created": "2026-11-26T22:32:51Z",
+      "seconds": 13651.89,
+      "web": true,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 4092,
+          "passed": 3734
+        },
+        "2": {
+          "total": 4092,
+          "passed": 1392
+        },
+        "3": {
+          "total": 4092,
+          "passed": 496
+        }
+      }
+    },
+    {
       "file": "rosetta-2/luacid-hard-quick.json",
       "sha256": "7baea7b906aea2e60d0f2c75e2882c2b8b5acd093fb756b79334ea43cc859826",
       "decompiler": "luacid",
       "version": null,
+      "options": null,
       "tier": "hard-quick",
       "hash": "f6bbc849d6126c23",
       "score": {
@@ -1795,6 +3357,7 @@
         "refused": 472,
         "mismatch": 30
       },
+      "same_calls": null,
       "created": "2026-11-25T18:34:55Z",
       "seconds": 969.77,
       "web": true,
@@ -1815,10 +3378,48 @@
       }
     },
     {
+      "file": "rosetta-3/luacid-hard-quick.json",
+      "sha256": "d419982abdff9bbe1d3adfd9378bef0754a81c0f840ace6d3971988c159d8521",
+      "decompiler": "luacid",
+      "version": null,
+      "options": null,
+      "tier": "hard-quick",
+      "hash": "9bcb49d29e867a92",
+      "score": {
+        "passed": 353,
+        "total": 882
+      },
+      "totals": {
+        "pass": 353,
+        "refused": 498,
+        "mismatch": 31
+      },
+      "same_calls": null,
+      "created": "2026-11-26T15:08:03Z",
+      "seconds": 1031.88,
+      "web": true,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 294,
+          "passed": 247
+        },
+        "2": {
+          "total": 294,
+          "passed": 78
+        },
+        "3": {
+          "total": 294,
+          "passed": 28
+        }
+      }
+    },
+    {
       "file": "rosetta-2/lua-expert-hard-full.json",
       "sha256": "1b71bd3bced4ae2b1f6ce6898099e078bd8a09dab9e97f1ebcead87853f642de",
       "decompiler": "lua.expert",
       "version": null,
+      "options": null,
       "tier": "hard-full",
       "hash": "4280f326d51a106a",
       "score": {
@@ -1831,6 +3432,7 @@
         "refused": 8387,
         "mismatch": 1
       },
+      "same_calls": null,
       "created": "2026-11-25T17:33:43Z",
       "seconds": 4499.78,
       "web": true,
@@ -1851,10 +3453,49 @@
       }
     },
     {
+      "file": "rosetta-3/lua-expert-hard-full.json",
+      "sha256": "7d3f5893dac81679a71f68406431aa27675cfdc21d8bbef1dd94c533777cb9fe",
+      "decompiler": "lua.expert",
+      "version": null,
+      "options": null,
+      "tier": "hard-full",
+      "hash": "9921d3bde4a99bfd",
+      "score": {
+        "passed": 3859,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 3859,
+        "unusable": 6,
+        "refused": 8416,
+        "mismatch": 1
+      },
+      "same_calls": null,
+      "created": "2026-11-26T17:22:33Z",
+      "seconds": 4523.67,
+      "web": true,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 4092,
+          "passed": 3729
+        },
+        "2": {
+          "total": 4092,
+          "passed": 128
+        },
+        "3": {
+          "total": 4092,
+          "passed": 2
+        }
+      }
+    },
+    {
       "file": "rosetta-2/tovek-hard-full.json",
       "sha256": "3778f5e6217c3c7cab91e88ef5457db17efa4732028cc090f5b3440914109bd4",
       "decompiler": "tovek",
       "version": "2.7",
+      "options": null,
       "tier": "hard-full",
       "hash": "4280f326d51a106a",
       "score": {
@@ -1867,6 +3508,7 @@
         "refused": 8455,
         "mismatch": 1
       },
+      "same_calls": null,
       "created": "2026-11-25T15:56:46Z",
       "seconds": 33.44,
       "web": false,
@@ -1887,10 +3529,49 @@
       }
     },
     {
+      "file": "rosetta-3/tovek-hard-full.json",
+      "sha256": "6ef9925207ec73e8f925950e9fb795ab2be483afdb23b83f8b1e46a0fc343f12",
+      "decompiler": "tovek",
+      "version": "2.7",
+      "options": null,
+      "tier": "hard-full",
+      "hash": "9921d3bde4a99bfd",
+      "score": {
+        "passed": 3792,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 3792,
+        "unusable": 6,
+        "refused": 8483,
+        "mismatch": 1
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:40:36Z",
+      "seconds": 44.25,
+      "web": false,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 4092,
+          "passed": 3606
+        },
+        "2": {
+          "total": 4092,
+          "passed": 179
+        },
+        "3": {
+          "total": 4092,
+          "passed": 7
+        }
+      }
+    },
+    {
       "file": "rosetta-2/lua-expert-hard-quick.json",
       "sha256": "af6835c728ba245e34c0ff18a1e77ea48b0e315b173f35d5b410c2e28bd673e0",
       "decompiler": "lua.expert",
       "version": null,
+      "options": null,
       "tier": "hard-quick",
       "hash": "f6bbc849d6126c23",
       "score": {
@@ -1901,6 +3582,7 @@
         "pass": 256,
         "refused": 590
       },
+      "same_calls": null,
       "created": "2026-11-25T16:18:39Z",
       "seconds": 367.11,
       "web": true,
@@ -1921,10 +3603,47 @@
       }
     },
     {
+      "file": "rosetta-3/lua-expert-hard-quick.json",
+      "sha256": "c4c3d231673c6ee88c359f0103b541227fab2df76d06048e0ddb8660bee7d2ac",
+      "decompiler": "lua.expert",
+      "version": null,
+      "options": null,
+      "tier": "hard-quick",
+      "hash": "9bcb49d29e867a92",
+      "score": {
+        "passed": 264,
+        "total": 882
+      },
+      "totals": {
+        "pass": 264,
+        "refused": 618
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:48:57Z",
+      "seconds": 440.69,
+      "web": true,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 294,
+          "passed": 248
+        },
+        "2": {
+          "total": 294,
+          "passed": 16
+        },
+        "3": {
+          "total": 294,
+          "passed": 0
+        }
+      }
+    },
+    {
       "file": "rosetta-2/tovek-hard-quick.json",
       "sha256": "1f8455ec06ea4224c783fe4d7416a7fb2eaf1d98e5b8acb829adf0b92737cf95",
       "decompiler": "tovek",
       "version": "2.7",
+      "options": null,
       "tier": "hard-quick",
       "hash": "f6bbc849d6126c23",
       "score": {
@@ -1935,6 +3654,7 @@
         "pass": 223,
         "refused": 623
       },
+      "same_calls": null,
       "created": "2026-11-25T15:54:58Z",
       "seconds": 4.62,
       "web": false,
@@ -1955,10 +3675,47 @@
       }
     },
     {
+      "file": "rosetta-3/tovek-hard-quick.json",
+      "sha256": "3c7114bcceaece1816a7395450211a1e331cc6af456a26a36d1f423dfa773c0b",
+      "decompiler": "tovek",
+      "version": "2.7",
+      "options": null,
+      "tier": "hard-quick",
+      "hash": "9bcb49d29e867a92",
+      "score": {
+        "passed": 231,
+        "total": 882
+      },
+      "totals": {
+        "pass": 231,
+        "refused": 651
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:38:30Z",
+      "seconds": 6.35,
+      "web": false,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 294,
+          "passed": 215
+        },
+        "2": {
+          "total": 294,
+          "passed": 16
+        },
+        "3": {
+          "total": 294,
+          "passed": 0
+        }
+      }
+    },
+    {
       "file": "rosetta-2/fission-hard-quick.json",
       "sha256": "3c5d68d5430972a01a157e0094fb09873cbecb2ee7539987a6e846820f2577de",
       "decompiler": "fission",
       "version": "1.0.5-beta",
+      "options": null,
       "tier": "hard-quick",
       "hash": "f6bbc849d6126c23",
       "score": {
@@ -1970,6 +3727,7 @@
         "recompile_failed": 51,
         "mismatch": 579
       },
+      "same_calls": null,
       "created": "2026-11-25T15:55:21Z",
       "seconds": 22.85,
       "web": false,
@@ -1994,6 +3752,7 @@
       "sha256": "5749311f8354af3ab4bfdc94a7e67cd1f12aac848378a163fc0c4b362303b2e6",
       "decompiler": "composite",
       "version": null,
+      "options": null,
       "tier": "hard-quick",
       "hash": "f6bbc849d6126c23",
       "score": {
@@ -2005,6 +3764,7 @@
         "refused": 592,
         "mismatch": 41
       },
+      "same_calls": null,
       "created": "2026-11-25T16:21:09Z",
       "seconds": 514.8,
       "web": true,
@@ -2025,10 +3785,48 @@
       }
     },
     {
+      "file": "rosetta-3/fission-hard-quick.json",
+      "sha256": "78798399a77db881e0e7bfb18db6c99aae7f1ffef82c375fda28434f29e88e08",
+      "decompiler": "fission",
+      "version": "1.0.5-beta",
+      "options": null,
+      "tier": "hard-quick",
+      "hash": "9bcb49d29e867a92",
+      "score": {
+        "passed": 222,
+        "total": 882
+      },
+      "totals": {
+        "pass": 222,
+        "recompile_failed": 54,
+        "mismatch": 606
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:41:44Z",
+      "seconds": 38.29,
+      "web": false,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 294,
+          "passed": 209
+        },
+        "2": {
+          "total": 294,
+          "passed": 7
+        },
+        "3": {
+          "total": 294,
+          "passed": 6
+        }
+      }
+    },
+    {
       "file": "rosetta-2/fission-hard-full.json",
       "sha256": "40e4d7417073b125ece58e84402ac8ca8273eebc6c3aff33ebefc684f471ce2e",
       "decompiler": "fission",
       "version": "1.0.5-beta",
+      "options": null,
       "tier": "hard-full",
       "hash": "4280f326d51a106a",
       "score": {
@@ -2041,6 +3839,7 @@
         "recompile_failed": 803,
         "mismatch": 8442
       },
+      "same_calls": null,
       "created": "2026-11-25T15:59:55Z",
       "seconds": 189.2,
       "web": false,
@@ -2061,10 +3860,49 @@
       }
     },
     {
+      "file": "rosetta-3/fission-hard-full.json",
+      "sha256": "b53c1d936cf48708d865ce9c30b33e05c7df81c2db9670eac17b17694f3a64a4",
+      "decompiler": "fission",
+      "version": "1.0.5-beta",
+      "options": null,
+      "tier": "hard-full",
+      "hash": "9921d3bde4a99bfd",
+      "score": {
+        "passed": 3001,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 3001,
+        "unusable": 6,
+        "recompile_failed": 806,
+        "mismatch": 8469
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:48:07Z",
+      "seconds": 225.03,
+      "web": false,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 4092,
+          "passed": 2960
+        },
+        "2": {
+          "total": 4092,
+          "passed": 25
+        },
+        "3": {
+          "total": 4092,
+          "passed": 16
+        }
+      }
+    },
+    {
       "file": "rosetta-2/composite-hard-full.json",
       "sha256": "10cf56fe1e4cf247c8582622bf6ae6229bfc0dacc2137ec789fc3d32b55a2980",
       "decompiler": "composite",
       "version": null,
+      "options": null,
       "tier": "hard-full",
       "hash": "4280f326d51a106a",
       "score": {
@@ -2077,6 +3915,7 @@
         "refused": 8599,
         "mismatch": 722
       },
+      "same_calls": null,
       "created": "2026-11-25T17:50:52Z",
       "seconds": 5379.46,
       "web": true,
@@ -2101,6 +3940,7 @@
       "sha256": "6d06e38efe44bbe00d5f664c378ffc1484b068dd39a56decc3ae49af810004cb",
       "decompiler": "sunberry-old-core",
       "version": "0.5.6",
+      "options": null,
       "tier": "hard-full",
       "hash": "4280f326d51a106a",
       "score": {
@@ -2113,6 +3953,7 @@
         "recompile_failed": 36,
         "mismatch": 10887
       },
+      "same_calls": null,
       "created": "2026-11-25T15:56:12Z",
       "seconds": 25.04,
       "web": false,
@@ -2133,10 +3974,49 @@
       }
     },
     {
+      "file": "rosetta-3/sunberry-old-core-hard-full.json",
+      "sha256": "92dfa3f96cb3a313d1596d90ebbe0c480b311f7379f6a178654b41527d5ba4ac",
+      "decompiler": "sunberry-old-core",
+      "version": "0.5.6",
+      "options": null,
+      "tier": "hard-full",
+      "hash": "9921d3bde4a99bfd",
+      "score": {
+        "passed": 1317,
+        "total": 12276
+      },
+      "totals": {
+        "pass": 1317,
+        "unusable": 6,
+        "recompile_failed": 36,
+        "mismatch": 10923
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:38:00Z",
+      "seconds": 31.8,
+      "web": false,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 4092,
+          "passed": 933
+        },
+        "2": {
+          "total": 4092,
+          "passed": 372
+        },
+        "3": {
+          "total": 4092,
+          "passed": 12
+        }
+      }
+    },
+    {
       "file": "rosetta-2/sunberry-old-core-hard-quick.json",
       "sha256": "dc5e52a8bcd437d4c12586f8859a1673bb2ea9c6270db8e73e4deda172998c7e",
       "decompiler": "sunberry-old-core",
       "version": "0.5.6",
+      "options": null,
       "tier": "hard-quick",
       "hash": "f6bbc849d6126c23",
       "score": {
@@ -2148,6 +4028,7 @@
         "recompile_failed": 3,
         "mismatch": 770
       },
+      "same_calls": null,
       "created": "2026-11-25T15:54:54Z",
       "seconds": 2.51,
       "web": false,
@@ -2168,10 +4049,48 @@
       }
     },
     {
+      "file": "rosetta-3/sunberry-old-core-hard-quick.json",
+      "sha256": "c5e9475052cf39dbf82110b7b995c9760040d3a8c439d57bb55b2155344c469c",
+      "decompiler": "sunberry-old-core",
+      "version": "0.5.6",
+      "options": null,
+      "tier": "hard-quick",
+      "hash": "9bcb49d29e867a92",
+      "score": {
+        "passed": 73,
+        "total": 882
+      },
+      "totals": {
+        "pass": 73,
+        "recompile_failed": 3,
+        "mismatch": 806
+      },
+      "same_calls": null,
+      "created": "2026-11-26T14:36:22Z",
+      "seconds": 4.71,
+      "web": false,
+      "archived": true,
+      "levels": {
+        "1": {
+          "total": 294,
+          "passed": 54
+        },
+        "2": {
+          "total": 294,
+          "passed": 17
+        },
+        "3": {
+          "total": 294,
+          "passed": 2
+        }
+      }
+    },
+    {
       "file": "rosetta-2/sunberry-hard-quick.json",
       "sha256": "72b10033910af4483342e83d2f3d3626dfb0a22fd31cbb968a8457c4569eede4",
       "decompiler": "sunberry",
       "version": "0.5.6-e6e8581",
+      "options": null,
       "tier": "hard-quick",
       "hash": "f6bbc849d6126c23",
       "score": {
@@ -2182,6 +4101,7 @@
         "pass": 35,
         "refused": 811
       },
+      "same_calls": null,
       "created": "2026-11-25T15:54:51Z",
       "seconds": 1.28,
       "web": false,
@@ -2206,6 +4126,7 @@
       "sha256": "626a93515b7fc8d77ac7352e07ca1e4a016cb834cae5afb2e8f3d2245d7e675f",
       "decompiler": "sunberry",
       "version": "0.5.6-e6e8581",
+      "options": null,
       "tier": "hard-full",
       "hash": "4280f326d51a106a",
       "score": {
@@ -2218,6 +4139,7 @@
         "refused": 11859,
         "mismatch": 2
       },
+      "same_calls": null,
       "created": "2026-11-25T15:55:47Z",
       "seconds": 21.95,
       "web": false,
@@ -2239,14 +4161,14 @@
     }
   ],
   "suites": {
-    "f0eae8ffcedd440e": {
-      "name": "rosetta-3",
+    "6a95f18434373f4a": {
+      "name": "rosetta-4",
       "tier": "full",
       "profiles": 6,
       "sections": {
         "cases": {
-          "count": 41,
-          "names": "ededa3b9f7ce28dc81aa2ef16478dba5937801ff54eb133000bd55c1d73f2413"
+          "count": 42,
+          "names": "964f8341842567f2128fc4b5e01bc97b4c2e62ad8e5eaf8db322dba9371b97fa"
         },
         "libraries": {
           "count": 6,
@@ -2262,14 +4184,14 @@
         }
       }
     },
-    "9921d3bde4a99bfd": {
-      "name": "rosetta-3",
+    "724fd4dd8498513d": {
+      "name": "rosetta-4",
       "tier": "hard-full",
       "profiles": 6,
       "sections": {
         "cases": {
-          "count": 41,
-          "names": "ededa3b9f7ce28dc81aa2ef16478dba5937801ff54eb133000bd55c1d73f2413"
+          "count": 42,
+          "names": "964f8341842567f2128fc4b5e01bc97b4c2e62ad8e5eaf8db322dba9371b97fa"
         },
         "libraries": {
           "count": 6,
@@ -2285,14 +4207,14 @@
         }
       }
     },
-    "9bcb49d29e867a92": {
-      "name": "rosetta-3",
+    "820f50496ba24191": {
+      "name": "rosetta-4",
       "tier": "hard-quick",
       "profiles": 6,
       "sections": {
         "cases": {
-          "count": 41,
-          "names": "ededa3b9f7ce28dc81aa2ef16478dba5937801ff54eb133000bd55c1d73f2413"
+          "count": 42,
+          "names": "964f8341842567f2128fc4b5e01bc97b4c2e62ad8e5eaf8db322dba9371b97fa"
         },
         "libraries": {
           "count": 6,
@@ -2304,18 +4226,41 @@
         },
         "mutants": {
           "count": 50,
-          "names": "cb9d916a4194608ab649c11a8fbe6e5924c21ee29e7b4ff1b082f8c9567812f0"
+          "names": "0a358e9f972d5ef66ded238365aac1ec75995205494b0c0f2abe707bf2580b3d"
         }
       }
     },
-    "e24826907050bd1d": {
-      "name": "rosetta-3",
+    "75a22ac96a3ad36c": {
+      "name": "rosetta-4",
+      "tier": "obfuscated",
+      "profiles": 6,
+      "sections": {
+        "cases": {
+          "count": 42,
+          "names": "964f8341842567f2128fc4b5e01bc97b4c2e62ad8e5eaf8db322dba9371b97fa"
+        },
+        "libraries": {
+          "count": 6,
+          "names": "b916118a0f3702e87edc287b2bfe446b79f97a955f8b4f69038c0cd33ed66aff"
+        },
+        "generated": {
+          "count": 50,
+          "names": "fbe4fb3b6f5bc20615b14940a817edd91c01dbd1439a4fc00da7bc62dd587c0c"
+        },
+        "mutants": {
+          "count": 50,
+          "names": "0a358e9f972d5ef66ded238365aac1ec75995205494b0c0f2abe707bf2580b3d"
+        }
+      }
+    },
+    "f99045656e5f7f14": {
+      "name": "rosetta-4",
       "tier": "quick",
       "profiles": 6,
       "sections": {
         "cases": {
-          "count": 41,
-          "names": "ededa3b9f7ce28dc81aa2ef16478dba5937801ff54eb133000bd55c1d73f2413"
+          "count": 42,
+          "names": "964f8341842567f2128fc4b5e01bc97b4c2e62ad8e5eaf8db322dba9371b97fa"
         },
         "libraries": {
           "count": 6,
@@ -2327,7 +4272,7 @@
         },
         "mutants": {
           "count": 50,
-          "names": "cb9d916a4194608ab649c11a8fbe6e5924c21ee29e7b4ff1b082f8c9567812f0"
+          "names": "0a358e9f972d5ef66ded238365aac1ec75995205494b0c0f2abe707bf2580b3d"
         }
       }
     },
@@ -2434,6 +4379,98 @@
         "cases": {
           "count": 41,
           "names": "ededa3b9f7ce28dc81aa2ef16478dba5937801ff54eb133000bd55c1d73f2413"
+        },
+        "generated": {
+          "count": 50,
+          "names": "fbe4fb3b6f5bc20615b14940a817edd91c01dbd1439a4fc00da7bc62dd587c0c"
+        },
+        "mutants": {
+          "count": 50,
+          "names": "cb9d916a4194608ab649c11a8fbe6e5924c21ee29e7b4ff1b082f8c9567812f0"
+        }
+      }
+    },
+    "f0eae8ffcedd440e": {
+      "name": "rosetta-3",
+      "tier": "full",
+      "profiles": 6,
+      "sections": {
+        "cases": {
+          "count": 41,
+          "names": "ededa3b9f7ce28dc81aa2ef16478dba5937801ff54eb133000bd55c1d73f2413"
+        },
+        "libraries": {
+          "count": 6,
+          "names": "b916118a0f3702e87edc287b2bfe446b79f97a955f8b4f69038c0cd33ed66aff"
+        },
+        "generated": {
+          "count": 1000,
+          "names": "e53bcd60f34574cb1c793edbc172c42a86543e1cc9b2c5d8834dde89c390765d"
+        },
+        "mutants": {
+          "count": 1000,
+          "names": "75f1b60ca7dde4c61d897de64bf319dcd0704e1ceb34d064b3ec68e67a28c579"
+        }
+      }
+    },
+    "9921d3bde4a99bfd": {
+      "name": "rosetta-3",
+      "tier": "hard-full",
+      "profiles": 6,
+      "sections": {
+        "cases": {
+          "count": 41,
+          "names": "ededa3b9f7ce28dc81aa2ef16478dba5937801ff54eb133000bd55c1d73f2413"
+        },
+        "libraries": {
+          "count": 6,
+          "names": "b916118a0f3702e87edc287b2bfe446b79f97a955f8b4f69038c0cd33ed66aff"
+        },
+        "generated": {
+          "count": 1000,
+          "names": "e53bcd60f34574cb1c793edbc172c42a86543e1cc9b2c5d8834dde89c390765d"
+        },
+        "mutants": {
+          "count": 1000,
+          "names": "75f1b60ca7dde4c61d897de64bf319dcd0704e1ceb34d064b3ec68e67a28c579"
+        }
+      }
+    },
+    "9bcb49d29e867a92": {
+      "name": "rosetta-3",
+      "tier": "hard-quick",
+      "profiles": 6,
+      "sections": {
+        "cases": {
+          "count": 41,
+          "names": "ededa3b9f7ce28dc81aa2ef16478dba5937801ff54eb133000bd55c1d73f2413"
+        },
+        "libraries": {
+          "count": 6,
+          "names": "b916118a0f3702e87edc287b2bfe446b79f97a955f8b4f69038c0cd33ed66aff"
+        },
+        "generated": {
+          "count": 50,
+          "names": "fbe4fb3b6f5bc20615b14940a817edd91c01dbd1439a4fc00da7bc62dd587c0c"
+        },
+        "mutants": {
+          "count": 50,
+          "names": "cb9d916a4194608ab649c11a8fbe6e5924c21ee29e7b4ff1b082f8c9567812f0"
+        }
+      }
+    },
+    "e24826907050bd1d": {
+      "name": "rosetta-3",
+      "tier": "quick",
+      "profiles": 6,
+      "sections": {
+        "cases": {
+          "count": 41,
+          "names": "ededa3b9f7ce28dc81aa2ef16478dba5937801ff54eb133000bd55c1d73f2413"
+        },
+        "libraries": {
+          "count": 6,
+          "names": "b916118a0f3702e87edc287b2bfe446b79f97a955f8b4f69038c0cd33ed66aff"
         },
         "generated": {
           "count": 50,
