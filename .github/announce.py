@@ -111,7 +111,16 @@ def scores(before, after):
             "footer": {"text": f"{len(board)} on the board · {after[:7]}"},
         })
     title = "new official result" if len(changed) == 1 else f"{len(changed)} new official results"
-    return [{"content": f"**{title}**", "embeds": embeds[i:i + 10]} for i in range(0, len(embeds), 10)]
+    # Discord takes at most 10 embeds and 6000 characters of embed text per message
+    messages, size = [], 6000
+    for e in embeds:
+        n = len(e["title"]) + len(e["description"]) + len(e["footer"]["text"])
+        if size + n > 5800 or len(messages[-1]["embeds"]) == 10:
+            messages.append({"content": f"**{title}**" if not messages else "", "embeds": []})
+            size = 0
+        messages[-1]["embeds"].append(e)
+        size += n
+    return messages
 
 
 SUITE_RE = re.compile(r'pub const SUITE: &str = "([^"]+)";')
